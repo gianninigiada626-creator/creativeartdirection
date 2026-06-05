@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giada Giannini</title>
+<link href="https://db.onlinewebfonts.com/c/d657d7d101ab20c57a9d4c4f603f10ee?family=Jelek+Type" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#080808;
+  --white:#f0ebe2;
+  --grey:#2a2a2a;
+  --grey2:#1a1a1a;
+  --accent:#f0ebe2;
+}
+
+html,body{
+  width:100%;height:100%;
+  overflow:hidden;
+  background:var(--black);
+  font-family:'Space Mono',monospace;
+  cursor:auto;
+  user-select:none;
+}
+
+/* ── CUSTOM CURSOR ── */
+.cur{position:fixed;width:8px;height:8px;background:var(--white);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:width .3s,height .3s,background .3s}
+.cur-r{position:fixed;width:32px;height:32px;border:1px solid rgba(255,255,255,.3);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:left .1s,top .1s,width .3s,height .3s}
+body:hover .cur{opacity:1}
+
+/* ══════════════════════════════
+   DESKTOP
+══════════════════════════════ */
+#desktop{
+  position:fixed;inset:0;
+  background:var(--black);
+  display:flex;flex-direction:column;
+  transition:opacity .6s ease, transform .6s ease;
+}
+
+/* WALLPAPER — grain texture */
+#desktop::before{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;
+}
+
+/* MENU BAR */
+.menubar{
+  position:relative;z-index:10;
+  width:100%;height:28px;
+  background:rgba(255,255,255,.04);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+}
+.mb-left{display:flex;align-items:center;gap:20px}
+.mb-apple{font-size:14px;color:var(--white);opacity:.8}
+.mb-item{font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.6);cursor:pointer}
+.mb-item:hover{color:var(--white)}
+.mb-right{display:flex;align-items:center;gap:16px}
+.mb-time{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.05em}
+
+/* DESKTOP AREA */
+.desktop-area{
+  flex:1;position:relative;z-index:5;
+  padding:40px;
+  display:flex;flex-direction:column;align-items:flex-end;gap:20px;
+}
+
+/* ICONS */
+.icon{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  
+  transition:transform .2s ease;
+  width:80px;
+}
+.icon:hover{transform:scale(1.05)}
+.icon:hover .icon-img{filter:brightness(1.15)}
+.icon.selected .icon-label{background:rgba(255,255,255,.15);border-radius:3px}
+
+.icon-img{
+  width:64px;height:64px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+
+/* FOLDER ICON */
+.folder-svg{width:64px;height:56px;position:relative}
+
+.icon-label{
+  font-size:11px;color:var(--white);
+  text-align:center;letter-spacing:.03em;
+  padding:2px 4px;
+  text-shadow:0 1px 3px rgba(0,0,0,.8);
+  font-family:'Space Mono',monospace;
+}
+
+/* DOCK */
+.dock{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:flex-end;gap:8px;
+  background:rgba(255,255,255,.06);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  padding:8px 16px;
+  z-index:10;
+}
+.dock-item{
+  width:52px;height:52px;
+  border-radius:12px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  
+  transition:transform .2s ease;
+  font-size:22px;
+  position:relative;
+}
+.dock-item:hover{transform:translateY(-8px) scale(1.15)}
+.dock-item::after{
+  content:attr(data-label);
+  position:absolute;bottom:calc(100% + 8px);
+  background:rgba(0,0,0,.8);color:var(--white);
+  font-size:10px;letter-spacing:.05em;
+  padding:4px 10px;border-radius:6px;
+  white-space:nowrap;opacity:0;transition:opacity .2s;
+  pointer-events:none;font-family:'Space Mono',monospace;
+}
+.dock-item:hover::after{opacity:1}
+.dock-sep{width:1px;height:40px;background:rgba(255,255,255,.1);margin:0 4px}
+
+/* DESKTOP TEXT */
+.desktop-greeting{
+  position:absolute;left:40px;top:50%;transform:translateY(-50%);
+  z-index:5;
+}
+.dg-small{font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.25);text-transform:uppercase;margin-bottom:12px}
+.dg-big{
+  font-family:'Jelek Type','Bebas Neue',sans-serif;
+  font-size:clamp(60px,8vw,110px);
+  line-height:.88;
+  color:var(--white);
+  letter-spacing:-.01em;
+}
+.dg-sub{font-family:'Cormorant Garamond';font-style:italic;font-size:18px;color:rgba(255,255,255,.35);margin-top:16px;letter-spacing:.05em}
+
+/* ══════════════════════════════
+   MAGAZINE APP
+══════════════════════════════ */
+#magazine{
+  position:fixed;inset:0;z-index:100;
+  opacity:0;pointer-events:none;
+  transition:opacity .5s ease;
+}
+#magazine.open{opacity:1;pointer-events:all}
+
+/* WINDOW CHROME */
+.win{
+  position:absolute;
+  top:32px;left:32px;right:32px;bottom:32px;
+  background:var(--black);
+  border-radius:14px;
+  box-shadow:0 40px 120px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.08);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
+
+.win-titlebar{
+  height:40px;flex-shrink:0;
+  background:var(--grey2);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;
+  padding:0 16px;gap:8px;
+  position:relative;
+}
+.win-btn{width:13px;height:13px;border-radius:50%;transition:filter .2s}
+.win-btn.close{background:#ff5f57}
+.win-btn.min{background:#febc2e}
+.win-btn.max{background:#28c840}
+.win-btn:hover{filter:brightness(1.2)}
+.win-title{
+  position:absolute;left:50%;transform:translateX(-50%);
+  font-size:12px;color:rgba(255,255,255,.4);letter-spacing:.1em;
+  font-family:'Space Mono',monospace;
+}
+.win-section-label{
+  position:absolute;right:16px;
+  font-size:9px;letter-spacing:.25em;color:rgba(255,255,255,.2);text-transform:uppercase;
+}
+
+/* MAGAZINE CONTENT */
+.win-content{flex:1;overflow:hidden;position:relative}
+
+/* PAGES */
+.page{
+  position:absolute;inset:0;
+  opacity:0;pointer-events:none;
+  transition:opacity .5s ease;
+  overflow:hidden;
+}
+.page.on{opacity:1;pointer-events:all}
+
+/* PROGRESS BAR */
+.prog{
+  position:absolute;bottom:0;left:0;height:2px;
+  background:var(--white);z-index:50;
+  transition:width .5s cubic-bezier(.77,0,.18,1);
+}
+
+/* ── GRAIN OVERLAY ── */
+.grain{
+  position:absolute;inset:0;pointer-events:none;z-index:45;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;opacity:.5;
+}
+
+/* NAV */
+.mag-nav{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:14px;z-index:60;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.07);
+  padding:9px 18px;border-radius:100px;
+}
+.m-arr{background:none;border:none;color:rgba(255,255,255,.3);font-size:14px;transition:color .2s;font-family:'Space Mono',monospace;padding:0 6px}
+.m-arr:hover{color:var(--white)}
+.m-dots{display:flex;gap:5px}
+.m-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.18);border:none;transition:background .3s,transform .3s}
+.m-dot.on{background:var(--white);transform:scale(1.4)}
+.m-cnt{font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.2);min-width:36px;text-align:center}
+
+/* ════════════════════
+   PAGE STYLES
+════════════════════ */
+
+/* COVER */
+.p-cover{background:var(--black)}
+.pc-grid{
+  position:absolute;inset:0;
+  display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(3,1fr);
+  gap:2px;z-index:1;
+}
+.pc-cell{overflow:hidden;background:#111}
+.pc-cell img{width:100%;height:100%;object-fit:cover;filter:saturate(.8) contrast(1.1)}
+.pc-overlay{
+  position:absolute;inset:0;z-index:10;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:0 5%;
+  background:linear-gradient(135deg,rgba(0,0,0,.5) 0%,rgba(0,0,0,.2) 100%);
+}
+.pc-t{
+  font-family:'Jelek Type','Bebas Neue',sans-serif;
+  font-size:clamp(80px,12vw,180px);
+  line-height:.82;color:var(--white);
+  letter-spacing:-.02em;
+  mix-blend-mode:normal;
+}
+.pc-t.inv{-webkit-text-stroke:2px var(--white);color:transparent}
+.pc-top{position:absolute;top:0;left:0;right:0;padding:16px 24px;display:flex;justify-content:space-between;z-index:15;background:linear-gradient(to bottom,rgba(0,0,0,.6),transparent)}
+.pc-top span{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.45);text-transform:uppercase}
+.pc-bot{position:absolute;bottom:52px;left:24px;right:24px;z-index:15;display:flex;justify-content:space-between;align-items:flex-end}
+.pc-name{font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:rgba(255,255,255,.4);letter-spacing:.08em}
+.pc-iss{font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.4);text-transform:uppercase}
+
+/* MANIFESTO */
+.p-manifesto{background:var(--black)}
+.pm-inner{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:4% 5%}
+.pm-row{display:flex;align-items:center;line-height:.8;margin-bottom:4px}
+.pm-word{
+  font-family:'Jelek Type','Bebas Neue',sans-serif;
+  font-size:clamp(70px,11vw,165px);
+  color:var(--white);letter-spacing:-.02em;
+  white-space:nowrap;
+}
+.pm-word.out{-webkit-text-stroke:2px var(--white);color:transparent}
+.pm-word.inv{color:var(--black);-webkit-text-stroke:0;background:var(--white);padding:0 8px}
+.pm-img{
+  width:clamp(60px,8vw,120px);height:clamp(60px,8vw,120px);
+  overflow:hidden;flex-shrink:0;margin:0 6px;
+  border:1px solid rgba(255,255,255,.1);
+}
+.pm-img img{width:100%;height:100%;object-fit:cover;filter:saturate(.85)}
+.pm-foot{position:absolute;bottom:52px;left:5%;right:5%;display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,.05);padding-top:12px}
+.pm-foot span{font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.18);text-transform:uppercase}
+
+/* CHI SEI */
+.p-chisei{background:var(--white)}
+.pcs-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-start;padding:8%}
+.pcs-hand{
+  font-family:'Jelek Type',cursive;
+  font-size:clamp(44px,7vw,88px);
+  line-height:1.2;color:var(--black);
+  transform:rotate(-.5deg);
+}
+.pcs-hand .red{color:#8B1A1A}
+.pcs-hand .fade{opacity:.4;font-size:.55em}
+.pcs-corner{position:absolute;bottom:48px;right:48px;font-size:9px;letter-spacing:.25em;color:rgba(0,0,0,.25);text-transform:uppercase}
+
+/* TEMPLATE A — cream, photo left, text right */
+.tmpl-a{background:#e4ddd0}
+.ta-fold{position:absolute;top:0;left:50%;transform:translateX(-50%);width:14px;height:100%;background:linear-gradient(to right,transparent,rgba(0,0,0,.18) 45%,rgba(0,0,0,.22) 50%,rgba(0,0,0,.18) 55%,transparent);z-index:30}
+.ta-photol{position:absolute;top:0;left:0;width:50%;height:100%;overflow:hidden}
+.ta-photol img{width:100%;height:100%;object-fit:cover}
+.ta-text{position:absolute;top:0;left:50%;right:0;bottom:0;padding:5% 4%;display:flex;flex-direction:column;justify-content:space-between}
+.ta-rh{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.25em;color:rgba(0,0,0,.28);text-transform:uppercase}
+.ta-tag{font-size:8px;letter-spacing:.28em;color:#8B1A1A;text-transform:uppercase;border:1px solid #8B1A1A;padding:3px 10px;align-self:flex-start}
+.ta-title{font-family:'Jelek Type','Bebas Neue',sans-serif;font-size:clamp(40px,5.5vw,72px);color:var(--black);line-height:.9;letter-spacing:.01em}
+.ta-hand{font-family:'Jelek Type',cursive;font-size:clamp(18px,2.2vw,28px);color:#8B1A1A;transform:rotate(-1.5deg);display:block;margin-top:4px}
+.ta-body{font-family:'Georgia',serif;font-size:11px;line-height:1.85;color:#444;border-left:2px solid rgba(139,26,26,.3);padding-left:12px}
+.ta-foot{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.15em;color:#aaa;text-transform:uppercase;border-top:1px solid rgba(0,0,0,.1);padding-top:10px}
+
+/* TEMPLATE B — dark, photo right, text left */
+.tmpl-b{background:var(--black)}
+.tb-photor{position:absolute;top:0;right:0;width:52%;height:100%;overflow:hidden}
+.tb-photor img{width:100%;height:100%;object-fit:cover;filter:contrast(1.05) saturate(.85)}
+.tb-photor::before{content:'';position:absolute;top:0;left:0;width:45%;height:100%;background:linear-gradient(to right,var(--black),transparent);z-index:2}
+.tb-text{position:absolute;top:0;left:0;width:52%;bottom:0;padding:5% 4%;display:flex;flex-direction:column;justify-content:space-between;z-index:5}
+.tb-rh{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.25em;color:rgba(255,255,255,.18);text-transform:uppercase}
+.tb-tag{font-size:8px;letter-spacing:.28em;color:#8B1A1A;text-transform:uppercase;border:1px solid #8B1A1A;padding:3px 10px;align-self:flex-start}
+.tb-title{font-family:'Jelek Type','Bebas Neue',sans-serif;font-size:clamp(40px,5.5vw,72px);color:var(--white);line-height:.9;letter-spacing:.01em}
+.tb-hand{font-family:'Jelek Type',cursive;font-size:clamp(18px,2.2vw,28px);color:#8B1A1A;transform:rotate(-1.5deg);display:block;margin-top:4px}
+.tb-body{font-family:'Georgia',serif;font-size:11px;line-height:1.85;color:rgba(255,255,255,.35);border-left:2px solid rgba(139,26,26,.45);padding-left:12px}
+.tb-quote{font-family:'Jelek Type',cursive;font-size:clamp(16px,1.8vw,24px);color:var(--white);opacity:.5;line-height:1.4;transform:rotate(-1deg);max-width:340px}
+.tb-foot{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.15em;color:rgba(255,255,255,.15);text-transform:uppercase;border-top:1px solid rgba(255,255,255,.05);padding-top:10px}
+
+/* TEMPLATE C — grid top, text bottom */
+.tmpl-c{background:var(--black)}
+.tc-grid{position:absolute;top:0;left:0;width:100%;height:67%;display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.tc-grid .cell{overflow:hidden}
+.tc-grid .cell img{width:100%;height:100%;object-fit:cover;filter:saturate(.8)}
+.tc-bottom{position:absolute;bottom:0;left:0;right:0;height:34%;padding:3% 4%;display:flex;align-items:center;gap:5%;border-top:1px solid rgba(255,255,255,.05)}
+.tc-btitle{font-family:'Jelek Type','Bebas Neue',sans-serif;font-size:clamp(36px,5vw,68px);color:var(--white);line-height:.88;flex-shrink:0}
+.tc-btag{font-size:8px;letter-spacing:.25em;color:#8B1A1A;text-transform:uppercase;margin-bottom:6px}
+.tc-bbody{font-family:'Georgia',serif;font-size:11px;line-height:1.75;color:rgba(255,255,255,.3)}
+.tc-bbody strong{color:var(--white)}
+
+/* TEMPLATE D — dark typographic explosion */
+.tmpl-d{background:var(--black);overflow:hidden}
+.td-bgw{position:absolute;bottom:-30px;left:-10px;font-family:'Jelek Type','Bebas Neue',sans-serif;font-size:320px;line-height:1;color:rgba(255,255,255,.012);letter-spacing:-.06em;pointer-events:none;white-space:nowrap;z-index:1}
+.td-collage{position:absolute;top:0;right:0;width:44%;height:100%;display:grid;grid-template-rows:1fr 1fr;gap:2px;z-index:5}
+.td-collage .cell{overflow:hidden}
+.td-collage .cell img{width:100%;height:100%;object-fit:cover}
+.td-main{position:absolute;top:5%;left:4%;right:48%;bottom:5%;z-index:10;display:flex;flex-direction:column;justify-content:space-between}
+.td-tag{font-size:8px;letter-spacing:.3em;color:#8B1A1A;text-transform:uppercase}
+.td-big{font-family:'Jelek Type','Bebas Neue',sans-serif;font-size:clamp(56px,7.5vw,108px);line-height:.82;color:var(--white)}
+.td-big span{color:#8B1A1A}
+.td-hand{font-family:'Jelek Type',cursive;font-size:clamp(16px,1.8vw,24px);color:var(--white);opacity:.45;line-height:1.4;transform:rotate(-1.5deg);max-width:380px}
+.td-foot{font-size:8px;letter-spacing:.15em;color:rgba(255,255,255,.12);text-transform:uppercase;border-top:1px solid rgba(255,255,255,.04);padding-top:10px}
+
+/* BACK COVER */
+.p-back{background:#080808;overflow:hidden}
+.pb-diag{position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent,transparent 55px,rgba(255,255,255,.015) 55px,rgba(255,255,255,.015) 56px)}
+.pb-floor{position:absolute;bottom:0;left:0;right:0;height:35%;background:rgba(255,255,255,.03);border-top:1px solid rgba(255,255,255,.05)}
+.pb-hand-bg{position:absolute;top:10%;left:-2%;font-family:'Jelek Type','Bebas Neue',sans-serif;font-size:280px;line-height:.8;color:rgba(255,255,255,.025);transform:rotate(-3deg);pointer-events:none;z-index:1;letter-spacing:-.03em}
+.pb-top{position:absolute;top:5%;left:5%;right:5%;z-index:10;display:flex;justify-content:space-between;align-items:center}
+.pb-tl{font-size:9px;letter-spacing:.35em;color:rgba(255,255,255,.3);text-transform:uppercase}
+.pb-tr{font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:rgba(255,255,255,.3)}
+.pb-main{position:absolute;top:15%;left:5%;z-index:10}
+.pb-l1{font-family:'Jelek Type','Bebas Neue',sans-serif;font-size:clamp(110px,15vw,210px);line-height:.8;color:var(--white);letter-spacing:-.02em;display:block}
+.pb-l2{font-family:'Jelek Type','Bebas Neue',sans-serif;font-size:clamp(110px,15vw,210px);line-height:.8;color:rgba(255,255,255,.12);-webkit-text-stroke:1px rgba(255,255,255,.2);letter-spacing:-.02em;display:block}
+.pb-handline{position:absolute;top:62%;left:5%;z-index:10;font-family:'Jelek Type',cursive;font-size:clamp(18px,2.5vw,32px);color:rgba(255,255,255,.3);transform:rotate(-1.5deg)}
+.pb-contacts{position:absolute;bottom:6%;left:5%;right:5%;z-index:10;display:flex;justify-content:space-between;align-items:flex-end}
+.pb-cl{font-size:8px;letter-spacing:.28em;color:rgba(255,255,255,.25);text-transform:uppercase;margin-bottom:4px}
+.pb-cv{font-family:'Cormorant Garamond';font-size:18px;color:var(--white)}
+.pb-sig{font-family:'Cormorant Garamond';font-style:italic;font-size:12px;color:rgba(255,255,255,.25);letter-spacing:.06em}
+.pb-projects{position:absolute;bottom:20%;right:5%;z-index:10;text-align:right}
+.pb-pl{font-size:8px;letter-spacing:.28em;color:rgba(255,255,255,.25);text-transform:uppercase;margin-bottom:10px}
+.pb-pi{font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:rgba(255,255,255,.4);line-height:1.8}
+
+/* ABOUT WINDOW */
+#about-win{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%);
+  width:500px;
+  background:var(--grey2);
+  border-radius:12px;
+  box-shadow:0 20px 60px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.07);
+  z-index:200;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s,transform .3s;
+  transform:translateX(-50%) scale(.95);
+}
+#about-win.open{opacity:1;pointer-events:all;transform:translateX(-50%) scale(1)}
+.aw-bar{height:36px;background:var(--grey);border-radius:12px 12px 0 0;display:flex;align-items:center;padding:0 12px;gap:8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.aw-content{padding:28px 32px}
+.aw-title{font-family:'Jelek Type','Bebas Neue',sans-serif;font-size:36px;color:var(--white);margin-bottom:20px;letter-spacing:.02em}
+.aw-body{font-family:'Georgia',serif;font-size:13px;line-height:1.85;color:rgba(255,255,255,.45)}
+.aw-body strong{color:var(--white)}
+
+/* CONTACT WINDOW */
+#contact-win{
+  position:fixed;top:80px;left:50%;transform:translateX(-50%);
+  width:420px;
+  background:var(--grey2);
+  border-radius:12px;
+  box-shadow:0 20px 60px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.07);
+  z-index:200;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s,transform .3s;
+  transform:translateX(-50%) scale(.95);
+}
+#contact-win.open{opacity:1;pointer-events:all;transform:translateX(-50%) scale(1)}
+.cw-bar{height:36px;background:var(--grey);border-radius:12px 12px 0 0;display:flex;align-items:center;padding:0 12px;gap:8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.cw-content{padding:28px 32px;display:flex;flex-direction:column;gap:18px}
+.cw-title{font-family:'Jelek Type','Bebas Neue',sans-serif;font-size:32px;color:var(--white);letter-spacing:.02em}
+.cw-item{border-top:1px solid rgba(255,255,255,.06);padding-top:14px}
+.cw-l{font-size:8px;letter-spacing:.28em;color:rgba(255,255,255,.3);text-transform:uppercase;margin-bottom:5px}
+.cw-v{font-family:'Cormorant Garamond';font-size:20px;color:var(--white)}
+
+/* LOADING OVERLAY */
+#loader{
+  position:fixed;inset:0;background:var(--black);z-index:9999;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;
+  transition:opacity .8s ease;
+}
+#loader.done{opacity:0;pointer-events:none}
+.loader-word{font-family:'Jelek Type','Bebas Neue',sans-serif;font-size:48px;color:var(--white);letter-spacing:.05em}
+.loader-bar{width:200px;height:1px;background:rgba(255,255,255,.1);position:relative;overflow:hidden}
+.loader-fill{position:absolute;top:0;left:0;height:100%;background:var(--white);animation:loadfill 1.5s ease forwards}
+@keyframes loadfill{from{width:0}to{width:100%}}
+
+</style>
+</head>
+<body>
+
+<!-- CURSORS -->
+<div class="cur" id="cur"></div>
+<div class="cur-r" id="cur-r"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-word">GIADA GIANNINI</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<!-- ══ DESKTOP ══ -->
+<div id="desktop">
+  <!-- Menu Bar -->
+  <div class="menubar">
+    <div class="mb-left">
+      <span class="mb-apple">⌘</span>
+      <span class="mb-item">Giada Giannini</span>
+      <span class="mb-item">File</span>
+      <span class="mb-item">View</span>
+      <span class="mb-item">Work</span>
+    </div>
+    <div class="mb-right">
+      <span class="mb-time" id="clock">00:00</span>
+      <span class="mb-time">●</span>
+    </div>
+  </div>
+
+  <!-- Desktop Area -->
+  <div class="desktop-area">
+    <!-- Magazine Folder -->
+    <div class="icon" id="icon-mag" onclick="openMag()">
+      <div class="icon-img">
+        <svg class="folder-svg" viewBox="0 0 64 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 12C4 9.8 5.8 8 8 8H26L32 14H56C58.2 14 60 15.8 60 18V48C60 50.2 58.2 52 56 52H8C5.8 52 4 50.2 4 48V12Z" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+          <path d="M4 20H60V48C60 50.2 58.2 52 56 52H8C5.8 52 4 50.2 4 48V20Z" fill="rgba(255,255,255,0.08)"/>
+          <text x="32" y="40" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.4)" font-family="Space Mono">01</text>
+        </svg>
+      </div>
+      <span class="icon-label">Issue 01</span>
+    </div>
+
+    <!-- About -->
+    <div class="icon" id="icon-about" onclick="openAbout()">
+      <div class="icon-img">
+        <svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="46" height="46" rx="10" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+          <text x="27" y="34" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)" font-family="Georgia">i</text>
+        </svg>
+      </div>
+      <span class="icon-label">About.txt</span>
+    </div>
+
+    <!-- Contact -->
+    <div class="icon" id="icon-contact" onclick="openContact()">
+      <div class="icon-img">
+        <svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="12" width="46" height="32" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+          <path d="M4 16L27 30L50 16" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+        </svg>
+      </div>
+      <span class="icon-label">Contact</span>
+    </div>
+  </div>
+
+  <!-- Desktop greeting -->
+  <div class="desktop-greeting">
+    <div class="dg-small">Creative Direction · Issue 01</div>
+    <div class="dg-big">GIADA<br>GIANNINI.</div>
+    <div class="dg-sub">Double-click to open</div>
+  </div>
+
+  <!-- Dock -->
+  <div class="dock">
+    <div class="dock-item" data-label="Magazine" onclick="openMag()">📖</div>
+    <div class="dock-item" data-label="About" onclick="openAbout()">📄</div>
+    <div class="dock-sep"></div>
+    <div class="dock-item" data-label="Instagram" onclick="window.open('https://instagram.com/giadaggii','_blank')">📷</div>
+    <div class="dock-item" data-label="Email" onclick="window.open('mailto:gianningiada626@gmail.com','_blank')">✉️</div>
+  </div>
+</div>
+
+<!-- ══ MAGAZINE ══ -->
+<div id="magazine">
+  <div class="win">
+    <div class="win-titlebar">
+      <div class="win-btn close" onclick="closeMag()"></div>
+      <div class="win-btn min"></div>
+      <div class="win-btn max"></div>
+      <div class="win-title">Giada Giannini — Issue 01</div>
+      <div class="win-section-label" id="win-sec">Cover</div>
+    </div>
+    <div class="win-content">
+      <div class="prog" id="prog"></div>
+
+      <!-- COVER -->
+      <div class="page p-cover on" id="pg0" data-sec="Cover">
+        <div class="grain"></div>
+        <div class="pc-grid" id="cover-grid">
+          <!-- populated by JS from Supabase -->
+        </div>
+        <div class="pc-overlay">
+          <div class="pc-t">GIADA</div>
+          <div class="pc-t">GIANNINI.</div>
+          <div class="pc-t inv">ISSUE 01.</div>
+        </div>
+        <div class="pc-top">
+          <span>Creative Direction · AI-Driven Campaigns</span>
+          <span>2026</span>
+        </div>
+        <div class="pc-bot">
+          <span class="pc-name">Brand · Artist · World</span>
+          <span class="pc-iss">@giadaggii</span>
+        </div>
+      </div>
+
+      <!-- MANIFESTO -->
+      <div class="page p-manifesto" id="pg1" data-sec="Manifesto">
+        <div class="grain"></div>
+        <div class="pm-inner">
+          <div class="pm-row">
+            <span class="pm-word">I&nbsp;</span>
+            <div class="pm-img" id="pm-img1"></div>
+            <span class="pm-word">BUILD</span>
+          </div>
+          <div class="pm-row">
+            <div class="pm-img" id="pm-img2"></div>
+            <span class="pm-word" style="color:#8B1A1A">&nbsp;WORLDS.</span>
+          </div>
+          <div class="pm-row">
+            <span class="pm-word out">YOU&nbsp;</span>
+            <div class="pm-img" id="pm-img3"></div>
+            <span class="pm-word out">&nbsp;JUST</span>
+          </div>
+          <div class="pm-row">
+            <span class="pm-word">LIVE&nbsp;</span>
+            <div class="pm-img" id="pm-img4"></div>
+            <span class="pm-word" style="color:#8B1A1A">IN&nbsp;</span>
+            <span class="pm-word">THEM.</span>
+          </div>
+        </div>
+        <div class="pm-foot">
+          <span>Giada Giannini · Creative Direction</span>
+          <span>02</span>
+        </div>
+      </div>
+
+      <!-- CHI SEI -->
+      <div class="page p-chisei" id="pg2" data-sec="Who I Am">
+        <div class="pcs-inner">
+          <div class="pcs-hand">
+            I BUILD<br>
+            <span class="red">WORLDS</span><br>
+            4 U<br>
+            <span class="fade">(& 4 ME.)</span>
+          </div>
+        </div>
+        <div class="pcs-corner">03 · Who I Am</div>
+      </div>
+
+      <!-- BRAND 1 -->
+      <div class="page tmpl-a" id="pg3" data-sec="Brand Direction">
+        <div class="grain"></div>
+        <div class="ta-fold"></div>
+        <div class="ta-photol" id="ta-img1"></div>
+        <div class="ta-text">
+          <div class="ta-rh"><span>Brand Direction</span><span>04</span></div>
+          <div>
+            <div class="ta-tag">Brand</div>
+            <div class="ta-title">Visual<br>Identity<br>That Holds.</div>
+            <div class="ta-hand">not just a logo.</div>
+          </div>
+          <div class="ta-body">I start where most creative directors don't — with the question of what a brand actually <em>believes.</em> Not what it sells. What it believes.<br><br>From there, every visual decision has a reason.</div>
+          <div class="ta-foot"><span>Brand Identity · Campaign Direction</span><span>04</span></div>
+        </div>
+      </div>
+
+      <!-- ARTIST 1 -->
+      <div class="page tmpl-b" id="pg4" data-sec="Artist Direction">
+        <div class="grain"></div>
+        <div class="tb-photor" id="tb-img1"></div>
+        <div class="tb-text">
+          <div class="tb-rh"><span>Artist Direction</span><span>05</span></div>
+          <div>
+            <div class="tb-tag">Artist</div>
+            <div class="tb-title">The Visual<br>World of<br>Your Music.</div>
+            <div class="tb-hand">only with soul fit.</div>
+          </div>
+          <div class="tb-body">Music without a visual world is just sound. I build the other half — the identity that makes people <em>feel</em> the music before they hear it.</div>
+          <div class="tb-foot"><span>Music · Culture · Art · Visual Identity</span><span>05</span></div>
+        </div>
+      </div>
+
+      <!-- BRAND 2 -->
+      <div class="page tmpl-d" id="pg5" data-sec="Brand Direction">
+        <div class="grain"></div>
+        <div class="td-bgw">BRAND</div>
+        <div class="td-collage" id="td-col1">
+          <div class="cell" id="td-c1a"></div>
+          <div class="cell" id="td-c1b"></div>
+        </div>
+        <div class="td-main">
+          <div class="td-tag">Brand · Campaign</div>
+          <div class="td-big">YOUR<br>BRAND<br>HAS A <span>SOUL.</span><br>FIND IT.</div>
+          <div class="td-hand">"No moodboards without meaning. No aesthetics without argument."</div>
+          <div class="td-foot">Brand Identity · Campaign Direction · Content Strategy</div>
+        </div>
+      </div>
+
+      <!-- ARTIST 2 -->
+      <div class="page tmpl-a" id="pg6" data-sec="Artist Direction" style="background:var(--black)">
+        <div class="grain"></div>
+        <div class="ta-fold" style="background:linear-gradient(to right,transparent,rgba(0,0,0,.35) 45%,rgba(0,0,0,.4) 50%,rgba(0,0,0,.35) 55%,transparent)"></div>
+        <div class="ta-photol" id="ta-img2"></div>
+        <div class="ta-text" style="background:var(--black)">
+          <div class="ta-rh" style="color:rgba(255,255,255,.2)"><span>Artist Direction</span><span>07</span></div>
+          <div>
+            <div class="ta-tag">Artist</div>
+            <div class="ta-title" style="color:var(--white)">Culture<br>Is The<br>Campaign.</div>
+            <div class="ta-hand">the periphery is not a problem.</div>
+          </div>
+          <div class="ta-body" style="color:rgba(255,255,255,.38);border-color:rgba(139,26,26,.45)">I work with artists who have something to say — not just something to sell.<br><br>Joy as a political act. Community as a set.</div>
+          <div class="ta-foot" style="color:rgba(255,255,255,.18);border-color:rgba(255,255,255,.05)"><span>Music · Culture · Visual Identity</span><span>07</span></div>
+        </div>
+      </div>
+
+      <!-- BRAND 3 -->
+      <div class="page tmpl-c" id="pg7" data-sec="Brand Direction">
+        <div class="grain"></div>
+        <div class="tc-grid" id="tc-grid1">
+          <div class="cell" id="tc-c1"></div>
+          <div class="cell" id="tc-c2"></div>
+          <div class="cell" id="tc-c3"></div>
+        </div>
+        <div class="tc-bottom">
+          <div>
+            <div class="tc-btag">Brand · AI Production</div>
+            <div class="tc-btitle" style="color:var(--white)">AI-Driven<br>Production.</div>
+          </div>
+          <div>
+            <div class="tc-bbody" style="color:rgba(255,255,255,.3)">2 years developing a personal AI workflow. <strong>If you have a bad idea, AI won't help you think better.</strong> It will just make your bad idea faster and louder.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARTIST 3 -->
+      <div class="page tmpl-b" id="pg8" data-sec="Artist Direction">
+        <div class="grain"></div>
+        <div class="tb-photor" id="tb-img2"></div>
+        <div class="tb-text">
+          <div class="tb-rh"><span>Artist Direction</span><span>09</span></div>
+          <div>
+            <div class="tb-tag">Artist</div>
+            <div class="tb-title">The Body<br>As<br>Argument.</div>
+            <div class="tb-hand">presence over beauty.</div>
+          </div>
+          <div class="tb-quote">"Every frame was architected with intention. Casting called for presence over beauty."</div>
+          <div class="tb-foot"><span>Casting · Art Direction · Visual Language</span><span>09</span></div>
+        </div>
+      </div>
+
+      <!-- ARTIST 4 -->
+      <div class="page tmpl-a" id="pg9" data-sec="Artist Direction" style="background:var(--black)">
+        <div class="grain"></div>
+        <div class="ta-fold" style="background:linear-gradient(to right,transparent,rgba(0,0,0,.35) 45%,rgba(0,0,0,.4) 50%,rgba(0,0,0,.35) 55%,transparent)"></div>
+        <div class="ta-photol" id="ta-img3"></div>
+        <div class="ta-text" style="background:var(--black)">
+          <div class="ta-rh" style="color:rgba(255,255,255,.2)"><span>Artist Direction</span><span>10</span></div>
+          <div>
+            <div class="ta-tag">Artist</div>
+            <div class="ta-title" style="color:var(--white)">Sound<br>Needs A<br>World.</div>
+            <div class="ta-hand">and a thesis.</div>
+          </div>
+          <div class="ta-body" style="color:rgba(255,255,255,.38);border-color:rgba(139,26,26,.45)">Every musical project carries a cultural position. My job is to make that position visible.<br><br>Photography and AI hybrid production. From concept to final assets.</div>
+          <div class="ta-foot" style="color:rgba(255,255,255,.18);border-color:rgba(255,255,255,.05)"><span>Artist Projects · Visual Identity</span><span>10</span></div>
+        </div>
+      </div>
+
+      <!-- BRAND 4 -->
+      <div class="page tmpl-d" id="pg10" data-sec="Brand Direction">
+        <div class="grain"></div>
+        <div class="td-bgw">CAMPAIGN</div>
+        <div class="td-collage" id="td-col2">
+          <div class="cell" id="td-c2a"></div>
+          <div class="cell" id="td-c2b"></div>
+        </div>
+        <div class="td-main">
+          <div class="td-tag">Brand · Campaign Direction</div>
+          <div class="td-big">CAMPAIGNS<br>THAT <span>CARRY</span><br>A THESIS.</div>
+          <div class="td-hand">"Not just what a brand sells — what it means. That's where the campaign starts."</div>
+          <div class="td-foot">Concept · Art Direction · AI Production · From €4,500</div>
+        </div>
+      </div>
+
+      <!-- BRAND 5 -->
+      <div class="page tmpl-a" id="pg11" data-sec="Brand Direction">
+        <div class="grain"></div>
+        <div class="ta-fold"></div>
+        <div class="ta-photol" id="ta-img4"></div>
+        <div class="ta-text">
+          <div class="ta-rh"><span>Brand Direction</span><span>12</span></div>
+          <div>
+            <div class="ta-tag">Brand</div>
+            <div class="ta-title">Color<br>System<br>As Story.</div>
+            <div class="ta-hand">nothing imported, nothing elevated.</div>
+          </div>
+          <div class="ta-body">Every color system I build is rooted in a cultural truth. Colors that already exist in those spaces — not imported from the outside.<br><br>From identity to campaign to every touchpoint.</div>
+          <div class="ta-foot"><span>Visual Identity · Color System · Brand Language</span><span>12</span></div>
+        </div>
+      </div>
+
+      <!-- BRAND 6 -->
+      <div class="page tmpl-c" id="pg12" data-sec="Brand Direction">
+        <div class="grain"></div>
+        <div class="tc-grid" id="tc-grid2">
+          <div class="cell" id="tc-c4"></div>
+          <div class="cell" id="tc-c5"></div>
+          <div class="cell" id="tc-c6"></div>
+        </div>
+        <div class="tc-bottom">
+          <div>
+            <div class="tc-btag">Brand · Full Partnership</div>
+            <div class="tc-btitle" style="color:var(--white)">Full Creative<br>Partnership.</div>
+          </div>
+          <div>
+            <div class="tc-bbody" style="color:rgba(255,255,255,.3)">Identity + Campaign in one. For brands ready to build something complete — from the ground up, with a clear point of view. <strong>From €7,500</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARTIST 5 -->
+      <div class="page tmpl-b" id="pg13" data-sec="Artist Direction">
+        <div class="grain"></div>
+        <div class="tb-photor" id="tb-img3"></div>
+        <div class="tb-text">
+          <div class="tb-rh"><span>Artist Direction</span><span>14</span></div>
+          <div>
+            <div class="tb-tag">Artist</div>
+            <div class="tb-title">Visual<br>Language<br>For Culture.</div>
+            <div class="tb-hand">the street as resistance.</div>
+          </div>
+          <div class="tb-body">Community spaces are not backdrops. They are the story. Cultural direction that starts from truth — not from borrowed aesthetics.<br><br>Joy as a political act.</div>
+          <div class="tb-foot"><span>Cultural Direction · Visual Identity · Campaign</span><span>14</span></div>
+        </div>
+      </div>
+
+      <!-- ARTIST 6 -->
+      <div class="page tmpl-a" id="pg14" data-sec="Artist Direction" style="background:var(--black)">
+        <div class="grain"></div>
+        <div class="ta-fold" style="background:linear-gradient(to right,transparent,rgba(0,0,0,.35) 45%,rgba(0,0,0,.4) 50%,rgba(0,0,0,.35) 55%,transparent)"></div>
+        <div class="ta-photol" id="ta-img5"></div>
+        <div class="ta-text" style="background:var(--black)">
+          <div class="ta-rh" style="color:rgba(255,255,255,.2)"><span>Artist Direction</span><span>15</span></div>
+          <div>
+            <div class="ta-tag">Artist</div>
+            <div class="ta-title" style="color:var(--white)">Archive<br>As<br>Identity.</div>
+            <div class="ta-hand">objects meant to last.</div>
+          </div>
+          <div class="ta-body" style="color:rgba(255,255,255,.38);border-color:rgba(139,26,26,.45)">Fashion, sculpture, archival photography. The body as an artwork in progress — not a finished object.<br><br>Near-monochromatic systems. Lighting designed to flatten rather than flatter.</div>
+          <div class="ta-foot" style="color:rgba(255,255,255,.18);border-color:rgba(255,255,255,.05)"><span>Fashion · Archive · Visual Direction</span><span>15</span></div>
+        </div>
+      </div>
+
+      <!-- BRAND 7 -->
+      <div class="page tmpl-d" id="pg15" data-sec="Brand Direction">
+        <div class="grain"></div>
+        <div class="td-bgw">WORLD</div>
+        <div class="td-collage" id="td-col3">
+          <div class="cell" id="td-c3a"></div>
+          <div class="cell" id="td-c3b"></div>
+        </div>
+        <div class="td-main">
+          <div class="td-tag">Brand · Strategy</div>
+          <div class="td-big">RADICAL<br><span>SIMPLICITY</span><br>IS HARD.</div>
+          <div class="td-hand">"One garment. One person. One neighborhood. The power comes from the refusal to add anything unnecessary."</div>
+          <div class="td-foot">Brand Philosophy · Visual Identity · Campaign Concept</div>
+        </div>
+      </div>
+
+      <!-- BRAND 8 -->
+      <div class="page tmpl-a" id="pg16" data-sec="Brand Direction">
+        <div class="grain"></div>
+        <div class="ta-fold"></div>
+        <div class="ta-photol" id="ta-img6"></div>
+        <div class="ta-text">
+          <div class="ta-rh"><span>Brand Direction</span><span>17</span></div>
+          <div>
+            <div class="ta-tag">Brand</div>
+            <div class="ta-title">Every<br>Frame<br>Intended.</div>
+            <div class="ta-hand">no softboxes. no flattery.</div>
+          </div>
+          <div class="ta-body">Lighting harsh and unforgiving. Locations chosen for brutalist geometry. Color grades that push shadows to cold teal and crush blacks to near-zero.<br><br>Visual tension that mirrors the brand's position.</div>
+          <div class="ta-foot"><span>Art Direction · Production · Color Strategy</span><span>17</span></div>
+        </div>
+      </div>
+
+      <!-- ARTIST 7 -->
+      <div class="page tmpl-b" id="pg17" data-sec="Artist Direction">
+        <div class="grain"></div>
+        <div class="tb-photor" id="tb-img4"></div>
+        <div class="tb-text">
+          <div class="tb-rh"><span>Artist Direction</span><span>18</span></div>
+          <div>
+            <div class="tb-tag">Artist</div>
+            <div class="tb-title">Process<br>As<br>Practice.</div>
+            <div class="tb-hand">the work before the work.</div>
+          </div>
+          <div class="tb-quote">"Research, thesis, production, delivery. Four steps. One coherent visual world every time."</div>
+          <div class="tb-foot"><span>Creative Process · AI Workflow · Visual Direction</span><span>18</span></div>
+        </div>
+      </div>
+
+      <!-- ARTIST 8 -->
+      <div class="page tmpl-c" id="pg18" data-sec="Artist Direction">
+        <div class="grain"></div>
+        <div class="tc-grid" id="tc-grid3">
+          <div class="cell" id="tc-c7"></div>
+          <div class="cell" id="tc-c8"></div>
+          <div class="cell" id="tc-c9"></div>
+        </div>
+        <div class="tc-bottom">
+          <div>
+            <div class="tc-btag">Artist · Projects</div>
+            <div class="tc-btitle" style="color:var(--white)">Only With<br>Soul Fit.</div>
+          </div>
+          <div>
+            <div class="tc-bbody" style="color:rgba(255,255,255,.3)">Music, culture, art — anything with a thesis worth building around. I only work with projects I genuinely believe in. <strong>The work shows.</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARTIST 9 -->
+      <div class="page tmpl-b" id="pg19" data-sec="Artist Direction">
+        <div class="grain"></div>
+        <div class="tb-photor" id="tb-img5"></div>
+        <div class="tb-text">
+          <div class="tb-rh"><span>Artist Direction</span><span>20</span></div>
+          <div>
+            <div class="tb-tag">Artist</div>
+            <div class="tb-title">Fashion<br>As<br>Sculpture.</div>
+            <div class="tb-hand">the body as artwork.</div>
+          </div>
+          <div class="tb-body">At the intersection of fashion, sculpture, and archival photography. Every compositional choice was architectural.<br><br>The grain references large-format analog photography — objects meant to last.</div>
+          <div class="tb-foot"><span>Fashion · Art Direction · Archive</span><span>20</span></div>
+        </div>
+      </div>
+
+      <!-- BACK COVER -->
+      <div class="page p-back" id="pg20" data-sec="Let's Talk">
+        <div class="grain"></div>
+        <div class="pb-diag"></div>
+        <div class="pb-floor"></div>
+        <div class="pb-hand-bg">LET'S<br>TALK.</div>
+        <div class="pb-top">
+          <span class="pb-tl">Let's build something real</span>
+          <span class="pb-tr">@giadaggii</span>
+        </div>
+        <div class="pb-main">
+          <span class="pb-l1">LET'S</span>
+          <span class="pb-l2">TALK.</span>
+        </div>
+        <div class="pb-handline">brands · artists · projects with a soul.</div>
+        <div class="pb-projects">
+          <div class="pb-pl">Personal Projects</div>
+          <div class="pb-pi">
+            VOID — "No Rules Left"<br>
+            KINFOLK — Community as Story<br>
+            BLOC — Joy as Political Act<br>
+            CORNERSTONE — Radical Simplicity<br>
+            RELIQUARY — Body as Archive
+          </div>
+        </div>
+        <div class="pb-contacts">
+          <div>
+            <div class="pb-cl">Email</div>
+            <div class="pb-cv">gianningiada626@gmail.com</div>
+          </div>
+          <div>
+            <div class="pb-cl">Instagram</div>
+            <div class="pb-cv">@giadaggii</div>
+          </div>
+          <div class="pb-sig">Giada Giannini — Creative Direction · 2026</div>
+        </div>
+      </div>
+
+    </div><!-- /win-content -->
+
+    <!-- NAV -->
+    <div class="mag-nav">
+      <button class="m-arr" onclick="move(-1)">←</button>
+      <div class="m-dots" id="mdots"></div>
+      <span class="m-cnt" id="mcnt">01/21</span>
+      <button class="m-arr" onclick="move(1)">→</button>
+    </div>
+  </div><!-- /win -->
+</div><!-- /magazine -->
+
+<!-- ABOUT WINDOW -->
+<div id="about-win">
+  <div class="aw-bar">
+    <div class="win-btn close" onclick="closeAbout()" style="cursor:none"></div>
+    <div class="win-btn min"></div>
+    <div class="win-btn max"></div>
+  </div>
+  <div class="aw-content">
+    <div class="aw-title">About.txt</div>
+    <div class="aw-body">
+      <strong>Giada Giannini</strong> is a Creative Director specializing in AI-driven visual storytelling. With a foundation in photography and a deep understanding of brand culture, she builds campaigns that carry a thesis — not just an aesthetic.<br><br>
+      Her process starts with brand analysis and cultural positioning — understanding not just what a brand sells, but what it <strong>means.</strong><br><br>
+      Based in Italy. Available worldwide.<br>
+      Accepting new clients · Q3 2026.
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT WINDOW -->
+<div id="contact-win">
+  <div class="cw-bar">
+    <div class="win-btn close" onclick="closeContact()" style="cursor:none"></div>
+    <div class="win-btn min"></div>
+    <div class="win-btn max"></div>
+  </div>
+  <div class="cw-content">
+    <div class="cw-title">Contact</div>
+    <div class="cw-item">
+      <div class="cw-l">Email</div>
+      <div class="cw-v">gianningiada626@gmail.com</div>
+    </div>
+    <div class="cw-item">
+      <div class="cw-l">Instagram</div>
+      <div class="cw-v">@giadaggii</div>
+    </div>
+    <div class="cw-item">
+      <div class="cw-l">Based in</div>
+      <div class="cw-v">Italy · Available Worldwide</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SUPABASE CONFIG ──
+const SUPA_URL = 'https://bdbkedxqlvgquuzcilcr.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkYmtlZHhxbHZncXV1emNpbGNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NzA1MjAsImV4cCI6MjA5NjI0NjUyMH0.wCZ0JwVDJhbGigWEAz8eP6P8GFo7aqpGhGOnLUCaA-8';
+const BUCKET = 'magazine';
+
+// Image filenames in order (matching your numbering)
+const IMAGES = [
+  'IMG_1606.png', // 1 brand
+  'IMG_1609.png', // 2 artist
+  'IMG_1607.png', // 3 brand
+  'IMG_1612.png', // 4 artist
+  'IMG_1614.png', // 5 brand
+  'IMG_1617.png', // 6 artist
+  'IMG_1616.png', // 7 brand
+  'IMG_1620.png', // 8 artist
+  'IMG_1619.png', // 9 artist
+  'IMG_1624.png', // 10 brand
+  'IMG_1626.png', // 11 brand
+  'IMG_1627.png', // 12 brand
+  'IMG_1629.png', // 13 artist
+  'IMG_1632.png', // 14 artist
+  'IMG_1635.png', // 15 brand
+  'IMG_1637.png', // 16 brand
+  'IMG_1640.png', // 17 artist
+  'IMG_1641.png', // 18 artist
+  'IMG_1611.png', // 19 artist
+];
+
+function imgUrl(filename) {
+  return `${SUPA_URL}/storage/v1/object/public/${BUCKET}/${filename}`;
+}
+
+function setImg(elementId, filename, isBg=false) {
+  const el = document.getElementById(elementId);
+  if(!el || !filename) return;
+  const url = imgUrl(filename);
+  if(isBg) {
+    el.style.backgroundImage = `url(${url})`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+  } else {
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover';
+    img.onerror = () => { el.style.background = '#1a1a1a'; };
+    el.appendChild(img);
+  }
+}
+
+function loadImages() {
+  // COVER GRID — use first 12 images
+  const grid = document.getElementById('cover-grid');
+  for(let i=0;i<12;i++) {
+    const cell = document.createElement('div');
+    cell.className = 'pc-cell';
+    const img = document.createElement('img');
+    img.src = imgUrl(IMAGES[i % IMAGES.length]);
+    img.onerror = () => { cell.style.background = '#1a1a1a'; };
+    cell.appendChild(img);
+    grid.appendChild(cell);
+  }
+
+  // MANIFESTO inline photos
+  ['pm-img1','pm-img2','pm-img3','pm-img4'].forEach((id,i) => {
+    setImg(id, IMAGES[12+i]);
+  });
+
+  // BRAND pages photos (template-a photo-left)
+  const brandImgs = [0,2,4,6,9,10,11,14,15]; // brand indices
+  const brandEls = ['ta-img1','ta-img2','ta-img3','ta-img4','ta-img5','ta-img6'];
+  brandEls.forEach((id,i) => {
+    setImg(id, IMAGES[brandImgs[i] || 0], true);
+    const el = document.getElementById(id);
+    if(el) el.classList.add('ta-photol');
+  });
+
+  // ARTIST pages photos (template-b photo-right)
+  const artistImgs = [1,3,5,7,8,12,13,16,17,18]; // artist indices
+  const artistEls = ['tb-img1','tb-img2','tb-img3','tb-img4','tb-img5'];
+  artistEls.forEach((id,i) => {
+    setImg(id, IMAGES[artistImgs[i] || 1], true);
+    const el = document.getElementById(id);
+    if(el) el.classList.add('tb-photor');
+  });
+
+  // TEMPLATE D collages
+  setImg('td-c1a', IMAGES[2], true);
+  setImg('td-c1b', IMAGES[9], true);
+  setImg('td-c2a', IMAGES[9], true);
+  setImg('td-c2b', IMAGES[14], true);
+  setImg('td-c3a', IMAGES[14], true);
+  setImg('td-c3b', IMAGES[6], true);
+
+  // TEMPLATE C grids
+  [['tc-c1',0],['tc-c2',6],['tc-c3',15],
+   ['tc-c4',11],['tc-c5',10],['tc-c6',18],
+   ['tc-c7',16],['tc-c8',8],['tc-c9',17]
+  ].forEach(([id,idx]) => {
+    setImg(id, IMAGES[idx], true);
+  });
+}
+
+// ── MAGAZINE NAV ──
+let cur = 0;
+const pages = document.querySelectorAll('.page');
+const total = pages.length;
+const mdots = document.getElementById('mdots');
+const mcnt = document.getElementById('mcnt');
+const prog = document.getElementById('prog');
+const winSec = document.getElementById('win-sec');
+
+for(let i=0;i<total;i++) {
+  const d = document.createElement('button');
+  d.className = 'm-dot' + (i===0?' on':'');
+  d.addEventListener('click', ()=>goTo(i));
+  mdots.appendChild(d);
+}
+
+function goTo(n) {
+  pages[cur].classList.remove('on');
+  mdots.children[cur].classList.remove('on');
+  cur = n;
+  pages[cur].classList.add('on');
+  mdots.children[cur].classList.add('on');
+  mcnt.textContent = String(cur+1).padStart(2,'0') + '/' + String(total).padStart(2,'0');
+  prog.style.width = ((cur+1)/total*100) + '%';
+  winSec.textContent = pages[cur].dataset.sec || '';
+}
+
+function move(d) { goTo((cur+d+total)%total); }
+
+document.addEventListener('keydown', e => {
+  if(document.getElementById('magazine').classList.contains('open')) {
+    if(e.key==='ArrowRight') move(1);
+    if(e.key==='ArrowLeft') move(-1);
+    if(e.key==='Escape') closeMag();
+  }
+});
+
+let tx = 0;
+document.getElementById('magazine').addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+document.getElementById('magazine').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if(Math.abs(dx) > 40) move(dx < 0 ? 1 : -1);
+});
+
+// ── WINDOW CONTROLS ──
+let imagesLoaded = false;
+function openMag() {
+  document.getElementById('magazine').classList.add('open');
+  if(!imagesLoaded) { loadImages(); imagesLoaded = true; }
+  prog.style.width = (1/total*100) + '%';
+}
+function closeMag() { document.getElementById('magazine').classList.remove('open'); }
+function openAbout() { document.getElementById('about-win').classList.add('open'); }
+function closeAbout() { document.getElementById('about-win').classList.remove('open'); }
+function openContact() { document.getElementById('contact-win').classList.add('open'); }
+function closeContact() { document.getElementById('contact-win').classList.remove('open'); }
+
+// ── CLOCK ──
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = h + ':' + m;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ── CURSOR ──
+const c = document.getElementById('cur');
+const cr = document.getElementById('cur-r');
+let mx=0, my=0, rx=0, ry=0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  c.style.left = mx + 'px'; c.style.top = my + 'px';
+});
+(function loop() {
+  rx += (mx - rx) * .12; ry += (my - ry) * .12;
+  cr.style.left = rx + 'px'; cr.style.top = ry + 'px';
+  requestAnimationFrame(loop);
+})();
+document.querySelectorAll('.icon,.dock-item,.m-arr,.arr,.win-btn,.m-dot').forEach(el => {
+  el.addEventListener('mouseenter', () => { c.style.width='14px'; c.style.height='14px'; cr.style.width='52px'; cr.style.height='52px'; });
+  el.addEventListener('mouseleave', () => { c.style.width='8px'; c.style.height='8px'; cr.style.width='32px'; cr.style.height='32px'; });
+});
+
+// ── LOADER ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('done');
+  }, 1800);
+});
+
+// init prog
+prog.style.width = (1/total*100) + '%';
+</script>
+</body>
+</html>
