@@ -8,14 +8,14 @@ export const CONSOLE = 'OSSARIO 2';
 
 export const TRACKS = [
   'RESPAWN',
-  'BAR SPORT',
-  'SIGARETTA ALLE 4',
-  'PASSAGGIO',
+  'CORNER BAR',
+  '4AM CIGARETTE',
+  'THE RIDE',
   'NPC feat. LUPO NERO',
-  'VIETATO AI VIVI',
+  'NO LIVING ALLOWED',
   'SANTA MUERTE',
-  'GENTE DI STRADA',
-  'AMARO',
+  'STREET PEOPLE',
+  'THE USUAL',
   'MISSION PASSED',
   'WASTED',
   'MUERTO',
@@ -25,7 +25,7 @@ export const PRODUCERS =
   'I Ossobuco & Mercy V. II Lupo Nero III Camposanto IV Ossobuco V Lupo Nero & Dj Requiem ' +
   'VI Mercy V. VII Dj Requiem VIII Camposanto & Ossobuco IX Lupo Nero X Mercy V. XI Dj Requiem XII Mercy V. & Camposanto';
 
-export const CREDITS = 'Mix: Ossobuco † Master: Dj Requiem † Artwork: Mercy V. † Autore: Mercy V.';
+export const CREDITS = 'Mixed by Ossobuco † Mastered by Dj Requiem † Artwork by Mercy V. † Written by Mercy V.';
 
 /**
  * The song, analysed: ~95.7 BPM, first beat at 0.165 s, the beat drops at 10.18 s.
