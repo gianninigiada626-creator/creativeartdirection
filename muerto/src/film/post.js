@@ -163,10 +163,11 @@ export const GradeShader = {
  * Edges stay crisp, everything else flattens into strokes of paint.
  */
 export const PaintShader = {
+  // the radius is compiled into the loop: software GL pays for every iteration, skipped or not
+  defines: { KR: 3 },
   uniforms: {
     tDiffuse: { value: null },
     uRes: { value: [1920, 1080] },
-    uRadius: { value: 4 },
     uStep: { value: 1.25 },
     uAmount: { value: 1 },
   },
@@ -174,19 +175,16 @@ export const PaintShader = {
   fragmentShader: /* glsl */ `
     uniform sampler2D tDiffuse;
     uniform vec2 uRes;
-    uniform float uRadius;
     uniform float uStep;
     uniform float uAmount;
     varying vec2 vUv;
     void main() {
       vec2 px = uStep / uRes;
-      int R = int(uRadius);
       vec3 m0 = vec3(0.0), m1 = vec3(0.0), m2 = vec3(0.0), m3 = vec3(0.0);
       vec3 s0 = vec3(0.0), s1 = vec3(0.0), s2 = vec3(0.0), s3 = vec3(0.0);
       float n0 = 0.0, n1 = 0.0, n2 = 0.0, n3 = 0.0;
-      for (int j = -6; j <= 6; j++) {
-        for (int i = -6; i <= 6; i++) {
-          if (abs(i) > R || abs(j) > R) continue;
+      for (int j = -KR; j <= KR; j++) {
+        for (int i = -KR; i <= KR; i++) {
           vec3 c = texture2D(tDiffuse, vUv + vec2(float(i), float(j)) * px).rgb;
           vec3 cc = c * c;
           if (i <= 0 && j <= 0) { m0 += c; s0 += cc; n0 += 1.0; }

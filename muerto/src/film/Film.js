@@ -153,10 +153,14 @@ export class Film {
     this.bloomPass.threshold = this.bloom.threshold;
     this.bloomPass.enabled = this.bloom.strength > 0.001;
     const pu = this.paintPass.uniforms;
-    pu.uRadius.value = this.paint.radius;
     pu.uStep.value = this.paint.step * (this.paintScale ?? 1);
     pu.uAmount.value = this.paint.amount;
     this.paintPass.enabled = this.paint.radius > 0.5;
+    const kr = Math.max(1, Math.min(6, Math.round(this.paint.radius)));
+    if (this.paintPass.material.defines.KR !== kr) {
+      this.paintPass.material.defines.KR = kr;
+      this.paintPass.material.needsUpdate = true;
+    }
     this.composer.render();
     // the DOM layers share the same fade, flash and cinema bars
     const v = this.veils;
