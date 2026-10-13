@@ -685,7 +685,7 @@ async function cameretta() {
 
 
 // ── II · FIFTEEN ──
-async function corridoio() {
+async function corridoio({ anim = false } = {}) {
   const s = new THREE.Scene();
   s.background = new THREE.Color(0.85, 0.87, 0.9);
   s.add(plane(4, 40, 0.68, [0, 0, -15]));
@@ -701,7 +701,7 @@ async function corridoio() {
   const crowd = [];
   for (let i = 0; i < kinds.length; i++) {
     const z = -2.5 - i * 1.6 - (i % 3) * 0.4;
-    const x = ((i * 0.37) % 1.6) - 0.8;
+    const x = anim ? ((i * 0.37) % 1.5) - 1.15 : ((i * 0.37) % 1.6) - 0.8; // in the animatic they leave him a lane by the lockers
     const clip = kinds[i] === 'teengirl' ? 'hvwalk' : 'walk';
     const o = await grey(kinds[i], clip, { pos: [x, 0, z], rotY: 0, t: (i * 0.23) % 1, tone: 0.55 + (i % 3) * 0.08 });
     crowd.push({ o, z, t0: (i * 0.23) % 1 });
@@ -712,13 +712,13 @@ async function corridoio() {
   const update = (k, t) => {
     for (const c of crowd) {
       let z = c.z + 1.2 * t;
-      while (z > 2.6) z -= 22;
+      while (z > 0.6) z -= 22; // they leave the frame before they reach the lens
       c.o.position.z = z;
       c.o.mixer?.setTime(c.t0 + t);
     }
-    me.position.z = -3.8 - 0.62 * t;
-    me.position.x = 0.55 + 0.12 * Math.sin(t * 0.7);
-    me.mixer?.setTime(0.4 + t * 0.6);
+    me.position.z = -2.6 - 0.36 * t;
+    me.position.x = 1.0 + 0.08 * Math.sin(t * 0.7);
+    me.mixer?.setTime(0.4 + t * 0.45);
   };
   s.add(new THREE.HemisphereLight(0xeef2f8, 0x8a8e96, 1.8));
   for (let i = 0; i < 4; i++) {
@@ -1070,7 +1070,7 @@ async function alba() {
   s.add(await him('sitFloor', { pos: [-0.9, 0, -18.6], rotY: 186 }));
   const sun = s.userData.sun;
   const update = (k) => {
-    sun.position.y = -0.4 + (0.34 + 0.26 * k - 0.5) * 18;
+    sun.position.y = -0.4 + (-0.42 + 0.97 * ease(k) - 0.5) * 18; // from a sliver on the sea to more than half
   };
   return { scene: s, camera: cam(36, [1.4, 1.35, -3.5], [-2.4, 0.2, -60]), far: 500, update };
 }
