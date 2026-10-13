@@ -5,7 +5,8 @@ import { PANELS } from './panels3d.js';
 import { renderPasses } from './stage.js';
 window.renderPanel = async (id, opts = {}) => {
   const { scene, camera, far = 200 } = await PANELS[id](opts);
-  return { ...renderPasses(scene, camera, { far }), meta: JSON.stringify({ far }) };
+  const cam = { fov: camera.fov, aspect: camera.aspect, pos: camera.position.toArray() };
+  return { ...renderPasses(scene, camera, { far }), meta: JSON.stringify({ far, cam }) };
 };
 window.__ready = true;
 </script>

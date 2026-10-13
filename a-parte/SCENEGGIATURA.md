@@ -1,7 +1,7 @@
 # A PARTE
 ### *Aside*
 
-Cortometraggio d'animazione · circa 11 minuti · 2.39:1 · italiano, sottotitoli inglesi
+Cortometraggio d'animazione · circa 8 minuti · 2.39:1 · italiano, sottotitoli inglesi
 
 ---
 
