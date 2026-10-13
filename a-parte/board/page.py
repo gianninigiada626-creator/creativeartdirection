@@ -120,7 +120,7 @@ def build():
         d = sum(s['dur'] for s in SHOTS if s['act'] == key)
         act_marks.append(f'<span style="left:{x:.3f}%;width:{d / RUNTIME * 100:.3f}%">{esc(num)}</span>')
         x += d / RUNTIME * 100
-    roll = [s['id'] for s in SHOTS if any('Ci siamo tutti' in it for _, it, _ in s['lines'])]
+    roll = [s['id'] for s in SHOTS if any('Ci siamo tutti' in line[1] for line in s['lines'])]
     sections = []
     for key, num, name, tint, light in ACTS:
         shots = [s for s in SHOTS if s['act'] == key]
