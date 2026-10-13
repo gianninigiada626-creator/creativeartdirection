@@ -30,6 +30,7 @@ LOOKS = {
     'party':   dict(shadow=(0.04, 0.03, 0.08), keep=0.4, sat=1.5, warm=(1.0, 0.75, 0.55), gain=1.1, gamma=0.9, lo=0.03, hi=0.4),
     'neon':    dict(shadow=(0.04, 0.07, 0.08), keep=0.5, sat=1.2, warm=(0.9, 1.0, 0.85), gain=1.0, gamma=1.0, lo=0.04, hi=0.42),
     'dawn':    dict(shadow=(0.06, 0.08, 0.15), keep=0.55, sat=1.3, warm=(1.0, 0.8, 0.7), gain=1.0, gamma=1.0, lo=0.04, hi=0.45),
+    'nightlit': dict(shadow=(0.035, 0.05, 0.10), keep=0.65, sat=1.35, warm=(1.0, 0.78, 0.45), gain=1.45, gamma=0.85, lo=0.02, hi=0.3),
     'card':    dict(shadow=(0.05, 0.06, 0.1), keep=0.5, sat=1.0, warm=(1, 1, 1), gain=1.0, gamma=1.0, lo=0.03, hi=0.4),
 }
 
@@ -399,10 +400,10 @@ def canvas_weave(h, w, seed):
 
 
 def paint(passdir, tag, far=200.0, look='night', seed=1, faces=None, scale=1.0, red_rough=2.5):
+    """A rendered panel (its four passes and its faces) into a painting."""
     col = load(os.path.join(passdir, f'{tag}-color.png'))
     dep = load(os.path.join(passdir, f'{tag}-depth.png'))
     idp = (load(os.path.join(passdir, f'{tag}-id.png')) * 255 + 0.5).astype(np.int32)
-    h, w = col.shape[:2]
     d = dep[..., 0] + dep[..., 1] / 255.0 + dep[..., 2] / 65025.0
     z = np.maximum(d * far, 0.05)
     ids = (idp[..., 0] << 16) | (idp[..., 1] << 8) | idp[..., 2]
@@ -412,9 +413,13 @@ def paint(passdir, tag, far=200.0, look='night', seed=1, faces=None, scale=1.0, 
     if faces is None:
         fp = os.path.join(passdir, f'{tag}-faces.json')
         faces = json.load(open(fp)) if os.path.exists(fp) else []
+    return paint_arrays(col, z, ids, him, prop, faces, look, seed, scale, red_rough)
 
+
+def paint_arrays(col, z, ids, him, prop, faces, look, seed, scale=1.0, red_rough=2.5, graded=False):
+    h, w = col.shape[:2]
     L = LOOKS[look] if isinstance(look, str) else look
-    img = grade(col, L)
+    img = col if graded else grade(col, L)
     # paint the world as if he weren't there: his shape is filled from around it, then laid flat on top
     if him.any():
         img = cv2.inpaint((img * 255).astype(np.uint8), (cv2.dilate(him.astype(np.uint8), np.ones((5, 5), np.uint8))) * 255, 5, cv2.INPAINT_TELEA).astype(np.float32) / 255
@@ -456,6 +461,18 @@ def paint(passdir, tag, far=200.0, look='night', seed=1, faces=None, scale=1.0, 
         out = out * (1 - m) + paint_red * m
     out += np.random.default_rng(seed + 2).normal(0, 0.01, (h, w, 1)).astype(np.float32)
     return np.clip(out, 0, 1)
+
+
+def paint_ground(h, w, top, bottom, seed=1, look='card'):
+    """A painted ground with nothing on it: dark colour laid in big swirling strokes (title cards, a table)."""
+    t = np.linspace(0, 1, h, dtype=np.float32)[:, None, None]
+    base = np.float32(top) * (1 - t) + np.float32(bottom) * t
+    base = np.broadcast_to(base, (h, w, 3)).copy()
+    base *= (0.8 + 0.4 * noise(h, w, 180, seed + 3, 2))[..., None]
+    z = np.full((h, w), 10.0, np.float32)
+    ids = np.zeros((h, w), np.int32)
+    none = np.zeros((h, w), bool)
+    return paint_arrays(np.clip(base, 0, 1), z, ids, none, none, [], look, seed, graded=True)
 
 
 def save(img, path):

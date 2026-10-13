@@ -37,74 +37,72 @@ PIC_H = 804
 BAR = (H - PIC_H) // 2
 BOIL = 3
 
-# shots that move: seconds of 3D animation (then the last drawing holds and boils), or a loop period
-MOTION = {
-    '01': dict(anim=9.0), '02': dict(anim=13.0), '03': dict(anim=10.5), '06': dict(anim=10.0),
-    '08': dict(anim=18.0), '09': dict(loop=1.6), '11': dict(anim=16.0), '14': dict(anim=10.0),
-    '15': dict(anim=18.0), '21': dict(loop=1.8), '24': dict(anim=26.0), '25': dict(anim=18.0),
-}
-# when the first line of a shot is spoken, if not at once
+# every shot moves now. The 3D is rendered at 8 frames a second where things move, at 4 where life is only
+# breathing, once for the photograph; it is always painted 8 times a second, so the paint itself never stops.
+RFPS = {'10': 4, '12': 0, '16': 4, '18': 4, '19': 4, '20': 4, '25': 4, '26': 4, '27': 4}
+CARD = {'04', '28'}
 FIRST_LINE = {'01': 4.0, '02': 3.0, '03': 3.0, '10': 3.0, '14': 6.2, '16': 5.0, '19': 4.0, '23': 4.0, '24': 4.0, '26': 6.0, '27': 6.0}
 ACT_STARTS = {next(s['id'] for s in SHOTS if s['act'] == a[0]) for a in ACTS[1:]}
+DUR = {s['id']: s['dur'] for s in SHOTS}
+
+
+def renders(sid):
+    """(seconds, fps, frames) of the 3D render behind a shot."""
+    rf = RFPS.get(sid, 8)
+    if rf == 0:
+        return 1, 1, 1
+    return DUR[sid], rf, max(1, round(DUR[sid] * rf))
+
+
+def render(ids):
+    """Render each shot's 3D frame by frame (skipping what is already there)."""
+    for s in SHOTS:
+        sid = s['id']
+        if sid in CARD or (ids and sid not in ids):
+            continue
+        secs, fps, n = renders(sid)
+        d = os.path.join(ANIM, sid)
+        if os.path.exists(os.path.join(d, 'meta.json')) and len([f for f in os.listdir(d) if f.endswith('-color.png')]) >= n:
+            print('have', sid, flush=True)
+            continue
+        subprocess.run(['rm', '-rf', d])
+        subprocess.run(['node', os.path.join(ROOT, 'engine3d', 'anim.mjs'), ANIM, sid, str(secs), str(fps)], check=True)
 
 
 # ── drawing ──────────────────────────────────────────────────────────────────────────────────────
 
-def frames_of(sid):
-    m = MOTION[sid]
-    secs = m.get('anim') or m['loop']
-    return max(1, round(secs * DRAW_FPS))
-
-
-def _draw_anim(job):
-    sid, i, seed, out = job
+def _draw(job):
+    sid, r, seed, out = job
     if os.path.exists(out):
         return out
-    d = os.path.join(ANIM, sid)
-    meta = json.load(open(os.path.join(d, 'meta.json')))
-    img = stylize(d, f'f{i:04d}', far=meta['far'], tint=make.TINT.get(sid, (1, 1, 1)), seed=seed)
-    post = make.POST.get(sid)
-    if post:
-        img = post(img, seed * 7 + i)
+    if sid in CARD:
+        img = make.draw(sid, seed)
+    else:
+        img = make.draw(sid, seed, passdir=os.path.join(ANIM, sid), frame=f'f{r:04d}')
     cv2.imwrite(out, cv2.cvtColor((np.clip(img, 0, 1) * 255 + 0.5).astype(np.uint8), cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, 92])
     return out
 
 
-def _draw_still(job):
-    sid, seed, out = job
-    if os.path.exists(out):
-        return out
-    img = make.draw(sid, seed)
-    cv2.imwrite(out, cv2.cvtColor((np.clip(img, 0, 1) * 255 + 0.5).astype(np.uint8), cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, 92])
-    return out
-
-
-def draw(ids):
-    jobs_a, jobs_s = [], []
+def draw(ids, procs=4):
+    jobs = []
     for s in SHOTS:
         sid = s['id']
         if ids and sid not in ids:
             continue
         d = os.path.join(DRAW, sid)
         os.makedirs(d, exist_ok=True)
-        if sid in MOTION:
-            n = frames_of(sid)
-            for i in range(n):
-                jobs_a.append((sid, i, 1 + i % BOIL, os.path.join(d, f'a{i:04d}.jpg')))
-            if 'anim' in MOTION[sid]:
-                # the held end of the shot: its last frame, drawn three times
-                for b in range(BOIL):
-                    jobs_a.append((sid, n - 1, 1 + b, os.path.join(d, f'h{b}.jpg')))
-        else:
-            for b in range(BOIL):
-                jobs_s.append((sid, 1 + b, os.path.join(d, f'b{b}.jpg')))
-    with Pool(4) as p:
-        for k, _ in enumerate(p.imap_unordered(_draw_still, jobs_s)):
-            pass
-        for k, _ in enumerate(p.imap_unordered(_draw_anim, jobs_a, chunksize=4)):
+        if sid in CARD:
+            jobs += [(sid, 0, 1 + b, os.path.join(d, f'b{b}.jpg')) for b in range(BOIL)]
+            continue
+        secs, fps, n = renders(sid)
+        for i in range(int(s['dur'] * DRAW_FPS)):
+            r = min(n - 1, int(i * fps / DRAW_FPS)) if n > 1 else 0
+            jobs.append((sid, r, 1 + i % BOIL, os.path.join(d, f'a{i:04d}.jpg')))
+    with Pool(procs) as p:
+        for k, _ in enumerate(p.imap_unordered(_draw, jobs, chunksize=2)):
             if k % 50 == 0:
-                print('drawn', k, '/', len(jobs_a), flush=True)
-    print('drawings done', len(jobs_s) + len(jobs_a))
+                print('drawn', k, '/', len(jobs), flush=True)
+    print('drawings done', len(jobs), flush=True)
 
 
 # ── subtitles ────────────────────────────────────────────────────────────────────────────────────
@@ -133,12 +131,22 @@ def subtitle_events():
     ev, t0 = [], 0.0
     for s in SHOTS:
         items = []
-        for who, it, en in s['lines']:
+        for line in s['lines']:
+            who, it, en = line[:3]
+            at = line[3] if len(line) > 3 else None
             it = re.sub(r'\([^)]*\)\s*', '', it).strip()
             en = re.sub(r'\([^)]*\)\s*', '', en).strip()
-            for a, b in _split(it, en):
-                items.append((who, a, b, max(1.7, len(a) / 13.0 + 0.6)))
-        if items:
+            for j, (a, b) in enumerate(_split(it, en)):
+                items.append((who, a, b, max(1.7, len(a) / 13.0 + 0.6), at if j == 0 else None))
+        if items and any(x[4] is not None for x in items):
+            # lines tied to the action: each starts at its moment, or right after the one before
+            t = 0.0
+            for who, a, b, d, at in items:
+                t = max(t, at if at is not None else t)
+                ev.append((t0 + t, t0 + min(t + d, s['dur'] - 0.2), who, a, b))
+                t += d + 0.35
+        elif items:
+            items = [x[:4] for x in items]
             start = FIRST_LINE.get(s['id'], 0.7)
             gap = 0.35
             need = sum(d for *_, d in items) + gap * (len(items) - 1)
@@ -213,14 +221,9 @@ def drawing(sid, t):
     """The drawing on screen at t seconds into shot sid."""
     d = os.path.join(DRAW, sid)
     k = int(t * DRAW_FPS)
-    if sid in MOTION:
-        m, n = MOTION[sid], frames_of(sid)
-        if 'loop' in m:
-            return load(os.path.join(d, f'a{k % n:04d}.jpg'))
-        if k < n:
-            return load(os.path.join(d, f'a{k:04d}.jpg'))
-        return load(os.path.join(d, f'h{k % BOIL}.jpg'))
-    return load(os.path.join(d, f'b{k % BOIL}.jpg'))
+    if sid in CARD:
+        return load(os.path.join(d, f'b{k % BOIL}.jpg'))
+    return load(os.path.join(d, f'a{min(k, int(DUR[sid] * DRAW_FPS) - 1):04d}.jpg'))
 
 
 @lru_cache(maxsize=40)
@@ -363,8 +366,14 @@ def share(master=None):
 
 
 if __name__ == '__main__':
-    if sys.argv[1] == 'draw':
-        draw(sys.argv[2:])
+    if sys.argv[1] == 'render':
+        render(sys.argv[2:])
+    elif sys.argv[1] == 'draw':
+        procs = 4
+        args = sys.argv[2:]
+        if args and args[0].startswith('-j'):
+            procs, args = int(args[0][2:]), args[1:]
+        draw(args, procs)
     elif sys.argv[1] == 'cut':
         span = None
         if '--span' in sys.argv:

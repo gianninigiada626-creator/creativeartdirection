@@ -109,7 +109,16 @@ async function sampler(src, clipName) {
     clip.tracks = clip.tracks.filter((tr) => tr.name.endsWith('.quaternion') || /Hips\.position$/.test(tr.name));
     const mixer = new THREE.AnimationMixer(obj);
     mixer.clipAction(clip).play();
-    samplers[key] = { obj, bones, bind, mixer, dur: clip.duration };
+    // the clip's own standing height for the hips (clips and bind poses don't always share units)
+    // the clip's average hip height, measured in the world (armatures disagree about which way is up)
+    let hipsY0 = 0;
+    const v = new THREE.Vector3();
+    for (let i = 0; i < 8; i++) {
+      mixer.setTime((i / 8) * clip.duration);
+      obj.updateMatrixWorld(true);
+      hipsY0 += (bones.Hips ? bones.Hips.getWorldPosition(v).y : 0) / 8;
+    }
+    samplers[key] = { obj, bones, bind, mixer, dur: clip.duration, hipsY0 };
   }
   return samplers[key];
 }
@@ -180,8 +189,9 @@ function bindOf(obj, bones) {
   for (const [n, b] of Object.entries(bones)) bind[n] = { q: inv.clone().multiply(b.getWorldQuaternion(new THREE.Quaternion())), p: b.position.clone() };
   for (const [n, b] of Object.entries(bones)) b.quaternion.copy(saved[n]);
   obj.updateMatrixWorld(true);
+  const hips = bones.Hips ? obj.worldToLocal(bones.Hips.getWorldPosition(new THREE.Vector3())) : null;
   const order = Object.keys(bones).sort((a, b) => depth(bones[a]) - depth(bones[b]));
-  return { bind, order };
+  return { bind, order, hips };
 }
 const depth = (o) => (o.parent ? 1 + depth(o.parent) : 0);
 
@@ -197,7 +207,13 @@ function retarget(obj, S, t) {
     const want = delta.multiply(obj.rig.bind[n].q);
     const parentRel = rootInv.clone().multiply(tb.parent.getWorldQuaternion(new THREE.Quaternion()));
     tb.quaternion.copy(parentRel.invert().multiply(want));
-    if (n === 'Hips' && S.bind.Hips.p.y) tb.position.y = obj.rig.bind.Hips.p.y * (sb.position.y / S.bind.Hips.p.y);
+    if (n === 'Hips' && S.hipsY0 > 0 && obj.rig.hips) {
+      // the hips rise and fall as they do in the clip, scaled to this body
+      const k = sb.getWorldPosition(new THREE.Vector3()).y / S.hipsY0;
+      const p = obj.rig.hips.clone();
+      p.y *= k;
+      tb.position.copy(tb.parent.worldToLocal(obj.localToWorld(p)));
+    }
     tb.updateMatrixWorld(true);
   }
 }
@@ -321,10 +337,11 @@ export async function person(name, opts = {}) {
     const top = bones.HeadTop_End.getWorldPosition(new THREE.Vector3());
     const base = bones.Head.getWorldPosition(new THREE.Vector3());
     const hh = top.distanceTo(base);
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(hh * 0.62, 24, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), clay(opts.hair, { userData: { hair: true } }));
+    const hs = opts.hairSize ?? 1;
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(hh * 0.62 * hs, 24, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), clay(opts.hair, { userData: { hair: true } }));
     const ws = bones.Head.getWorldScale(new THREE.Vector3()).x;
     cap.scale.set(1 / ws, 1.05 / ws, 1.08 / ws);
-    cap.position.set(0, (hh * 0.62) / ws, (-hh * 0.08) / ws);
+    cap.position.set(0, (hh * (opts.hairY ?? 0.62)) / ws, (-hh * 0.08) / ws);
     cap.castShadow = true;
     bones.Head.add(cap);
   }

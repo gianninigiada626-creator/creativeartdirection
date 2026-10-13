@@ -79,7 +79,8 @@ def panel_html(s, start):
         tech.append(f'camera a {meta["cam"]["pos"][1]:.2f} m'.replace('.', ','))
     tech.append(MOVES[s['move'][0]])
     lines = []
-    for who, it, en in s['lines']:
+    for line in s['lines']:
+        who, it, en = line[:3]
         cls = 'line lui' if who == 'LUI' else ('line vo' if who == 'VO' else 'line')
         label = 'voce narrante' if who == 'VO' else who.lower()
         lines.append(f'<div class="{cls}"><span class="who">{esc(label)}</span><p class="it">{esc(it)}</p><p class="en">{esc(en)}</p></div>')

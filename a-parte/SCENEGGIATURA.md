@@ -198,8 +198,8 @@ Torniamo all'inizio. Lui contro la colonna.
 **18–20.** Quello che vede. Tre inquadrature, ferme, come fotografie.
 Una donna in macchina, le mani sul volante, piange senza rumore.
 
-> VO: Una donna che piangeva piano, per non disturbare la macchina.
-> *A woman crying softly, so as not to disturb the car.*
+> VO: Una donna che piangeva piano, per non disturbare la notte.
+> *A woman crying softly, so as not to disturb the night.*
 
 Un guardiano con le cuffie balla da solo tra le colonne.
 

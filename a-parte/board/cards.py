@@ -8,7 +8,11 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-from stylize import GRAPHITE, PAPER, RED, noise, wobble
+from paint import RED, paint_ground
+from stylize import GRAPHITE, PAPER, noise, wobble
+
+CREAM = (0.9, 0.85, 0.76)
+NIGHT_TOP, NIGHT_BOTTOM = (0.06, 0.075, 0.14), (0.025, 0.03, 0.055)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.join(HERE, '..', 'build', 'fonts')
@@ -77,12 +81,12 @@ def red_from(passdir, tag, rough=3.0, seed=1):
 
 
 def title_card(passdir, seed=3):
-    """04 — A PARTE. Centred, quiet; and to one side, small, sitting against nothing: him."""
-    img = paper(dark=0.0)
+    """04 — A PARTE. Centred, quiet, on a night-blue painted ground; to one side, small, sitting against nothing: him."""
+    img = paint_ground(H, W, NIGHT_TOP, NIGHT_BOTTOM, seed=seed)
     big = font('CormorantGaramond[wght].ttf', 150, 500)
     small = font('CormorantGaramond-Italic[wght].ttf', 44, 400)
     m = text_mask([('A PARTE', big, H / 2 - 18, 34), ('aside', small, H / 2 + 92, 10)])
-    img = ink(img, pencil(m, seed) * 0.92, GRAPHITE)
+    img = ink(img, pencil(m, seed) * 0.95, CREAM)
     # him, from the car park, small at the right — a parte
     red = red_from(passdir, '02', seed=seed)
     ys, xs = np.nonzero(red > 0.5)
@@ -97,17 +101,17 @@ def title_card(passdir, seed=3):
         # the ground he sits on: one short pencil stroke
         line = np.zeros((H, W), np.float32)
         cv2.line(line, (x0 - 60, y0 + ch + 2), (x0 + cw + 70, y0 + ch + 2), 1.0, 2, cv2.LINE_AA)
-        img = ink(img, pencil(line, seed + 6, 1.2) * 0.8, GRAPHITE)
+        img = ink(img, pencil(line, seed + 6, 1.2) * 0.7, CREAM)
         img = ink(img, mm, RED)
     return np.clip(img, 0, 1)
 
 
 def end_card(seed=5):
-    """28 — black. Then, very small, the title again."""
-    img = paper(dark=0.96, seed=21)
+    """28 — the dark. Then, very small, the title again."""
+    img = paint_ground(H, W, (0.03, 0.035, 0.06), (0.015, 0.018, 0.03), seed=seed + 20) * 0.8
     f = font('CormorantGaramond[wght].ttf', 46, 500)
     m = text_mask([('A PARTE', f, H / 2, 14)])
-    img = ink(img, pencil(m, seed, 1.0) * 0.55, (0.86, 0.84, 0.8))
+    img = ink(img, pencil(m, seed, 1.0) * 0.6, CREAM)
     return np.clip(img, 0, 1)
 
 
@@ -126,12 +130,12 @@ def photo(raw, passdir, tag='12'):
     pic = cv2.resize(pic, (int(pic.shape[1] * 1.0), int(pic.shape[0] * 1.0)))
     ph, pw = pic.shape[:2]
     # flash-flat, slightly faded print
-    pic = 0.12 + pic * 0.86
+    pic = 0.08 + pic * 0.9
     b = 26
-    card = np.ones((ph + 2 * b + 30, pw + 2 * b, 3), np.float32) * np.float32([0.95, 0.94, 0.91])
+    card = np.ones((ph + 2 * b + 30, pw + 2 * b, 3), np.float32) * np.float32([0.88, 0.85, 0.78])
     card[b:b + ph, b:b + pw] = pic
-    # the table it lies on
-    bg = paper(dark=0.55, seed=31)
+    # the table it lies on: dark wood, painted
+    bg = paint_ground(H, W, (0.16, 0.1, 0.07), (0.08, 0.05, 0.035), seed=31)
     ch, cw = card.shape[:2]
     s = min((H * 0.9) / ch, (W * 0.8) / cw)
     card = cv2.resize(card, (int(cw * s), int(ch * s)), interpolation=cv2.INTER_AREA)
@@ -152,7 +156,7 @@ def photo(raw, passdir, tag='12'):
     edge = cv2.morphologyEx((alpha > 0.5).astype(np.uint8), cv2.MORPH_GRADIENT, np.ones((3, 3), np.uint8)).astype(np.float32)
     full = np.zeros((H, W), np.float32)
     full[y0:y0 + big[1], x0:x0 + big[0]] = edge
-    bg = ink(bg, pencil(full, 4, 1.2) * 0.85, GRAPHITE)
+    bg = ink(bg, pencil(full, 4, 1.2) * 0.35, (0.1, 0.08, 0.07))
     return np.clip(bg, 0, 1)
 
 

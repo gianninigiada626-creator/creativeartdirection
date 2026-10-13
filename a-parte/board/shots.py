@@ -2,7 +2,7 @@
 The shot list of A PARTE: one entry per storyboard panel. It feeds the storyboard page and the animatic
 (durations, subtitles, camera moves), so the two never disagree.
 
-lines: (who, italian, english). who is 'VO' (him, as a man, close to the microphone), 'LUI' (him, in the
+lines: (who, italian, english[, at]) — at: the second of the shot the line starts, when it's tied to the action. who is 'VO' (him, as a man, close to the microphone), 'LUI' (him, in the
 scene: his only words), or another character.
 move: the camera in the animatic — ('hold',), ('push', amount), ('pull', amount), ('tilt', dy), ('pan', dx).
 """
@@ -35,9 +35,9 @@ SHOTS = [
     dict(id='05', act='sei', dur=30, slug='INT. CUCINA — SERA', shot='Totale lungo il tavolo', move=('push', 0.05),
          action='Camera all\'altezza di un bambino. Il padre dietro il giornale, la sorella con le cuffie, la madre al telefono alla finestra. In fondo al tavolo, piccolo, il bambino rosso. Il padre chiede il sale: la sorella lo passa. Il bambino lo stava già porgendo; rimette giù il braccio.',
          sound='Frigorifero, posate, la voce della madre al telefono, la musica nelle cuffie.',
-         lines=[('MADRE', '…sì, sì, ci siamo tutti…', '…yes, yes, we\'re all here…'),
-                ('PADRE', 'Il sale.', 'The salt.'),
-                ('VO', 'A casa eravamo in quattro. A tavola, quasi sempre tre.', 'At home there were four of us. At the table, usually three.')]),
+         lines=[('MADRE', '…sì, sì, ci siamo tutti…', '…yes, yes, we\'re all here…', 1.0),
+                ('PADRE', 'Il sale.', 'The salt.', 5.2),
+                ('VO', 'A casa eravamo in quattro. A tavola, quasi sempre tre.', 'At home there were four of us. At the table, usually three.', 13.0)]),
     dict(id='06', act='sei', dur=14, slug='INT. CUCINA — IL FRIGORIFERO', shot='Dettaglio', move=('tilt', 0.05),
          action='I disegni della sorella sotto le calamite: «BRAVA!», «10 e lode». Il suo foglio, un omino a pastello rosso, non ha calamita: scivola lungo lo sportello e sparisce dietro il frigo.',
          sound='Il motore del frigo. Il fruscio della carta.',
@@ -45,9 +45,9 @@ SHOTS = [
     dict(id='07', act='sei', dur=22, slug='INT. AULA — GIORNO', shot='Totale dal fondo, altezza di banco', move=('hold',),
          action='La maestra alla lavagna fa l\'appello. Ultima fila: un braccio rosso si alza. La maestra si gira verso la lavagna. Il braccio resta su.',
          sound='Gesso sulla lavagna, sedie, il cortile fuori dalle finestre.',
-         lines=[('MAESTRA', 'Ci siamo tutti?', 'Is everyone here?'),
-                ('BAMBINI', 'Sììì!', 'Yeees!'),
-                ('VO', 'Io alzavo la mano. Non per farmi vedere. Per farmi contare.', 'I\'d raise my hand. Not to be seen. To be counted.')]),
+         lines=[('MAESTRA', 'Ci siamo tutti?', 'Is everyone here?', 0.8),
+                ('BAMBINI', 'Sììì!', 'Yeees!', 2.5),
+                ('VO', 'Io alzavo la mano. Non per farmi vedere. Per farmi contare.', 'I\'d raise my hand. Not to be seen. To be counted.', 11.0)]),
     dict(id='08', act='sei', dur=18, slug='EXT. CORTILE DELLA SCUOLA — GIORNO', shot='Totale alto', move=('pull', 0.05),
          action='I capitani chiamano i nomi, uno dopo l\'altro. Il gruppo corre via verso la porta del campo. Sulla linea bianca dell\'asfalto resta una sola sagoma, rossa e piccola.',
          sound='Nomi gridati, scarpe sull\'asfalto, poi vento.',
@@ -82,8 +82,8 @@ SHOTS = [
     dict(id='15', act='quindici', dur=18, slug='INT. FESTA — NOTTE', shot='Campo medio', move=('hold',),
          action='Lui contro il muro, al buio. La luce trova solo chi balla. Il gruppo esce. La musica continua per nessuno.',
          sound='Bassi attraverso il pavimento. Poi la stessa canzone, in una stanza vuota.',
-         lines=[('AMICO', '(urlando sopra la musica) Ci siamo tutti? Andiamo su!', '(shouting over the music) Everyone here? Let\'s go up!'),
-                ('VO', 'Le feste sono il posto più rumoroso per stare zitti.', 'Parties are the loudest place to keep quiet.')]),
+         lines=[('AMICO', '(urlando sopra la musica) Ci siamo tutti? Andiamo su!', '(shouting over the music) Everyone here? Let\'s go up!', 6.5),
+                ('VO', 'Le feste sono il posto più rumoroso per stare zitti.', 'Parties are the loudest place to keep quiet.', 13.0)]),
     dict(id='16', act='quindici', dur=26, slug='EXT. TETTO — NOTTE', shot='Totale', move=('pull', 0.06),
          action='Seduto contro un comignolo, le gambe distese: la stessa posizione del parcheggio. Sotto, la città. Sopra, il cielo.',
          sound='Vento. La festa, molto lontana. Poi solo il vento.',
@@ -102,9 +102,9 @@ SHOTS = [
          sound='Il cemento, il ronzio dei neon. Nient\'altro.',
          lines=[('VO', 'Poi una sera, in un parcheggio, ho smesso di aspettare che qualcuno mi vedesse. E ho cominciato a guardare.', 'Then one night, in a car park, I stopped waiting for someone to see me. And I started to look.')]),
     dict(id='20', act='trenta', dur=10, slug='INT. PARCHEGGIO — CIÒ CHE VEDE', shot='Campo medio, fisso come una fotografia', move=('hold',),
-         action='Una donna in macchina, la luce di cortesia accesa. Le mani sul volante, la testa giù. Piange senza rumore.',
+         action='Una donna in macchina, la luce di cortesia accesa sul suo viso. Le mani sul volante. Piange senza rumore.',
          sound='Il ticchettio del motore che si raffredda.',
-         lines=[('VO', 'Una donna che piangeva piano, per non disturbare la macchina.', 'A woman crying softly, so as not to disturb the car.')]),
+         lines=[('VO', 'Una donna che piangeva piano, per non disturbare la notte.', 'A woman crying softly, so as not to disturb the night.')]),
     dict(id='21', act='trenta', dur=9, slug='INT. PARCHEGGIO — CIÒ CHE VEDE', shot='Figura intera', move=('hold',),
          action='Un guardiano balla da solo in una pozza di luce, tra le colonne.',
          sound='La musica che esce, minuscola, dalle sue cuffie.',
