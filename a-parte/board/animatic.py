@@ -333,6 +333,35 @@ def cut(out_name='a-parte-animatic', audio=True, span=None):
     return video
 
 
+def chapters(master=None, limit_mb=14.2):
+    """One file per act for the storyboard page (each under the page's per-file limit), two-pass."""
+    master = master or os.path.join(OUT, 'a-parte-animatic.mp4')
+    vdir = os.path.join(ROOT, 'out', 'web', 'video')
+    os.makedirs(vdir, exist_ok=True)
+    t = 0
+    for i, (key, *_) in enumerate(ACTS):
+        d = sum(s['dur'] for s in SHOTS if s['act'] == key)
+        kbps = int(limit_mb * 8e6 / d / 1000 * 0.94) - 96
+        out = os.path.join(vdir, f'animatic-{i + 1}.mp4')
+        log = os.path.join(OUT, f'pass-{i}')
+        base = ['ffmpeg', '-y', '-loglevel', 'error', '-ss', str(t), '-t', str(d), '-i', master,
+                '-vf', 'scale=1280:720:flags=lanczos', '-c:v', 'libx264', '-preset', 'slow', '-b:v', f'{kbps}k',
+                '-maxrate', f'{int(kbps * 1.6)}k', '-bufsize', f'{kbps * 3}k', '-pix_fmt', 'yuv420p', '-passlogfile', log]
+        subprocess.run(base + ['-pass', '1', '-an', '-f', 'mp4', '/dev/null'], check=True)
+        subprocess.run(base + ['-pass', '2', '-c:a', 'aac', '-b:a', '96k', '-movflags', '+faststart', out], check=True)
+        print(key, f'{os.path.getsize(out) / 1e6:.1f} MB', f'{kbps} kbps')
+        t += d
+
+
+def share(master=None):
+    """A lighter copy of the whole animatic to send around."""
+    master = master or os.path.join(OUT, 'a-parte-animatic.mp4')
+    out = os.path.join(OUT, 'a-parte-animatic-720p.mp4')
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', master, '-vf', 'scale=1280:720:flags=lanczos', '-c:v', 'libx264',
+                    '-preset', 'slow', '-crf', '27', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', out], check=True)
+    print(out, f'{os.path.getsize(out) / 1e6:.1f} MB')
+
+
 if __name__ == '__main__':
     if sys.argv[1] == 'draw':
         draw(sys.argv[2:])
@@ -342,3 +371,6 @@ if __name__ == '__main__':
             k = sys.argv.index('--span')
             span = (float(sys.argv[k + 1]), float(sys.argv[k + 2]))
         cut('preview' if span else 'a-parte-animatic', audio='--no-audio' not in sys.argv and not span, span=span)
+    elif sys.argv[1] == 'export':
+        chapters()
+        share()
