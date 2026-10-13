@@ -46,12 +46,200 @@ async function gltf(name) {
 }
 
 // ── materials ──
+/** A matte material: a grey level (linear), or a colour as '#rrggbb' (sRGB) or [r, g, b] (linear). */
 export function clay(v = 0.72, opts = {}) {
-  return new THREE.MeshStandardMaterial({ color: new THREE.Color(v, v, v), roughness: 0.92, metalness: 0, ...opts });
+  const color = typeof v === 'number' ? new THREE.Color(v, v, v) : Array.isArray(v) ? new THREE.Color(...v) : new THREE.Color(v);
+  return new THREE.MeshStandardMaterial({ color, roughness: 0.92, metalness: 0, ...opts });
+}
+
+// ── wardrobe: every grey person gets a body and clothes in colour ──
+const SKINS = ['#f1c9a5', '#e0ac85', '#c68c63', '#a8714f', '#8a5a3c', '#5e3b28', '#f3d2bb', '#d4a07a'];
+const HAIRS = ['#2a1d16', '#3b2a1e', '#1a1514', '#5a3c22', '#7a5530', '#141210', '#4a3a30', '#b08a5a'];
+const CLOTH = ['#2e4a6b', '#c49a3a', '#3f6b5c', '#6b4a6e', '#8a8f5a', '#1f2a3a', '#d7cbb0', '#5a6670', '#b56a2e', '#2f5f73', '#7d6a4f', '#454b5e', '#a8b4b0', '#3a3530'];
+export function wardrobe(seed) {
+  let r = (seed * 9301 + 49297) % 233280;
+  const pick = (a) => a[(r = (r * 9301 + 49297) % 233280) % a.length];
+  return { skin: pick(SKINS), hair: pick(HAIRS), top: pick(CLOTH), bottom: pick(CLOTH), shoes: pick(['#1c1a19', '#3a2a20', '#2a2f38', '#d9d4c8']) };
+}
+const PART = (bn) => (/Head|Neck|Eye/.test(bn) ? 'skin' : /Hand/.test(bn) ? 'hands' : /Foot|Toe/.test(bn) ? 'shoes' : /Hips|UpLeg|Leg/.test(bn) ? 'bottom' : 'top');
+const RPM = { Wolf3D_Head: 'skin', Wolf3D_Body: 'skin', Wolf3D_Outfit_Top: 'top', Wolf3D_Outfit_Bottom: 'bottom', Wolf3D_Outfit_Footwear: 'shoes', Wolf3D_Beard: 'hair', Wolf3D_Headwear: 'hat', EyeLeft: 'eyes', EyeRight: 'eyes', Wolf3D_Teeth: 'teeth' };
+const HVMAT = { hair: 'hair', skin: 'skin', 'T-shirt': 'top', short: 'bottom', brown: 'shoes', belt: 'dark', black: 'dark', white: 'teeth', pupil: 'eyes', iris: 'eyes', 'iris dark': 'eyes' };
+function dress(obj, c) {
+  const col = { ...c, hands: c.sleeves === 'long' ? c.top : c.skin, eyes: '#15100e', teeth: '#e8e2d6', dark: '#1d1a19', hat: c.hat ?? c.top };
+  const mat = (k) => new THREE.MeshStandardMaterial({ color: new THREE.Color(col[k] ?? col.top), roughness: 0.85 });
+  obj.traverse((o) => {
+    if (!o.isMesh) return;
+    if (RPM[o.name]) return (o.material = mat(RPM[o.name]));
+    if (Array.isArray(o.material) && o.material.some((m) => HVMAT[m.name])) return (o.material = o.material.map((m) => mat(HVMAT[m.name] ?? 'top')));
+    if (o.material?.userData?.hair) return (o.material = mat('hair'));
+    if (!o.isSkinnedMesh) return (o.material = mat('top'));
+    // a single body: colour each vertex by the bone that moves it most
+    const g = o.geometry.clone();
+    const si = g.attributes.skinIndex, sw = g.attributes.skinWeight;
+    const arr = new Float32Array(si.count * 3);
+    const cache = {};
+    for (let i = 0; i < si.count; i++) {
+      let best = 0, bw = -1;
+      for (let k = 0; k < 4; k++) if (sw.getComponent(i, k) > bw) (bw = sw.getComponent(i, k)), (best = si.getComponent(i, k));
+      const bn = o.skeleton.bones[best].name.replace(/^mixamorig:?/, '');
+      const key = PART(bn);
+      const cc = (cache[key] ??= new THREE.Color(col[key] ?? col.top));
+      arr[i * 3] = cc.r;
+      arr[i * 3 + 1] = cc.g;
+      arr[i * 3 + 2] = cc.b;
+    }
+    g.setAttribute('color', new THREE.BufferAttribute(arr, 3));
+    o.geometry = g;
+    o.material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 });
+  });
 }
 
 // ── people ──
 const CLIPS = { hvidle: ['HVGirl', 'Idle'], hvwalk: ['HVGirl', 'Walking'], idle: ['Xbot', 'idle'], walk: ['Xbot', 'walk'], run: ['Xbot', 'run'], sad: ['Xbot', 'sad_pose'], sneak: ['Xbot', 'sneak_pose'], samba: ['Michelle', 'SambaDance'], swalk: ['Soldier', 'Walk'], sidle: ['Soldier', 'Idle'] };
+
+const samplers = {};
+async function sampler(src, clipName) {
+  const key = `${src}:${clipName}`;
+  if (!samplers[key]) {
+    const g = await gltf(src);
+    const obj = SkeletonUtils.clone(g.scene);
+    const bones = boneMap(obj);
+    const { bind } = bindOf(obj, bones);
+    let clip = g.animations.find((a) => a.name === clipName).clone();
+    clip.tracks = clip.tracks.filter((tr) => tr.name.endsWith('.quaternion') || /Hips\.position$/.test(tr.name));
+    const mixer = new THREE.AnimationMixer(obj);
+    mixer.clipAction(clip).play();
+    samplers[key] = { obj, bones, bind, mixer, dur: clip.duration };
+  }
+  return samplers[key];
+}
+
+/**
+ * Every rig into the same T-pose (spine up, arms out with palms down, legs down, feet forward), so a clip
+ * made on one body moves another the same way whatever pose each was modelled in. Bones are aimed along
+ * their chain and twisted so a second landmark (across the palm, along the foot, across the shoulders) agrees.
+ */
+const T_POSE = [
+  ['Hips', 'Spine', [0, 1, 0], ['RightUpLeg', 'LeftUpLeg', [1, 0, 0]]],
+  ['Spine', 'Spine1', [0, 1, 0], ['RightArm', 'LeftArm', [1, 0, 0]]],
+  ['Spine1', 'Spine2', [0, 1, 0], ['RightArm', 'LeftArm', [1, 0, 0]]],
+  ['Spine2', 'Neck', [0, 1, 0], ['RightArm', 'LeftArm', [1, 0, 0]]],
+  ['Neck', 'Head', [0, 1, 0], null],
+  ['Head', 'HeadTop_End', [0, 1, 0], ['RightEye', 'LeftEye', [1, 0, 0]]],
+  ['LeftShoulder', 'LeftArm', [1, 0, 0], null],
+  ['LeftArm', 'LeftForeArm', [1, 0, 0], ['LeftHandPinky1', 'LeftHandIndex1', [0, 0, 1]]],
+  ['LeftForeArm', 'LeftHand', [1, 0, 0], ['LeftHandPinky1', 'LeftHandIndex1', [0, 0, 1]]],
+  ['LeftHand', 'LeftHandMiddle1', [1, 0, 0], ['LeftHandPinky1', 'LeftHandIndex1', [0, 0, 1]]],
+  ['RightShoulder', 'RightArm', [-1, 0, 0], null],
+  ['RightArm', 'RightForeArm', [-1, 0, 0], ['RightHandPinky1', 'RightHandIndex1', [0, 0, 1]]],
+  ['RightForeArm', 'RightHand', [-1, 0, 0], ['RightHandPinky1', 'RightHandIndex1', [0, 0, 1]]],
+  ['RightHand', 'RightHandMiddle1', [-1, 0, 0], ['RightHandPinky1', 'RightHandIndex1', [0, 0, 1]]],
+  ['LeftUpLeg', 'LeftLeg', [0, -1, 0], ['LeftFoot', 'LeftToeBase', [0, 0, 1]]],
+  ['LeftLeg', 'LeftFoot', [0, -1, 0], ['LeftFoot', 'LeftToeBase', [0, 0, 1]]],
+  ['LeftFoot', 'LeftToeBase', [0, -0.45, 1], null],
+  ['RightUpLeg', 'RightLeg', [0, -1, 0], ['RightFoot', 'RightToeBase', [0, 0, 1]]],
+  ['RightLeg', 'RightFoot', [0, -1, 0], ['RightFoot', 'RightToeBase', [0, 0, 1]]],
+  ['RightFoot', 'RightToeBase', [0, -0.45, 1], null],
+];
+
+function aimTwist(obj, bones, name, childName, dir, sec) {
+  const b = bones[name], c = bones[childName];
+  if (!b || !c) return;
+  const oq = obj.getWorldQuaternion(new THREE.Quaternion());
+  const wp = (x) => x.getWorldPosition(new THREE.Vector3());
+  obj.updateMatrixWorld(true);
+  const want = new THREE.Vector3(...dir).normalize().applyQuaternion(oq);
+  const cur = wp(c).sub(wp(b)).normalize();
+  let delta = new THREE.Quaternion().setFromUnitVectors(cur, want);
+  const apply = (dq) => {
+    const wq = b.getWorldQuaternion(new THREE.Quaternion());
+    const pq = b.parent.getWorldQuaternion(new THREE.Quaternion()).invert();
+    b.quaternion.copy(pq.multiply(dq.multiply(wq)));
+    b.updateMatrixWorld(true);
+  };
+  apply(delta);
+  if (sec && bones[sec[0]] && bones[sec[1]]) {
+    obj.updateMatrixWorld(true);
+    const flat = (v) => v.sub(want.clone().multiplyScalar(v.dot(want))).normalize();
+    const v = flat(wp(bones[sec[1]]).sub(wp(bones[sec[0]])));
+    const w = flat(new THREE.Vector3(...sec[2]).applyQuaternion(oq));
+    if (v.lengthSq() > 0.5 && w.lengthSq() > 0.5) {
+      const ang = Math.atan2(v.clone().cross(w).dot(want), v.dot(w));
+      apply(new THREE.Quaternion().setFromAxisAngle(want, ang));
+    }
+  }
+}
+
+function bindOf(obj, bones) {
+  const saved = Object.fromEntries(Object.entries(bones).map(([n, b]) => [n, b.quaternion.clone()]));
+  obj.updateMatrixWorld(true);
+  for (const [n, c, dir, sec] of T_POSE) aimTwist(obj, bones, n, c, dir, sec);
+  obj.updateMatrixWorld(true);
+  const inv = obj.getWorldQuaternion(new THREE.Quaternion()).invert();
+  const bind = {};
+  for (const [n, b] of Object.entries(bones)) bind[n] = { q: inv.clone().multiply(b.getWorldQuaternion(new THREE.Quaternion())), p: b.position.clone() };
+  for (const [n, b] of Object.entries(bones)) b.quaternion.copy(saved[n]);
+  obj.updateMatrixWorld(true);
+  const order = Object.keys(bones).sort((a, b) => depth(bones[a]) - depth(bones[b]));
+  return { bind, order };
+}
+const depth = (o) => (o.parent ? 1 + depth(o.parent) : 0);
+
+function retarget(obj, S, t) {
+  S.mixer.setTime(((t % S.dur) + S.dur) % S.dur);
+  S.obj.updateMatrixWorld(true);
+  const rootInv = obj.getWorldQuaternion(new THREE.Quaternion()).invert();
+  const tmp = new THREE.Quaternion();
+  for (const n of obj.rig.order) {
+    const sb = S.bones[n], tb = obj.bones[n];
+    if (!sb || !S.bind[n] || /Hand.+\d|Eye/.test(n)) continue;
+    const delta = sb.getWorldQuaternion(tmp).multiply(S.bind[n].q.clone().invert());
+    const want = delta.multiply(obj.rig.bind[n].q);
+    const parentRel = rootInv.clone().multiply(tb.parent.getWorldQuaternion(new THREE.Quaternion()));
+    tb.quaternion.copy(parentRel.invert().multiply(want));
+    if (n === 'Hips' && S.bind.Hips.p.y) tb.position.y = obj.rig.bind.Hips.p.y * (sb.position.y / S.bind.Hips.p.y);
+    tb.updateMatrixWorld(true);
+  }
+}
+
+/** Where a face is, in the head bone's own frame: measured once on the bind pose from the head's own vertices. */
+function faceFrame(obj, bones) {
+  const head = bones.Head;
+  if (!head) return null;
+  obj.updateMatrixWorld(true);
+  const Hinv = head.matrixWorld.clone().invert();
+  const hq = head.getWorldQuaternion(new THREE.Quaternion()).invert();
+  const oq = obj.getWorldQuaternion(new THREE.Quaternion());
+  const ax = (x, y, z) => new THREE.Vector3(x, y, z).applyQuaternion(oq).applyQuaternion(hq).normalize();
+  const L = ax(1, 0, 0), U = ax(0, 1, 0), F = ax(0, 0, 1);
+  const lo = [1e9, 1e9, 1e9], hi = [-1e9, -1e9, -1e9];
+  const v = new THREE.Vector3();
+  obj.traverse((m) => {
+    if (!m.isSkinnedMesh || !m.visible || /Headwear|Beard|Hair|Teeth|Eye/.test(m.name)) return;
+    const hi_ = m.skeleton.bones.indexOf(head);
+    const { skinIndex: si, skinWeight: sw } = m.geometry.attributes;
+    const idx = m.geometry.index ? new Set(m.geometry.index.array) : null;
+    for (let i = 0; i < si.count; i++) {
+      if (idx && !idx.has(i)) continue;
+      let w = 0;
+      for (let k = 0; k < 4; k++) if (si.getComponent(i, k) === hi_) w += sw.getComponent(i, k);
+      if (w < 0.6) continue;
+      m.getVertexPosition(i, v);
+      v.applyMatrix4(m.matrixWorld).applyMatrix4(Hinv);
+      const a = [v.dot(L), v.dot(U), v.dot(F)];
+      for (let k = 0; k < 3; k++) (lo[k] = Math.min(lo[k], a[k])), (hi[k] = Math.max(hi[k], a[k]));
+    }
+  });
+  if (lo[0] > hi[0]) return null;
+  return { L, U, F, lo, hi };
+}
+
+// a face, as fractions of the head's box: [side (−1 right … 1 left), height (0 chin … 1 crown), depth (0 back … 1 nose)]
+const FACE = {
+  eyeL: [0.36, 0.52, 0.86], eyeR: [-0.36, 0.52, 0.86], browLi: [0.13, 0.62, 0.9], browLo: [0.55, 0.61, 0.82], browRi: [-0.13, 0.62, 0.9], browRo: [-0.55, 0.61, 0.82],
+  noseTop: [0, 0.5, 0.95], noseTip: [0, 0.36, 1.0], mouthL: [0.22, 0.2, 0.9], mouthR: [-0.22, 0.2, 0.9], mouthC: [0, 0.2, 0.94], chin: [0, 0.04, 0.88],
+  cheekL: [0.5, 0.34, 0.8], cheekR: [-0.5, 0.34, 0.8], center: [0, 0.45, 0.5],
+};
 
 function boneMap(root) {
   const m = {};
@@ -72,12 +260,20 @@ export async function person(name, opts = {}) {
   const obj = SkeletonUtils.clone(g.scene);
   const bones = boneMap(obj);
   if (opts.trimHead) trimHead(obj, bones, opts.trimHead);
+  for (const n of opts.hide ?? []) {
+    const m = obj.getObjectByName(n);
+    if (m) m.visible = false;
+  }
+  obj.rig = bindOf(obj, bones);
+  obj.bones = bones;
+  const face = opts.face !== false && opts.id !== PROTAGONIST ? faceFrame(obj, bones) : null;
   // sample a base clip for a natural rest pose — only on the rig it was made for; other rigs are
   // posed entirely by aiming (their bind poses differ, a borrowed clip would twist them)
   const [src, clipName] = CLIPS[opts.clip ?? 'idle'];
   const native = src === name;
   const sg = await gltf(src);
   let clip = native ? sg.animations.find((a) => a.name === clipName) : null;
+  const borrowed = !native && opts.clip ? await sampler(src, clipName) : null;
   if (clip) {
     // rotations only: the root is placed by the scene, and rigs differ in units
     clip = clip.clone();
@@ -95,8 +291,19 @@ export async function person(name, opts = {}) {
   // aim bones at directions given in the character's own frame (+z forward, +y up, +x its left)
   obj.rotation.y = D(opts.rotY ?? 0);
   obj.updateMatrixWorld(true);
-  const aims = native ? opts.aim ?? {} : { ...POSE.stand.aim, ...(opts.aim ?? {}) };
+  if (borrowed) retarget(obj, borrowed, opts.t ?? 0);
+  const aims = native || borrowed ? opts.aim ?? {} : { ...POSE.stand.aim, ...(opts.aim ?? {}) };
   for (const [bn, dir] of Object.entries(aims)) aim(obj, bones, bn, dir);
+  obj.baseAims = aims;
+  // the clock of an animated shot: the clip moves on, then the pose's own aims are laid back over it
+  obj.tick = (t) => {
+    const tt = (opts.t ?? 0) + t * (opts.rate ?? 1);
+    if (obj.mixer) obj.mixer.setTime(tt);
+    else if (borrowed) retarget(obj, borrowed, tt);
+    obj.updateMatrixWorld(true);
+    for (const [bn, dir] of Object.entries(obj.aimNow ?? obj.baseAims)) aim(obj, bones, bn, dir);
+    obj.updateMatrixWorld(true);
+  };
   for (const [bn, r] of Object.entries(opts.bones ?? {})) {
     const b = bones[bn];
     if (!b) continue;
@@ -114,7 +321,7 @@ export async function person(name, opts = {}) {
     const top = bones.HeadTop_End.getWorldPosition(new THREE.Vector3());
     const base = bones.Head.getWorldPosition(new THREE.Vector3());
     const hh = top.distanceTo(base);
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(hh * 0.62, 24, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), clay(opts.hair));
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(hh * 0.62, 24, 12, 0, Math.PI * 2, 0, Math.PI * 0.55), clay(opts.hair, { userData: { hair: true } }));
     const ws = bones.Head.getWorldScale(new THREE.Vector3()).x;
     cap.scale.set(1 / ws, 1.05 / ws, 1.08 / ws);
     cap.position.set(0, (hh * 0.62) / ws, (-hh * 0.08) / ws);
@@ -127,32 +334,29 @@ export async function person(name, opts = {}) {
     const hh = bones.HeadTop_End.getWorldPosition(new THREE.Vector3()).distanceTo(bones.Head.getWorldPosition(new THREE.Vector3()));
     const ws = bones.Head.getWorldScale(new THREE.Vector3()).x;
     const [R, y, z, sy] = opts.bobShape ?? [0.58, 0.5, -0.14, 1.12];
-    const bob = new THREE.Mesh(new THREE.SphereGeometry(hh * R, 28, 18), clay(opts.bob));
+    const bob = new THREE.Mesh(new THREE.SphereGeometry(hh * R, 28, 18), clay(opts.bob, { userData: { hair: true } }));
     bob.scale.set(1 / ws, sy / ws, 1.02 / ws);
     bob.position.set(0, (hh * y) / ws, (hh * z) / ws);
     bob.castShadow = true;
     bones.Head.add(bob);
   }
   const tone = opts.tone ?? 0.7;
-  for (const n of opts.hide ?? []) {
-    const m = obj.getObjectByName(n);
-    if (m) m.visible = false;
-  }
   obj.traverse((o) => {
     if (o.isMesh && !o.material.userData?.keep) {
-      o.material = clay(tone);
+      o.material = clay(tone, { userData: { hair: !!o.material.userData?.hair } });
       o.castShadow = true;
       o.receiveShadow = true;
       o.frustumCulled = false;
     }
   });
+  if (opts.id !== PROTAGONIST && opts.dress !== false) dress(obj, { ...wardrobe(opts.seed ?? Math.floor((opts.pos?.[0] ?? 0) * 7 + (opts.pos?.[2] ?? 0) * 13 + 99)), ...(opts.wear ?? {}) });
   obj.scale.setScalar(opts.scale ?? 1);
   obj.position.set(...(opts.pos ?? [0, 0, 0]));
   obj.position.y -= opts.drop ?? 0;
   obj.rotation.y = D(opts.rotY ?? 0);
   obj.userData.id = opts.id ?? nextId();
+  if (face) obj.userData.face = { ...face, expr: opts.expr ?? 'neutral', look: opts.look ?? null };
   obj.updateMatrixWorld(true);
-  obj.bones = bones;
   // for animated shots: re-aim bones (absolute directions, so it doesn't matter what pose they hold now)
   obj.aimAll = (a) => {
     for (const [bn, dir] of Object.entries(a)) aim(obj, bones, bn, dir);
@@ -259,7 +463,6 @@ export const POSE = {
   sitChair: {
     drop: 0.5,
     aim: {
-      Spine: [0, 1, 0.02], Spine1: [0, 1, 0.05], Spine2: [0, 1, 0.05], Neck: [0, 1, 0.1],
       LeftUpLeg: [0.08, -0.05, 1], LeftLeg: [0.02, -1, 0.08], LeftFoot: [0, -0.3, 1],
       RightUpLeg: [-0.08, -0.05, 1], RightLeg: [-0.02, -1, 0.08], RightFoot: [0, -0.3, 1],
       LeftArm: [0.15, -1, 0.35], LeftForeArm: [-0.1, -0.15, 1], RightArm: [-0.15, -1, 0.35], RightForeArm: [0.1, -0.15, 1],
@@ -328,13 +531,53 @@ function depthMaterial(far) {
   return m;
 }
 
+/** Every visible face in the frame: its landmarks on screen, their depth, which way it looks. */
+function facesOf(scene, camera) {
+  const out = [];
+  scene.updateMatrixWorld(true);
+  camera.updateMatrixWorld(true);
+  const camPos = camera.getWorldPosition(new THREE.Vector3());
+  scene.traverse((o) => {
+    const f = o.userData.face;
+    if (!f || !o.bones?.Head || !o.visible) return;
+    let vis = true;
+    for (let p = o; p; p = p.parent) if (!p.visible) vis = false;
+    if (!vis) return;
+    const head = o.bones.Head;
+    const pt = (k) => {
+      const [a, b, c] = FACE[k];
+      const sx = a >= 0 ? f.hi[0] * a : -f.lo[0] * a;
+      const sy = f.lo[1] + (f.hi[1] - f.lo[1]) * b;
+      const sz = f.lo[2] + (f.hi[2] - f.lo[2]) * c;
+      const local = f.L.clone().multiplyScalar(sx).add(f.U.clone().multiplyScalar(sy)).add(f.F.clone().multiplyScalar(sz));
+      return local.applyMatrix4(head.matrixWorld);
+    };
+    const pts = {};
+    for (const k of Object.keys(FACE)) {
+      const w = pt(k);
+      const z = -w.clone().applyMatrix4(camera.matrixWorldInverse).z;
+      const n = w.clone().project(camera);
+      pts[k] = [(n.x * 0.5 + 0.5) * W, (1 - (n.y * 0.5 + 0.5)) * H, z];
+    }
+    const hq = head.getWorldQuaternion(new THREE.Quaternion());
+    const fwd = f.F.clone().applyQuaternion(hq).normalize();
+    const up = f.U.clone().applyQuaternion(hq).normalize();
+    const c = pt('center');
+    const toCam = camPos.clone().sub(c).normalize();
+    // how big a head is on screen: crown to chin in pixels
+    const a = pts.chin, b = pts.center;
+    out.push({ id: o.userData.id, expr: f.expr, look: f.look, facing: fwd.dot(toCam), side: f.L.clone().applyQuaternion(hq).dot(toCam), tilt: up.dot(toCam), px: Math.hypot(a[0] - b[0], a[1] - b[1]) * 2.2, pts });
+  });
+  return out;
+}
+
 export function renderPasses(scene, camera, { far = 200 } = {}) {
   const meshes = [];
   scene.traverse((o) => o.isMesh && meshes.push(o));
   const orig = meshes.map((o) => o.material);
   const bg = scene.background;
   const fog = scene.fog;
-  const out = {};
+  const out = { faces: JSON.stringify(facesOf(scene, camera)) };
   // colour, as lit
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.needsUpdate = true;
@@ -342,6 +585,8 @@ export function renderPasses(scene, camera, { far = 200 } = {}) {
   out.color = renderer.domElement.toDataURL('image/png');
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
   scene.fog = null;
+  const ghosts = meshes.filter((o) => o.userData.colorOnly && o.visible);
+  ghosts.forEach((o) => (o.visible = false));
   // normals (keeping any normal map, so waves and fabric still draw)
   const nm = new THREE.MeshNormalMaterial();
   meshes.forEach((o, i) => (o.material = orig[i].normalMap ? new THREE.MeshNormalMaterial({ normalMap: orig[i].normalMap, normalScale: orig[i].normalScale }) : nm));
@@ -365,6 +610,7 @@ export function renderPasses(scene, camera, { far = 200 } = {}) {
   renderer.render(scene, camera);
   out.id = renderer.domElement.toDataURL('image/png');
   meshes.forEach((o, i) => (o.material = orig[i]));
+  ghosts.forEach((o) => (o.visible = true));
   scene.background = bg;
   scene.fog = fog;
   renderer.outputColorSpace = THREE.SRGBColorSpace;

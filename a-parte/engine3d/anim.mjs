@@ -19,7 +19,10 @@ for (let i = 0; i < n; i++) {
   const k = n === 1 ? 0 : i / (n - 1);
   const passes = await p.evaluate(([k, t]) => window.renderFrame(k, t), [k, i / +fps]);
   const tag = `f${String(i).padStart(4, '0')}`;
-  for (const [key, v] of Object.entries(passes)) writeFileSync(`${dir}/${tag}-${key}.png`, Buffer.from(v.split(',')[1], 'base64'));
+  for (const [key, v] of Object.entries(passes)) {
+    if (key === 'faces') writeFileSync(`${dir}/${tag}-faces.json`, v);
+    else writeFileSync(`${dir}/${tag}-${key}.png`, Buffer.from(v.split(',')[1], 'base64'));
+  }
 }
 console.log(id, n, 'frames', ((Date.now() - t0) / n / 1000).toFixed(2), 's/frame');
 await b.close();

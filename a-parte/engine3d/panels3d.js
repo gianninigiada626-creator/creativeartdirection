@@ -21,10 +21,15 @@ function shadowed(light, size = 2048, area = 12) {
 }
 
 // ── people ──
-/** The protagonist: the red one. As a man the light passes through him; as a child he still had a shadow. */
+/**
+ * The protagonist: the red one, on a man's body (square shoulders, straight flanks), with hair. As a man the
+ * light passes through him; as a child he still had a shadow. Seated or leaning, he still breathes (idle).
+ */
+const HIM = { hide: ['Wolf3D_Headwear', 'Wolf3D_Beard'], hair: 0.3, face: false, dress: false };
 async function him(pose, opts = {}) {
   const clip = ['walk', 'idle', 'run'].includes(pose);
-  const o = clip ? await person('Xbot', { clip: pose, ...opts, id: PROTAGONIST }) : await posed('Xbot', pose, { ...opts, id: PROTAGONIST });
+  const base = { ...HIM, t: 1.3, ...opts, id: PROTAGONIST };
+  const o = clip ? await person('readyplayer.me', { clip: pose, ...base }) : await posed('readyplayer.me', pose, { clip: 'idle', rate: 0.8, ...base });
   o.traverse((m) => m.isMesh && (m.castShadow = !!opts.shadow));
   return o;
 }
@@ -59,7 +64,8 @@ async function grey(kind, pose, opts = {}) {
   const [name, base] = k;
   const o = { ...base, ...opts, aim: { ...(ARMS[opts.arms] ?? {}), ...(opts.aim ?? {}) } };
   if (['walk', 'run', 'idle', 'hvwalk', 'samba', 'hvidle'].includes(pose)) return person(name, { ...o, clip: pose });
-  return posed(name, pose, o);
+  // nobody holds still: a posed body breathes on an idle clip under its pose
+  return posed(name, pose, { clip: 'idle', t: ((opts.pos?.[0] ?? 0) * 3.1 + (opts.pos?.[2] ?? 0) * 1.7) % 6 + 6, rate: 0.9, ...o });
 }
 
 // ── motion, for the animatic ──
@@ -101,8 +107,9 @@ function sheet(w, h, tex, pos, rot = [0, 0, 0]) {
   return m;
 }
 
-function emissive(w, h, d, pos, v = 1.6) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: 0x111111, emissive: new THREE.Color(v, v * 0.95, v * 0.85) }));
+function emissive(w, h, d, pos, v = 1.6, color = null) {
+  const e = color ? new THREE.Color(color).multiplyScalar(v) : new THREE.Color(v, v * 0.95, v * 0.85);
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: 0x111111, emissive: e }));
   m.position.set(...pos);
   m.userData.id = nextId();
   return m;
@@ -254,89 +261,203 @@ function buildings(s, z0, n, seed = 1, lit = 0.25) {
   }
 }
 
+// ── light you can see, sky you can stand under ──
+/** A soft cone of light in the air (haze). Drawn only in the colour pass. */
+function shaft(from, to, r0, r1, color = '#ffd9a0', opacity = 0.18) {
+  const A = new THREE.Vector3(...from), B = new THREE.Vector3(...to);
+  const len = A.distanceTo(B);
+  const geo = new THREE.CylinderGeometry(r1, r0, len, 32, 1, true);
+  geo.translate(0, -len / 2, 0);
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color(color) }, uOp: { value: opacity }, uLen: { value: len } },
+    vertexShader: `varying float vY; varying vec3 vN; varying vec3 vV;
+      void main(){ vY = -position.y; vN = normalize(normalMatrix*normal); vec4 mv = modelViewMatrix*vec4(position,1.0); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader: `uniform vec3 uColor; uniform float uOp; uniform float uLen; varying float vY; varying vec3 vN; varying vec3 vV;
+      void main(){ float along = clamp(vY/uLen,0.0,1.0); float edge = pow(abs(dot(normalize(vN), normalize(vV))), 1.6);
+        gl_FragColor = vec4(uColor * uOp * edge * pow(1.0-along, 1.3), 1.0); }`,
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+  });
+  const m = new THREE.Mesh(geo, mat);
+  m.position.copy(A);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), B.clone().sub(A).normalize());
+  m.userData.colorOnly = true;
+  m.castShadow = m.receiveShadow = false;
+  return m;
+}
+
+/** A sky: a dome coloured from the horizon up, unlit, never fogged. */
+function sky(stops, radius = 900) {
+  const geo = new THREE.SphereGeometry(radius, 48, 24);
+  const col = [];
+  const c = new THREE.Color();
+  const p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const e = Math.max(-0.1, p.getY(i) / radius);
+    let k = 0;
+    while (k < stops.length - 2 && e > stops[k + 1][0]) k++;
+    const [e0, c0] = stops[k], [e1, c1] = stops[k + 1];
+    c.set(c0).lerp(new THREE.Color(c1), Math.min(1, Math.max(0, (e - e0) / (e1 - e0))));
+    col.push(c.r, c.g, c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false }));
+  m.userData.id = nextId();
+  return m;
+}
+
+/** A painted band of hazard stripes and a bay number, the way car park pillars are marked. */
+function pillarMarks(n) {
+  return canvasTex(256, 512, (x, w, h) => {
+    x.fillStyle = '#5d636c';
+    x.fillRect(0, 0, w, h);
+    x.fillStyle = '#d1a43a';
+    x.fillRect(0, h - 120, w, 120);
+    x.fillStyle = '#16171a';
+    for (let i = -4; i < 10; i++) {
+      x.beginPath();
+      x.moveTo(i * 48, h);
+      x.lineTo(i * 48 + 24, h);
+      x.lineTo(i * 48 + 24 + 120, h - 120);
+      x.lineTo(i * 48 + 120, h - 120);
+      x.fill();
+    }
+    x.fillStyle = '#e8e2d2';
+    x.font = 'bold 96px sans-serif';
+    x.fillText(n, 60, 200);
+  });
+}
+
 // ── PROLOGUE · the car park ──
 const GARAGE_PILLARS = [[-9.6, -4.5], [-9.6, -10.5], [-9.6, -16.5], [-9.6, -22.5], [-3.6, -16.5], [2.4, -16.5], [7, -8]];
 // what he sees, later: a woman in her car, a guard dancing, a boy counting the pillars
 const WOMAN_CAR = { x: -4.2, z: -8.6, rotY: 72 };
 const GUARD = [-0.8, -12.8];
 const BOY = [-7.9, -4.2];
-async function garageSet({ beam = 1, ambient = 0.55, lamp = 26 } = {}) {
+async function garageSet({ beam = 1, ambient = 0.55, lamp = 26, sodium = 1 } = {}) {
+  // concrete gone blue in the dark, pools of sodium light, the floor's yellow lines, numbered pillars
   const s = new THREE.Scene();
-  s.background = new THREE.Color(0.03, 0.03, 0.035);
-  const apron = plane(14, 9, 0.8, [0, 0, 1.6]);
+  s.background = new THREE.Color('#04060b');
+  const apron = plane(14, 9, '#565a61', [0, 0, 1.6]);
   s.add(apron);
-  s.add(boxMesh(14, 0.12, 0.25, 0.7, [0, 0, -2.85]));
-  const deck = plane(60, 40, 0.3, [0, -0.12, -22]);
+  s.add(boxMesh(14, 0.12, 0.25, '#6d7076', [0, 0, -2.85]));
+  const deck = plane(60, 40, '#383c43', [0, -0.12, -22]);
   s.add(deck);
   for (let i = -6; i <= 3; i++) {
-    const line = plane(0.12, 4.8, 1.0, [i * 2.6 - 1.2, -0.115, -6.4]);
+    const line = plane(0.12, 4.8, '#d6a640', [i * 2.6 - 1.2, -0.115, -6.4]);
     line.rotation.z = D(8);
     line.userData.id = deck.userData.id;
     s.add(line);
   }
-  const bayEnd = plane(24, 0.12, 1.0, [-2, -0.115, -3.9]);
+  const bayEnd = plane(24, 0.12, '#d6a640', [-2, -0.115, -3.9]);
   bayEnd.userData.id = deck.userData.id;
   s.add(bayEnd);
   for (const x of [-4.2, -1.0]) {
-    const j = plane(0.035, 9, 0.5, [x, 0.002, 1.6]);
+    const j = plane(0.035, 9, '#3a3d43', [x, 0.002, 1.6]);
     j.userData.id = apron.userData.id;
     s.add(j);
   }
   for (const z of [-0.6, 2.4]) {
-    const j = plane(14, 0.035, 0.5, [0, 0.002, z]);
+    const j = plane(14, 0.035, '#3a3d43', [0, 0.002, z]);
     j.userData.id = apron.userData.id;
     s.add(j);
   }
+  // oil stains where cars have stood
+  for (const [x, z, r] of [[-3.5, -6.2, 0.7], [-0.8, -6.8, 0.55], [1.8, -6.3, 0.6], [-6.3, -6.6, 0.5]]) {
+    const st = new THREE.Mesh(new THREE.CircleGeometry(r, 24), clay('#24272c'));
+    st.rotation.x = -Math.PI / 2;
+    st.position.set(x, -0.112, z);
+    st.userData.id = deck.userData.id;
+    s.add(st);
+  }
+  s.add(plane(60, 50, '#1c1f25', [0, 3.0, -15], Math.PI / 2));
+  for (const z of [-2.5, -8.5, -14.5, -20.5]) s.add(boxMesh(60, 0.4, 0.45, '#24272e', [0, 2.6, z]));
   // the pillar he leans on, and others further out on the deck
-  s.add(boxMesh(1.3, 4.2, 1.3, 0.66, [1.2, 0, -0.35]));
-  for (const [x, z] of GARAGE_PILLARS) s.add(boxMesh(1.2, 4.2, 1.2, 0.5, [x, -0.12, z]));
-  s.add(new THREE.HemisphereLight(0xdde3ea, 0x2a2622, ambient));
-  const l = shadowed(new THREE.PointLight(0xfff2dc, lamp, 16, 1.6), 1024);
-  l.position.set(-1.6, 3.6, 3.2);
-  s.add(l);
+  const pillar = (w, x, y, z, n) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, 4.2, w), new THREE.MeshStandardMaterial({ map: pillarMarks(n), roughness: 0.9 }));
+    m.position.set(x, y + 2.1, z);
+    m.castShadow = m.receiveShadow = true;
+    m.userData.id = nextId();
+    return m;
+  };
+  s.add(pillar(1.3, 1.2, 0, -0.35, 'B17'));
+  GARAGE_PILLARS.forEach(([x, z], i) => s.add(pillar(1.2, x, -0.12, z, `B${12 + i * 3}`)));
+  s.add(new THREE.HemisphereLight('#2f5296', '#06080e', ambient * 1.5));
+  // sodium lamps: a warm island under each, the rest left to the blue
+  const lamps = [[-1.6, 2.75, 1.4, lamp / 26], [-6, 2.75, -6.5, 1], [3.2, 2.75, -10.5, 0.8], [-12, 2.75, -12, 0.9], [-3.5, 2.75, -18, 0.7]];
+  for (const [x, y, z, k] of lamps) {
+    if (!(k * sodium)) continue;
+    const l = shadowed(new THREE.PointLight('#ffa64a', 13 * k * sodium, 7, 1.9), 1024);
+    l.position.set(x, y, z);
+    s.add(l);
+    s.add(emissive(0.6, 0.06, 0.18, [x, y + 0.03, z], 2.2 * Math.min(1, k * sodium + 0.2), '#ffc27a'));
+    s.add(shaft([x, y, z], [x, -0.1, z], 0.15, 2.2, '#ffb361', 0.07 * k * sodium));
+  }
   if (beam) {
-    const spot = shadowed(new THREE.SpotLight(0xfff0d0, 260 * beam, 30, D(16), 0.55, 1.4), 2048);
+    const spot = shadowed(new THREE.SpotLight('#fff0d4', 300 * beam, 30, D(16), 0.55, 1.4), 2048);
     spot.position.set(-11, 0.75, -1.2);
     spot.target.position.set(2, 0.4, 0.2);
     s.add(spot, spot.target);
+    const sh = shaft([-11, 0.75, -1.2], [2, 0.4, 0.2], 0.25, 3.4, '#fff1d8', 0.16 * beam);
+    s.add(sh);
+    spot.userData.shaft = sh;
     s.userData.beam = spot;
   }
   return s;
 }
 
+/** Point the headlight beam and its haze at a target. */
+function aimBeam(spot, from, to) {
+  spot.position.set(...from);
+  spot.target.position.set(...to);
+  const sh = spot.userData.shaft;
+  if (sh) {
+    sh.position.set(...from);
+    sh.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), new THREE.Vector3(...to).sub(new THREE.Vector3(...from)).normalize());
+    sh.material.uniforms.uOp.value = 0.16 * (spot.intensity / 390);
+  }
+}
+
+
 const HIM_AT_PILLAR = { pos: [0.3, 0, -0.25], rotY: -90 };
 
 async function p01() {
-  const s = await garageSet({ beam: 1.3, ambient: 0.05, lamp: 0 });
+  // dark; a car turns in and its lights find the pillar
+  const s = await garageSet({ beam: 1.3, ambient: 0.06, lamp: 0, sodium: 0.12 });
   s.add(await him('sitFloor', HIM_AT_PILLAR));
   const spot = s.userData.beam, I = spot.intensity;
   const update = (k, t) => {
     const u = ease(clamp01((t - 1.5) / 7));
     spot.intensity = I * clamp01((t - 1) / 1.2);
-    spot.position.set(-11, 0.75, -9 + 7.8 * u);
-    spot.target.position.set(2, 0.4, -9 + 9.2 * u);
+    aimBeam(spot, [-11, 0.75, -9 + 7.8 * u], [2, 0.4, -9 + 9.2 * u]);
   };
+  update(0, 8.5);
   return { scene: s, camera: cam(40, [-1.35, 1.5, 3.9], [0.05, 0.55, -0.55]), far: 80, update };
 }
 
+
 async function p02() {
-  const s = await garageSet();
+  const s = await garageSet({ ambient: 0.3 });
   s.add(await him('sitFloor', HIM_AT_PILLAR));
   const spot = s.userData.beam, I = spot.intensity;
   const update = (k, t) => {
     const u = ease(clamp01((t - 3) / 8));
-    spot.position.set(-11, 0.75, -1.2 + 5 * u);
-    spot.target.position.set(2, 0.4, 0.2 + 7 * u);
     spot.intensity = I * (1 - clamp01((t - 10) / 3));
+    aimBeam(spot, [-11, 0.75, -1.2 + 5 * u], [2, 0.4, 0.2 + 7 * u]);
   };
+  update(0, 4);
   return { scene: s, camera: cam(40, [-1.35, 1.5, 3.9], [0.05, 0.55, -0.55]), far: 80, update };
 }
 
+
 async function p03() {
-  const s = await garageSet({ beam: 0 });
+  const s = await garageSet({ beam: 0, ambient: 0.3 });
   s.add(await him('sitFloor', HIM_AT_PILLAR));
-  const c = car(-2.4, -7.2, 172, 0.34, true);
+  const c = car(-2.4, -7.2, 172, '#24414c', true);
   s.add(c);
+  // the brake lights glow on the floor behind it
+  const glow = new THREE.PointLight('#ff3a2a', 3, 4, 2);
+  glow.position.set(0, 0.6, -2.6);
+  c.add(glow);
   const update = (k, t) => {
     const u = clamp01((t - 1) / 9);
     c.position.z = -6.4 - 14 * easeIn(u);
@@ -345,83 +466,130 @@ async function p03() {
   return { scene: s, camera: cam(30, [-2.6, 0.75, 2.2], [-0.4, 0.55, -4]), far: 80, update };
 }
 
+
 // ── I · SIX · the kitchen ──
 async function kitchen() {
-  // the table runs away from us: he sits at the far end, facing the camera, his chin at the tablecloth
+  // the table runs away from us: he sits at the far end, facing the camera, his chin at the tablecloth.
+  // A Hopper evening: the lamp's amber over the table, the window's blue on everyone's back.
   const s = new THREE.Scene();
-  s.background = new THREE.Color(0.2, 0.2, 0.22);
-  s.add(plane(10, 9, 0.62, [0, 0, -1]));
-  s.add(plane(10, 3, 0.8, [0, 1.5, -4.2], 0));
-  const lw = plane(9, 3, 0.76, [-2.6, 1.5, -1], 0);
+  s.background = new THREE.Color('#0a0c14');
+  s.add(plane(10, 9, '#6b4a35', [0, 0, -1]));
+  s.add(plane(10, 3, '#5d6650', [0, 1.5, -4.2], 0));
+  const lw = plane(9, 3, '#535b48', [-2.6, 1.5, -1], 0);
   lw.rotation.y = Math.PI / 2;
   s.add(lw);
-  const rw = plane(9, 3, 0.76, [2.8, 1.5, -1], 0);
+  const rw = plane(9, 3, '#535b48', [2.8, 1.5, -1], 0);
   rw.rotation.y = -Math.PI / 2;
   s.add(rw);
-  // window at the back, evening; cupboards and the fridge on the left
-  s.add(emissive(1.4, 1.1, 0.05, [1.3, 1.45, -4.17], 0.75));
-  s.add(boxMesh(1.55, 0.06, 0.14, 0.5, [1.3, 0.88, -4.12]));
-  s.add(boxMesh(0.04, 1.1, 0.06, 0.4, [1.3, 0.9, -4.15]));
-  s.add(boxMesh(1.8, 0.9, 0.6, 0.7, [-1.4, 0, -3.9]));
-  s.add(boxMesh(1.8, 0.7, 0.35, 0.72, [-1.4, 1.6, -4.0]));
-  s.add(boxMesh(0.7, 1.8, 0.65, 0.86, [-2.2, 0, -3.0]));
-  // the table, the chairs, the salt
+  s.add(plane(10, 9, '#2e261f', [0, 2.8, -1], Math.PI / 2));
+  // window at the back, the blue hour; cupboards and the fridge on the left
+  s.add(emissive(1.4, 1.1, 0.05, [1.3, 1.45, -4.17], 1.2, '#4d6fb8'));
+  s.add(boxMesh(1.55, 0.06, 0.14, '#d9d0bf', [1.3, 0.88, -4.12]));
+  s.add(boxMesh(0.04, 1.1, 0.06, '#d9d0bf', [1.3, 0.9, -4.15]));
+  s.add(boxMesh(1.8, 0.9, 0.6, '#2f5557', [-1.4, 0, -3.9]));
+  s.add(boxMesh(1.82, 0.04, 0.62, '#cbbfa6', [-1.4, 0.9, -3.9]));
+  s.add(boxMesh(1.8, 0.7, 0.35, '#2f5557', [-1.4, 1.6, -4.0]));
+  s.add(boxMesh(0.7, 1.8, 0.65, '#d6cdb8', [-2.2, 0, -3.0]));
   const T = { z0: -2.75, z1: -0.25, y: 0.74 };
-  s.add(boxMesh(1.0, 0.05, T.z1 - T.z0, 0.9, [0, T.y, (T.z0 + T.z1) / 2]));
-  for (const [x, z] of [[-0.44, T.z0 + 0.06], [0.44, T.z0 + 0.06], [-0.44, T.z1 - 0.06], [0.44, T.z1 - 0.06]]) s.add(boxMesh(0.05, T.y, 0.05, 0.5, [x, 0, z]));
+  s.add(boxMesh(1.0, 0.05, T.z1 - T.z0, '#ece4d2', [0, T.y, (T.z0 + T.z1) / 2]));
+  for (const [x, z] of [[-0.44, T.z0 + 0.06], [0.44, T.z0 + 0.06], [-0.44, T.z1 - 0.06], [0.44, T.z1 - 0.06]]) s.add(boxMesh(0.05, T.y, 0.05, '#4a3426', [x, 0, z]));
   const chair = (x, z, rot) => {
     const g = new THREE.Group();
-    g.add(boxMesh(0.42, 0.04, 0.42, 0.45, [0, 0.44, 0]));
-    g.add(boxMesh(0.42, 0.5, 0.04, 0.45, [0, 0.46, -0.2]));
-    for (const [dx, dz] of [[-0.18, -0.18], [0.18, -0.18], [-0.18, 0.18], [0.18, 0.18]]) g.add(boxMesh(0.03, 0.44, 0.03, 0.4, [dx, 0, dz]));
+    g.add(boxMesh(0.42, 0.04, 0.42, '#5a3d2a', [0, 0.44, 0]));
+    g.add(boxMesh(0.42, 0.5, 0.04, '#5a3d2a', [0, 0.46, -0.2]));
+    for (const [dx, dz] of [[-0.18, -0.18], [0.18, -0.18], [-0.18, 0.18], [0.18, 0.18]]) g.add(boxMesh(0.03, 0.44, 0.03, '#4a3222', [dx, 0, dz]));
     g.position.set(x, 0, z);
     g.rotation.y = D(rot);
     g.userData.id = nextId();
     return g;
   };
   s.add(chair(-0.78, -1.15, 90), chair(0.78, -1.85, -90), chair(0, T.z0 - 0.3, 0));
-  s.add(boxMesh(0.36, 0.14, 0.36, 0.55, [0, 0.46, T.z0 - 0.3]));
-  const salt = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.03, 0.09, 12), clay(0.95));
-  salt.position.set(0.08, T.y + 0.07, -1.5);
+  s.add(boxMesh(0.36, 0.14, 0.36, '#3f6b5c', [0, 0.46, T.z0 - 0.3]));
+  const salt = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.03, 0.09, 12), clay('#f4f1ea'));
+  const SALT0 = [0.08, T.y + 0.07, -1.5];
+  salt.position.set(...SALT0);
   salt.userData.id = nextId();
   s.add(salt);
   for (const [x, z] of [[-0.25, -1.15], [0.25, -1.85], [0, -2.45]]) {
-    const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.02, 24), clay(0.95));
+    const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.1, 0.02, 24), clay('#f3efe6'));
     plate.position.set(x, T.y + 0.035, z);
     plate.userData.id = nextId();
     s.add(plate);
   }
+  const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.09, 0.09, 24), clay('#c9a23a'));
+  bowl.position.set(-0.05, T.y + 0.07, -0.75);
+  bowl.userData.id = nextId();
+  s.add(bowl);
   // the lamp over the table
-  const shade = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.24, 24, 1, true), clay(0.3, { side: THREE.DoubleSide }));
+  const shade = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.24, 24, 1, true), clay('#1f4646', { side: THREE.DoubleSide }));
   shade.position.set(0, 1.9, -1.5);
   shade.userData.id = nextId();
   s.add(shade);
   s.add(beam([0, 2.02, -1.5], [0, 3, -1.5], 0.012, 0.2));
-  s.add(emissive(0.08, 0.08, 0.08, [0, 1.8, -1.5], 3));
-  const bulb = shadowed(new THREE.PointLight(0xffe2b8, 10, 7, 1.5), 1024);
+  s.add(emissive(0.1, 0.08, 0.1, [0, 1.8, -1.5], 3, '#ffd08a'));
+  const bulb = shadowed(new THREE.PointLight('#ffb35e', 9, 5, 1.8), 1024);
   bulb.position.set(0, 1.74, -1.5);
   s.add(bulb);
-  s.add(new THREE.HemisphereLight(0xbfc8d6, 0x3a3430, 0.55));
+  s.add(shaft([0, 1.8, -1.5], [0, 0.75, -1.5], 0.28, 0.9, '#ffbe73', 0.05));
+  const win = shadowed(new THREE.DirectionalLight('#5c7fc8', 1.1), 1024, 4);
+  win.position.set(1.4, 1.8, -7);
+  win.target.position.set(0, 0.8, -1.5);
+  s.add(win, win.target);
+  s.add(new THREE.HemisphereLight('#3a4a78', '#1a1410', 0.4));
   // father behind his paper (left), sister in her headphones (right), mother at the window on the phone
-  const dad = await grey('beard', 'sitChair', { pos: [-0.78, 0.0, -1.15], rotY: 90, arms: 'newspaper', tone: 0.5 });
+  const dad = await grey('beard', 'sitChair', { pos: [-0.78, 0.0, -1.15], rotY: 90, arms: 'newspaper', expr: 'tired', wear: { skin: '#e0ac85', top: '#6b4a2f', bottom: '#2b2f38', hair: '#3b2a1e' } });
   s.add(dad);
   const paper = sheet(0.56, 0.4, canvasTex(256, 180, (x, w, h) => {
-    x.fillStyle = '#ddd';
+    x.fillStyle = '#e4ddcc';
     x.fillRect(0, 0, w, h);
-    x.fillStyle = '#555';
+    x.fillStyle = '#4a4540';
     for (let i = 0; i < 9; i++) x.fillRect(12, 34 + i * 16, w / 2 - 20, 6), x.fillRect(w / 2 + 8, 34 + i * 16, w / 2 - 20, 6);
     x.font = 'bold 26px serif';
     x.fillText('CRONACA', 14, 26);
   }), [0, 0, 0]);
   paper.material.side = THREE.DoubleSide;
   s.add(hold(dad, paper, 'Both', [0.04, 0.08, 0]));
-  s.add(await grey('woman', 'sitChair', { pos: [0.78, 0.0, -1.85], rotY: -90, scale: 0.86, arms: 'headphones', tone: 0.68, trimHead: { r: 0.75 }, bob: 0.3, bobShape: [0.46, 0.42, -0.12, 1.1] }));
-  const mum = await grey('woman', 'stand', { pos: [1.35, 0, -3.65], rotY: 160, arms: 'ear', tone: 0.6 });
+  const sis = await grey('woman', 'sitChair', { pos: [0.78, 0.0, -1.85], rotY: -90, scale: 0.86, arms: 'headphones', expr: 'neutral', trimHead: { r: 0.75 }, bob: 0.3, bobShape: [0.46, 0.42, -0.12, 1.1], wear: { skin: '#e8b892', top: '#c49a3a', bottom: '#1f2a3a', hair: '#2a1d16' } });
+  s.add(sis);
+  const mum = await grey('woman', 'stand', { pos: [1.35, 0, -3.65], rotY: 160, arms: 'ear', expr: 'smile', wear: { skin: '#e8b892', top: '#5b3a5e', bottom: '#2a2a33', hair: '#3a2618' } });
   s.add(mum);
-  s.add(hold(mum, phone(), 'Right'));
-  s.add(await him('sitChair', { pos: [0, 0.4, T.z0 - 0.3], rotY: 0, kid: true, scale: 0.6, aim: { Head: [0, 1, 0.05], LeftArm: [0.2, -0.5, 0.8], LeftForeArm: [0, 0.05, 1] } }));
-  return { scene: s, camera: cam(40, [0.05, 1.0, 2.5], [0, 0.88, -2.4]), far: 30 };
+  const ph = phone();
+  s.add(hold(mum, ph, 'Right'));
+  const KID = { Head: [0, 1, 0.05], LeftArm: [0.2, -0.5, 0.8], LeftForeArm: [0, 0.05, 1] };
+  const kid = await him('sitChair', { pos: [0, 0.4, T.z0 - 0.3], rotY: 0, kid: true, scale: 0.6, aim: KID });
+  s.add(kid);
+  // the salt, in five beats: "Il sale." — he reaches — she is quicker — it goes — his arm comes down
+  const set = (o, a) => {
+    o.aimNow = { ...o.baseAims, ...a };
+    o.aimAll(o.aimNow);
+  };
+  const PAPER_UP = ARMS.newspaper;
+  const PAPER_DOWN = { LeftArm: [0.25, -1, 0.5], LeftForeArm: [0.05, 0.05, 1], RightArm: [-0.25, -1, 0.5], RightForeArm: [-0.05, 0.05, 1], Head: [0, 0.95, 0.45] };
+  const SIS_REST = ARMS.headphones;
+  const SIS_REACH = { LeftArm: [0.25, -0.35, 1], LeftForeArm: [0.15, -0.1, 1], Head: [0.1, 0.9, 0.6] };
+  const SIS_PASS = { LeftArm: [0.55, -0.3, 0.8], LeftForeArm: [0.6, -0.05, 0.8], Head: [0.4, 0.9, 0.5] };
+  const KID_OFFER = { LeftArm: [0.05, 0.05, 1], LeftForeArm: [0, 0.12, 1], Head: [0, 1, 0.3] };
+  const update = (k, t) => {
+    const down = ease(clamp01((t - 5.0) / 0.7)) * (1 - ease(clamp01((t - 10.5) / 1.2)));
+    set(dad, mixAims(PAPER_UP, PAPER_DOWN, down));
+    hold(dad, paper, 'Both', [0.04, 0.08 - 0.05 * down, 0]);
+    const reach = ease(clamp01((t - 6.4) / 0.8)), pass = ease(clamp01((t - 7.3) / 1.1)), back = ease(clamp01((t - 8.6) / 0.9));
+    const nod = 0.12 * Math.sin(t * Math.PI * 2 * 1.9);
+    let a = mixAims({ ...SIS_REST, Head: [0, 0.8 + nod, 0.7] }, SIS_REACH, reach);
+    a = mixAims(a, SIS_PASS, pass);
+    a = mixAims(a, { ...SIS_REST, Head: [0, 0.8 + nod, 0.7] }, back);
+    set(sis, a);
+    const sp = [SALT0[0] - 0.5 * pass, SALT0[1] + 0.06 * Math.sin(Math.PI * pass), SALT0[2] + 0.3 * pass];
+    salt.position.set(...sp);
+    const offer = ease(clamp01((t - 6.0) / 0.8)) * (1 - ease(clamp01((t - 9.6) / 1.8)));
+    set(kid, mixAims(KID, KID_OFFER, offer));
+    mum.rotation.y = D(160) + 0.25 * Math.sin(t * 0.45);
+    hold(mum, ph, 'Right');
+  };
+  update(0, 7.6);
+  return { scene: s, camera: cam(40, [0.05, 1.0, 2.5], [0, 0.88, -2.4]), far: 30, update };
 }
+
 
 
 // ── the fridge ──
@@ -916,26 +1084,28 @@ async function metro() {
 async function womanAtWheel() {
   const g = new THREE.Group();
   // the courtesy light left on: the only light in her car
-  const dome = new THREE.PointLight(0xffe6c0, 2.2, 2.6, 1.4);
-  dome.position.set(0.05, 1.3, -0.25);
+  const dome = new THREE.PointLight('#ffd59a', 4.5, 2.6, 1.4);
+  dome.position.set(0.2, 1.33, 0.25);
   g.add(dome);
+  g.add(emissive(0.14, 0.02, 0.08, [0.05, 1.395, -0.25], 2.5, '#ffe2b0'));
   g.add(await grey('woman', 'sitChair', {
-    pos: [0.4, 0.4, -0.14], rotY: 0, tone: 0.6,
-    aim: { Spine: [0, 1, 0.2], Spine1: [0, 1, 0.25], Neck: [0, 0.5, 1], Head: [0, -0.35, 1], LeftArm: [0.2, -0.45, 1], LeftForeArm: [-0.15, 0.3, 1], RightArm: [-0.2, -0.45, 1], RightForeArm: [0.15, 0.3, 1] },
+    pos: [0.4, 0.4, -0.14], rotY: 0, expr: 'cry', wear: { skin: '#e3b08a', top: '#2f4f6b', bottom: '#1d2230', hair: '#2b1d15' },
+    aim: { Spine: [0, 1, 0.16], Spine1: [0, 1, 0.2], Neck: [0.05, 1, 0.35], Head: [0.1, 1, 0.42], LeftArm: [0.2, -0.45, 1], LeftForeArm: [-0.15, 0.3, 1], RightArm: [-0.2, -0.45, 1], RightForeArm: [0.15, 0.3, 1] },
   }));
   return g;
 }
 
 /** A pool of warm light over each of the ones he watches. */
 function islands(s, which) {
-  const at = { car: [WOMAN_CAR.x, WOMAN_CAR.z, 70], guard: [...GUARD, 100], boy: [...BOY, 80] };
+  const at = { car: [WOMAN_CAR.x, WOMAN_CAR.z, 55], guard: [...GUARD, 90], boy: [...BOY, 70] };
   for (const k of which) {
     const [x, z, power] = at[k];
-    const pool = shadowed(new THREE.SpotLight(0xfff0d0, power, 12, D(25), 0.75, 1.3), 1024);
-    pool.position.set(x + 0.3, 4.0, z + 0.2);
+    const pool = shadowed(new THREE.SpotLight('#ffb760', power, 12, D(25), 0.75, 1.3), 1024);
+    pool.position.set(x + 0.3, 2.85, z + 0.2);
     pool.target.position.set(x, 0, z);
     s.add(pool, pool.target);
-    s.add(emissive(0.9, 0.05, 0.14, [x + 0.3, 4.05, z + 0.2], 2.2));
+    s.add(emissive(0.9, 0.05, 0.14, [x + 0.3, 2.9, z + 0.2], 2.4, '#ffc98a'));
+    s.add(shaft([x + 0.3, 2.85, z + 0.2], [x, -0.1, z], 0.2, 1.8, '#ffb767', 0.08));
   }
 }
 
@@ -947,14 +1117,15 @@ async function p19() {
 
 async function p20() {
   // through her side window, framed by the pillars: hands on the wheel, head down, the engine off
-  const s = await garageSet({ beam: 0, ambient: 0.3, lamp: 0 });
-  const c = car(WOMAN_CAR.x, WOMAN_CAR.z, WOMAN_CAR.rotY, 0.42);
+  // close, at the height of her window: the courtesy light on her, the car park's night all round
+  const s = await garageSet({ beam: 0, ambient: 0.22, lamp: 0, sodium: 0.6 });
+  const c = car(WOMAN_CAR.x, WOMAN_CAR.z, WOMAN_CAR.rotY, '#23404a');
   c.add(await womanAtWheel());
   s.add(c);
   islands(s, ['car']);
   c.updateMatrixWorld(true);
-  const f = c.localToWorld(new THREE.Vector3(2.9, 1.45, 2.6));
-  const t = c.localToWorld(new THREE.Vector3(0.1, 0.9, -0.2));
+  const f = c.localToWorld(new THREE.Vector3(1.25, 1.32, 2.35));
+  const t = c.localToWorld(new THREE.Vector3(0.38, 1.12, -0.12));
   return { scene: s, camera: cam(30, f.toArray(), t.toArray()), far: 80 };
 }
 
@@ -1021,17 +1192,20 @@ function waves() {
 }
 
 async function seaSet({ sun = 0.5, sunX = -62 } = {}) {
+  // the breakwater at first light: a deep blue sea, the sky going from night to pink at the horizon
   const s = new THREE.Scene();
-  s.background = new THREE.Color(0.8, 0.8, 0.82);
-  s.fog = new THREE.Fog(0xcfd0d4, 30, 420);
-  const sea = plane(2000, 2000, 0.5, [0, -0.4, -900]);
+  s.background = new THREE.Color('#121a2e');
+  s.fog = new THREE.Fog('#5a6488', 60, 520);
+  s.add(sky([[-0.1, '#d68a74'], [0.0, '#e9a27a'], [0.04, '#c98a8e'], [0.12, '#6c6d98'], [0.3, '#2c3a66'], [1.0, '#121a33']]));
+  const sea = plane(2000, 2000, '#1d3550', [0, -0.4, -900]);
   sea.material.normalMap = waves();
   sea.material.normalScale = new THREE.Vector2(0.9, 0.9);
+  sea.material.roughness = 0.35;
   s.add(sea);
-  s.add(boxMesh(3.2, 1.1, 22, 0.62, [-0.8, -1.1, -9]));
+  s.add(boxMesh(3.2, 1.1, 22, '#5b5d63', [-0.8, -1.1, -9]));
   for (let i = 0; i < 16; i++) {
     const r = 0.6 + ((i * 37) % 10) / 14;
-    const b = new THREE.Mesh(new THREE.DodecahedronGeometry(r, 0), clay(0.38 + (i % 3) * 0.06));
+    const b = new THREE.Mesh(new THREE.DodecahedronGeometry(r, 0), clay(['#2a2e36', '#33363e', '#3b3d44'][i % 3]));
     b.scale.set(1.2, 0.7, 1);
     b.position.set(1.15 + (i % 2) * 0.6 + Math.sin(i * 2.1) * 0.2, -0.75, 1.5 - i * 1.4);
     b.rotation.set(i * 0.7, i * 1.3, i * 0.4);
@@ -1046,13 +1220,14 @@ async function seaSet({ sun = 0.5, sunX = -62 } = {}) {
     s.add(sunM);
     s.userData.sun = sunM;
   }
-  s.add(new THREE.HemisphereLight(0xe8e6ee, 0x55585e, 1.3));
-  const low = shadowed(new THREE.DirectionalLight(0xffe7d6, 1.6), 2048, 60);
+  s.add(new THREE.HemisphereLight('#7c86b8', '#141a26', 1.1));
+  const low = shadowed(new THREE.DirectionalLight('#ffb08a', 1.9), 2048, 60);
   low.position.set(-20, 6, -200);
   low.target.position.set(0, 0, -30);
   s.add(low, low.target);
   return s;
 }
+
 
 async function p24() {
   const s = await seaSet({ sun: null });

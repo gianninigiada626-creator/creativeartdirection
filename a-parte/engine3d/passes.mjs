@@ -16,7 +16,7 @@ for (const spec of ids) {
   const t = Date.now();
   const passes = await p.evaluate(([id, opts]) => window.renderPanel(id, opts), [id, opts]);
   for (const [k, v] of Object.entries(passes)) {
-    if (k === 'meta') writeFileSync(`${out}/${tag}-meta.json`, v);
+    if (k === 'meta' || k === 'faces') writeFileSync(`${out}/${tag}-${k}.json`, v);
     else writeFileSync(`${out}/${tag}-${k}.png`, Buffer.from(v.split(',')[1], 'base64'));
   }
   console.log(tag, (Date.now() - t) / 1000, 's');
