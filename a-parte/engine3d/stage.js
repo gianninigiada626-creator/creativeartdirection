@@ -88,7 +88,9 @@ export async function person(name, opts = {}) {
     const mixer = new THREE.AnimationMixer(obj);
     const act = mixer.clipAction(clip);
     act.play();
-    mixer.setTime(opts.t ?? 0); // the bones keep the sampled pose; the mixer is simply never updated again
+    mixer.setTime(opts.t ?? 0); // the bones keep the sampled pose until an animated shot moves the clock
+    obj.mixer = mixer;
+    obj.clipDur = clip.duration;
   }
   // aim bones at directions given in the character's own frame (+z forward, +y up, +x its left)
   obj.rotation.y = D(opts.rotY ?? 0);
@@ -151,6 +153,11 @@ export async function person(name, opts = {}) {
   obj.userData.id = opts.id ?? nextId();
   obj.updateMatrixWorld(true);
   obj.bones = bones;
+  // for animated shots: re-aim bones (absolute directions, so it doesn't matter what pose they hold now)
+  obj.aimAll = (a) => {
+    for (const [bn, dir] of Object.entries(a)) aim(obj, bones, bn, dir);
+    obj.updateMatrixWorld(true);
+  };
   return obj;
 }
 

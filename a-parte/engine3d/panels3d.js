@@ -62,6 +62,25 @@ async function grey(kind, pose, opts = {}) {
   return posed(name, pose, o);
 }
 
+// ── motion, for the animatic ──
+const clamp01 = (x) => Math.min(1, Math.max(0, x));
+const ease = (x) => x * x * (3 - 2 * x);
+const easeIn = (x) => x * x;
+/** Blend two sets of aims bone by bone (directions are normalised by aim()). */
+function mixAims(a, b, u) {
+  const o = {};
+  for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) {
+    const p = a[k] ?? b[k], q = b[k] ?? a[k];
+    o[k] = p.map((v, i) => v + (q[i] - v) * u);
+  }
+  return o;
+}
+const mirror = (a) => Object.fromEntries(Object.entries(a).map(([k, v]) => [k.replace(/^Left/, 'TMP').replace(/^Right/, 'Left').replace(/^TMP/, 'Right'), [-v[0], v[1], v[2]]]));
+/** Point along a parabola from a to b, lifted by `lift` at the middle. */
+function arc(a, b, u, lift) {
+  return a.map((v, i) => v + (b[i] - v) * u + (i === 1 ? 4 * lift * u * (1 - u) : 0));
+}
+
 // ── small props ──
 function canvasTex(w, h, draw) {
   const c = document.createElement('canvas');
@@ -280,6 +299,7 @@ async function garageSet({ beam = 1, ambient = 0.55, lamp = 26 } = {}) {
     spot.position.set(-11, 0.75, -1.2);
     spot.target.position.set(2, 0.4, 0.2);
     s.add(spot, spot.target);
+    s.userData.beam = spot;
   }
   return s;
 }
@@ -289,20 +309,40 @@ const HIM_AT_PILLAR = { pos: [0.3, 0, -0.25], rotY: -90 };
 async function p01() {
   const s = await garageSet({ beam: 1.3, ambient: 0.05, lamp: 0 });
   s.add(await him('sitFloor', HIM_AT_PILLAR));
-  return { scene: s, camera: cam(40, [-1.35, 1.5, 3.9], [0.05, 0.55, -0.55]), far: 80 };
+  const spot = s.userData.beam, I = spot.intensity;
+  const update = (k, t) => {
+    const u = ease(clamp01((t - 1.5) / 7));
+    spot.intensity = I * clamp01((t - 1) / 1.2);
+    spot.position.set(-11, 0.75, -9 + 7.8 * u);
+    spot.target.position.set(2, 0.4, -9 + 9.2 * u);
+  };
+  return { scene: s, camera: cam(40, [-1.35, 1.5, 3.9], [0.05, 0.55, -0.55]), far: 80, update };
 }
 
 async function p02() {
   const s = await garageSet();
   s.add(await him('sitFloor', HIM_AT_PILLAR));
-  return { scene: s, camera: cam(40, [-1.35, 1.5, 3.9], [0.05, 0.55, -0.55]), far: 80 };
+  const spot = s.userData.beam, I = spot.intensity;
+  const update = (k, t) => {
+    const u = ease(clamp01((t - 3) / 8));
+    spot.position.set(-11, 0.75, -1.2 + 5 * u);
+    spot.target.position.set(2, 0.4, 0.2 + 7 * u);
+    spot.intensity = I * (1 - clamp01((t - 10) / 3));
+  };
+  return { scene: s, camera: cam(40, [-1.35, 1.5, 3.9], [0.05, 0.55, -0.55]), far: 80, update };
 }
 
 async function p03() {
   const s = await garageSet({ beam: 0 });
   s.add(await him('sitFloor', HIM_AT_PILLAR));
-  s.add(car(-2.4, -7.2, 172, 0.34, true));
-  return { scene: s, camera: cam(30, [-2.6, 0.75, 2.2], [-0.4, 0.55, -4]), far: 80 };
+  const c = car(-2.4, -7.2, 172, 0.34, true);
+  s.add(c);
+  const update = (k, t) => {
+    const u = clamp01((t - 1) / 9);
+    c.position.z = -6.4 - 14 * easeIn(u);
+    c.position.x = -2.4 + 0.9 * easeIn(u);
+  };
+  return { scene: s, camera: cam(30, [-2.6, 0.75, 2.2], [-0.4, 0.55, -4]), far: 80, update };
 }
 
 // ── I · SIX · the kitchen ──
@@ -435,11 +475,16 @@ async function fridge() {
   g.position.set(0.33, 0.78, 0.335);
   g.rotation.set(0, 0, -0.55);
   s.add(g);
+  const update = (k, t) => {
+    const u = clamp01((t - 2.5) / 7);
+    g.position.set(0.3 + 0.06 * u, 0.98 - 1.05 * easeIn(u), 0.335);
+    g.rotation.z = -0.3 - 0.55 * ease(u);
+  };
   s.add(new THREE.HemisphereLight(0xffffff, 0x777066, 1.1));
   const l = shadowed(new THREE.DirectionalLight(0xffeedd, 1.6), 1024, 3);
   l.position.set(-2, 3, 3);
   s.add(l);
-  return { scene: s, camera: cam(36, [0.12, 1.08, 1.85], [0.12, 1.02, 0]), far: 20 };
+  return { scene: s, camera: cam(36, [0.12, 1.08, 1.85], [0.12, 1.02, 0]), far: 20, update };
 }
 
 
@@ -549,16 +594,29 @@ async function cortile() {
   s.add(boxMesh(3.7, 0.1, 0.1, 0.9, [0, 2, -18]));
   const runners = [[-2.5, -6, 0.1], [-1, -7.5, 0.35], [0.6, -5.5, 0.6], [2, -8, 0.2], [-3.4, -9, 0.5], [1.2, -10, 0.8], [3.2, -6.8, 0.45], [-0.2, -9.6, 0.15]];
   let k = 0;
+  const kids = [];
   for (const [x, z, t] of runners) {
     const girl = k++ % 2;
-    s.add(girl ? await grey('girl', 'hvwalk', { pos: [x, 0, z], rotY: 180 + (x * -3), t: t * 1.2 }) : await grey('boy', 'run', { pos: [x, 0, z], rotY: 180 + x * -3, t }));
+    const o = girl ? await grey('girl', 'hvwalk', { pos: [x, 0, z], rotY: 180 + (x * -3), t: t * 1.2 }) : await grey('boy', 'run', { pos: [x, 0, z], rotY: 180 + x * -3, t });
+    kids.push({ o, x, z0: -0.4 - (k % 4) * 0.7, t0: t, v: girl ? 1.6 : 3.0, delay: 0.4 + (k % 3) * 0.35 });
+    s.add(o);
   }
-  s.add(await him('idle', { pos: [-2.6, 0, 0.1], rotY: 160, kid: true, scale: 0.6, shadow: true }));
+  const me = await him('idle', { pos: [-2.6, 0, 0.1], rotY: 160, kid: true, scale: 0.6, shadow: true });
+  s.add(me);
+  const update = (kk, t) => {
+    for (const c of kids) {
+      const run = Math.max(0, t - c.delay);
+      c.o.position.z = Math.max(-17.5, c.z0 - c.v * run);
+      c.o.position.x = c.x * (0.4 + 0.6 * clamp01(run / 3)) - 0.6;
+      c.o.mixer?.setTime(c.t0 + t);
+    }
+    me.mixer?.setTime(t * 0.8);
+  };
   s.add(new THREE.HemisphereLight(0xf2f0ea, 0x8a8478, 1.5));
   const sun = shadowed(new THREE.DirectionalLight(0xfff1d6, 2.6), 4096, 25);
   sun.position.set(14, 18, 10);
   s.add(sun);
-  return { scene: s, camera: cam(40, [-0.6, 2.6, 7.0], [-0.9, 0.2, -8]), far: 120 };
+  return { scene: s, camera: cam(40, [-0.6, 2.6, 7.0], [-0.9, 0.2, -8]), far: 120, update };
 }
 
 async function muro() {
@@ -571,13 +629,24 @@ async function muro() {
   ball.castShadow = true;
   ball.userData.id = nextId();
   s.add(ball);
-  s.add(await him('stand', { pos: [-0.2, 0, 0], rotY: 170, kid: true, scale: 0.6, shadow: true, aim: ARMS.throw }));
+  const me = await him('stand', { pos: [-0.2, 0, 0], rotY: 170, kid: true, scale: 0.6, shadow: true, aim: ARMS.throw });
+  s.add(me);
+  const REST = { RightArm: [-0.2, -1, 0.15], RightForeArm: [-0.1, -0.7, 0.6], LeftArm: [0.2, -1, 0.15], LeftForeArm: [0.1, -0.7, 0.6] };
+  const CATCH = { RightArm: [-0.15, -0.25, 1], RightForeArm: [-0.05, 0.15, 1], LeftArm: [0.15, -0.25, 1], LeftForeArm: [0.05, 0.15, 1] };
+  const H = [-0.12, 1.12, -0.32], Wl = [0.12, 1.45, -2.64], G = [0.2, 0.11, -1.25];
+  const update = (k, t) => {
+    const p = (t % 1.6) / 1.6;
+    const pos = p < 0.32 ? arc(H, Wl, p / 0.32, 0.25) : p < 0.62 ? arc(Wl, G, (p - 0.32) / 0.3, 0.1) : arc(G, H, (p - 0.62) / 0.38, 0.45);
+    ball.position.set(...pos);
+    const a = p < 0.14 ? mixAims(ARMS.throw, REST, p / 0.14) : p < 0.78 ? REST : mixAims(REST, CATCH, (p - 0.78) / 0.22);
+    me.aimAll(a);
+  };
   s.add(new THREE.HemisphereLight(0xf2f0ea, 0x8a8478, 1.2));
   const sun = shadowed(new THREE.DirectionalLight(0xffe9c8, 3.4), 2048, 6);
   sun.position.set(-4, 2.2, 6);
   sun.target.position.set(0, 0.8, -3);
   s.add(sun, sun.target);
-  return { scene: s, camera: cam(40, [2.3, 1.0, 3.6], [-0.4, 1.0, -2.6]), far: 60 };
+  return { scene: s, camera: cam(40, [2.3, 1.0, 3.6], [-0.4, 1.0, -2.6]), far: 60, update };
 }
 
 // ── his room at night ──
@@ -629,20 +698,35 @@ async function corridoio() {
   }
   for (let i = 0; i < 7; i++) s.add(emissive(0.6, 0.04, 1.2, [0, 2.97, -i * 5], 2.2));
   const kinds = ['teen', 'teengirl', 'teen', 'teengirl', 'teen', 'teen', 'teengirl', 'teen', 'teengirl', 'teen', 'teen', 'teengirl'];
+  const crowd = [];
   for (let i = 0; i < kinds.length; i++) {
     const z = -2.5 - i * 1.6 - (i % 3) * 0.4;
     const x = ((i * 0.37) % 1.6) - 0.8;
     const clip = kinds[i] === 'teengirl' ? 'hvwalk' : 'walk';
-    s.add(await grey(kinds[i], clip, { pos: [x, 0, z], rotY: 0, t: (i * 0.23) % 1, tone: 0.55 + (i % 3) * 0.08 }));
+    const o = await grey(kinds[i], clip, { pos: [x, 0, z], rotY: 0, t: (i * 0.23) % 1, tone: 0.55 + (i % 3) * 0.08 });
+    crowd.push({ o, z, t0: (i * 0.23) % 1 });
+    s.add(o);
   }
-  s.add(await him('walk', { pos: [0.55, 0, -6.2], rotY: 180, scale: 0.94, t: 0.4 }));
+  const me = await him('walk', { pos: [0.55, 0, -6.2], rotY: 180, scale: 0.94, t: 0.4 });
+  s.add(me);
+  const update = (k, t) => {
+    for (const c of crowd) {
+      let z = c.z + 1.2 * t;
+      while (z > 2.6) z -= 22;
+      c.o.position.z = z;
+      c.o.mixer?.setTime(c.t0 + t);
+    }
+    me.position.z = -3.8 - 0.62 * t;
+    me.position.x = 0.55 + 0.12 * Math.sin(t * 0.7);
+    me.mixer?.setTime(0.4 + t * 0.6);
+  };
   s.add(new THREE.HemisphereLight(0xeef2f8, 0x8a8e96, 1.8));
   for (let i = 0; i < 4; i++) {
     const l = new THREE.PointLight(0xf4f8ff, 5, 9, 1.4);
     l.position.set(0, 2.7, -i * 7);
     s.add(l);
   }
-  return { scene: s, camera: cam(42, [0.2, 1.55, 3.2], [0, 1.2, -20]), far: 60 };
+  return { scene: s, camera: cam(42, [0.2, 1.55, 3.2], [0, 1.2, -20]), far: 60, update };
 }
 
 async function foto() {
@@ -711,13 +795,17 @@ async function bus() {
   b.rotation.y = D(-4);
   b.userData.id = nextId();
   s.add(b);
+  const update = (k, t) => {
+    const u = clamp01((t - 1.5) / 7.5);
+    b.position.x = 2.4 + 30 * easeIn(u);
+  };
   s.add(await him('stand', { pos: [-0.6, 0, 1.6], rotY: 100, scale: 0.94 }));
   buildings(s, -30, 14, 5, 0.05);
   s.add(new THREE.HemisphereLight(0xd8dde6, 0x5a5e66, 1.6));
   const sky = shadowed(new THREE.DirectionalLight(0xe8eef6, 0.8), 2048, 12);
   sky.position.set(-3, 10, 6);
   s.add(sky);
-  return { scene: s, camera: cam(40, [-5.8, 1.5, 7.4], [1.5, 1.2, -1]), far: 120 };
+  return { scene: s, camera: cam(40, [-5.8, 1.5, 7.4], [1.5, 1.2, -1]), far: 120, update };
 }
 
 
@@ -737,11 +825,24 @@ async function festa() {
     ['teen', 'dance', 0, [0.2, -1.4]], ['woman', 'samba', 2.3, [-2.6, -2.0]], ['teen', 'dance2', 0, [1.9, -5.8]],
   ];
   let k = 0;
+  const moving = [];
   for (const [kind, pose, t, [x, z]] of dancers) {
     const opts = { pos: [x, 0, z], rotY: 40 + k++ * 67, t, tone: 0.62 };
     if (pose === 'dance' || pose === 'dance2') Object.assign(opts, { arms: pose });
-    s.add(await grey(kind, pose.startsWith('dance') ? 'stand' : pose, opts));
+    const o = await grey(kind, pose.startsWith('dance') ? 'stand' : pose, opts);
+    moving.push({ o, t0: t, pose, ph: k * 0.7, r0: o.rotation.y });
+    s.add(o);
   }
+  const update = (kk, t) => {
+    for (const m of moving) {
+      if (m.o.mixer) m.o.mixer.setTime(m.t0 + t);
+      else {
+        const u = 0.5 + 0.5 * Math.sin((t / 0.55) * Math.PI + m.ph);
+        m.o.aimAll(mixAims(ARMS.dance, mirror(ARMS.dance2), u));
+      }
+      m.o.rotation.y = m.r0 + 0.25 * Math.sin(t * 1.3 + m.ph);
+    }
+  };
   s.add(await him('lean', { pos: [-4.62, 0, -1.4], rotY: 90, scale: 0.94 }));
   s.add(new THREE.HemisphereLight(0x404050, 0x101010, 0.22));
   for (const [c, x, z] of [[0xffd2e8, -1.4, -2.6], [0xd2e8ff, 1.6, -4.6], [0xfff0c0, 0.2, -1.6], [0xe0ffe0, -1.0, -5.2]]) {
@@ -750,7 +851,7 @@ async function festa() {
     l.target.position.set(x, 0, z);
     s.add(l, l.target);
   }
-  return { scene: s, camera: cam(42, [1.8, 1.55, 1.6], [-3.2, 1.05, -3.6]), far: 40 };
+  return { scene: s, camera: cam(42, [1.8, 1.55, 1.6], [-3.2, 1.05, -3.6]), far: 40, update };
 }
 
 
@@ -860,9 +961,15 @@ async function p20() {
 
 async function p21() {
   const s = await garageSet({ beam: 0, ambient: 0.25, lamp: 0 });
-  s.add(await grey('oldman', 'stand', { pos: [GUARD[0], -0.12, GUARD[1]], rotY: 150, arms: 'dance', tone: 0.5 }));
+  const g = await grey('oldman', 'stand', { pos: [GUARD[0], -0.12, GUARD[1]], rotY: 150, arms: 'dance', tone: 0.5 });
+  s.add(g);
   islands(s, ['guard']);
-  return { scene: s, camera: cam(30, [0.9, 1.2, -6.4], [GUARD[0], 0.85, GUARD[1]]), far: 80 };
+  const update = (k, t) => {
+    const w = (t / 1.8) * Math.PI * 2; // one bar of his song, looped
+    g.aimAll(mixAims(ARMS.dance, mirror(ARMS.dance), 0.5 + 0.5 * Math.sin(w)));
+    g.rotation.y = D(150) + 0.4 * Math.sin(w);
+  };
+  return { scene: s, camera: cam(30, [0.9, 1.2, -6.4], [GUARD[0], 0.85, GUARD[1]]), far: 80, update };
 }
 
 
@@ -937,6 +1044,7 @@ async function seaSet({ sun = 0.5, sunX = -62 } = {}) {
     sunM.position.set(sunX, -0.4 + (sun - 0.5) * 18, -400);
     sunM.userData.id = REDPROP;
     s.add(sunM);
+    s.userData.sun = sunM;
   }
   s.add(new THREE.HemisphereLight(0xe8e6ee, 0x55585e, 1.3));
   const low = shadowed(new THREE.DirectionalLight(0xffe7d6, 1.6), 2048, 60);
@@ -948,14 +1056,23 @@ async function seaSet({ sun = 0.5, sunX = -62 } = {}) {
 
 async function p24() {
   const s = await seaSet({ sun: null });
-  s.add(await him('walk', { pos: [-0.7, 0, -7], rotY: 180, t: 0.5 }));
-  return { scene: s, camera: cam(40, [0.9, 1.6, 2.5], [-0.8, 0.9, -20]), far: 500 };
+  const me = await him('walk', { pos: [-0.7, 0, -7], rotY: 180, t: 0.5 });
+  s.add(me);
+  const update = (k, t) => {
+    me.position.z = -2.5 - 0.6 * t;
+    me.mixer?.setTime(0.5 + t * 0.62);
+  };
+  return { scene: s, camera: cam(40, [0.9, 1.6, 2.5], [-0.8, 0.9, -20]), far: 500, update };
 }
 
 async function alba() {
   const s = await seaSet({ sun: 0.5 });
   s.add(await him('sitFloor', { pos: [-0.9, 0, -18.6], rotY: 186 }));
-  return { scene: s, camera: cam(36, [1.4, 1.35, -3.5], [-2.4, 0.2, -60]), far: 500 };
+  const sun = s.userData.sun;
+  const update = (k) => {
+    sun.position.y = -0.4 + (0.34 + 0.26 * k - 0.5) * 18;
+  };
+  return { scene: s, camera: cam(36, [1.4, 1.35, -3.5], [-2.4, 0.2, -60]), far: 500, update };
 }
 
 async function p26() {

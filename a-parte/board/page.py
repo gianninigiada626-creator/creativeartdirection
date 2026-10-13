@@ -133,7 +133,19 @@ def build():
   </header>
   <div class="grid">{"".join(panel_html(s, starts[s["id"]]) for s in shots)}</div>
 </section>''')
-    page = TEMPLATE.replace('%COLORSCRIPT_LINKS%', ''.join(links)).replace('%ACT_MARKS%', ''.join(act_marks)) \
+    chapters = []
+    vdir = os.path.join(WEB, 'video')
+    t = 0
+    for i, (key, num, name, _, _) in enumerate(ACTS):
+        d = sum(s['dur'] for s in SHOTS if s['act'] == key)
+        if os.path.exists(os.path.join(vdir, f'animatic-{i + 1}.mp4')):
+            chapters.append(dict(src=f'video/animatic-{i + 1}.mp4', num=num, name=name, start=tc(t), dur=tc(d)))
+        t += d
+    player = ''
+    if len(chapters) == len(ACTS):
+        btns = ''.join(f'<button type="button" class="ch" data-i="{i}" id="ch{i}"><span class="ch-num">{esc(c["num"])}</span><span class="ch-name">{esc(c["name"])}</span><span class="ch-t">{c["start"]} · {c["dur"]}</span></button>' for i, c in enumerate(chapters))
+        player = PLAYER.replace('%BTNS%', btns).replace('%SRCS%', json.dumps([c['src'] for c in chapters]))
+    page = TEMPLATE.replace('%PLAYER%', player).replace('%COLORSCRIPT_LINKS%', ''.join(links)).replace('%ACT_MARKS%', ''.join(act_marks)) \
         .replace('%SECTIONS%', ''.join(sections)).replace('%RUNTIME%', tc(RUNTIME)).replace('%N%', str(len(SHOTS))) \
         .replace('%ROLL%', ' · '.join(f'<a href="#t{r}">{r}</a>' for r in roll))
     with open(os.path.join(WEB, 'index.html'), 'w') as fh:
@@ -233,11 +245,25 @@ a:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 .line.none { border-left-style: dashed; }
 .sound { margin: 0; font-size: 13.5px; color: var(--pencil); }
 .sound span { font: 500 10.5px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; margin-right: 6px; }
+/* ── animatic ── */
+.animatic { margin-top: 34px; display: grid; grid-template-columns: minmax(0, 1fr) 15.5rem; gap: 18px 28px; }
+.animatic h4, .notes h4 { margin: 0 0 8px; font: 500 11.5px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--pencil); }
+.screen { background: #0d0d0c; aspect-ratio: 16 / 9; width: 100%; max-width: 100%; }
+.screen video { display: block; width: 100%; height: 100%; }
+.chapters { display: grid; gap: 6px; align-content: start; }
+.ch { display: grid; grid-template-columns: 4.2em minmax(0, 1fr); gap: 2px 8px; text-align: left; background: transparent; color: var(--graphite); border: 0; border-top: 1px solid var(--rule); padding: 10px 2px; cursor: pointer; font: inherit; }
+.ch:hover { background: var(--sheet); }
+.ch-num { font: 500 11px/1.4 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--pencil); grid-row: span 2; padding-top: 3px; }
+.ch-name { font: 500 21px/1.1 var(--display); }
+.ch-t { font: 400 11px/1.3 var(--mono); color: var(--pencil); font-variant-numeric: tabular-nums; }
+.ch[aria-current="true"] .ch-name { color: var(--red); }
+.ch[aria-current="true"] { border-top-color: var(--red); }
+.animatic .hint { grid-column: 1 / -1; margin: 0; font-size: 13.5px; color: var(--pencil); max-width: 80ch; }
 footer { margin-top: 72px; padding-top: 22px; border-top: 1px solid var(--rule); font: 400 12px/1.6 var(--mono); color: var(--pencil); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
 @media (max-width: 1040px) {
   .grid { grid-template-columns: minmax(0, 1fr); }
-  .title, .notes { grid-template-columns: minmax(0, 1fr); }
+  .title, .notes, .animatic { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
   .cap { grid-template-columns: minmax(0, 1fr); gap: 8px; }
@@ -277,6 +303,8 @@ footer { margin-top: 72px; padding-top: 22px; border-top: 1px solid var(--rule);
     <div class="acts">%ACT_MARKS%</div>
   </section>
 
+  %PLAYER%
+
   <section class="notes">
     <div>
       <h4>Il motivo</h4>
@@ -298,6 +326,32 @@ footer { margin-top: 72px; padding-top: 22px; border-top: 1px solid var(--rule);
   <footer><span>A PARTE · storyboard · tavole disegnate da scene 3D, passate a grafite</span><span>ispirazione: Spolu sami (D. Cam Van Nguyen, 2018)</span></footer>
 </div>
 '''
+
+PLAYER = r'''<section class="animatic" aria-label="Animatic">
+    <div>
+      <h4>Animatic · 8 disegni al secondo · suono provvisorio</h4>
+      <div class="screen"><video id="anim" controls playsinline preload="metadata" poster="img/s-04.jpg"></video></div>
+    </div>
+    <div class="chapters"><h4>Capitoli</h4>%BTNS%</div>
+    <p class="hint">I capitoli si susseguono da soli. La voce narrante non è ancora registrata: le sue parole sono nei sottotitoli, nella banda nera sotto l'immagine.</p>
+  </section>
+  <script>
+  (() => {
+    const srcs = %SRCS%;
+    const v = document.getElementById('anim');
+    const btns = [...document.querySelectorAll('.ch')];
+    let cur = 0;
+    const go = (i, play) => {
+      cur = i;
+      v.src = srcs[i];
+      btns.forEach((b, k) => b.setAttribute('aria-current', String(k === i)));
+      if (play) v.play().catch(() => {});
+    };
+    btns.forEach((b, i) => b.addEventListener('click', () => go(i, true)));
+    v.addEventListener('ended', () => { if (cur + 1 < srcs.length) go(cur + 1, true); });
+    go(0, false);
+  })();
+  </script>'''
 
 if __name__ == '__main__':
     build()

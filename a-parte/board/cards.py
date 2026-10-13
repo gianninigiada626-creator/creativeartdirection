@@ -76,15 +76,15 @@ def red_from(passdir, tag, rough=3.0, seed=1):
     return cv2.GaussianBlur(m, (0, 0), 0.7)
 
 
-def title_card(passdir):
+def title_card(passdir, seed=3):
     """04 — A PARTE. Centred, quiet; and to one side, small, sitting against nothing: him."""
     img = paper(dark=0.0)
     big = font('CormorantGaramond[wght].ttf', 150, 500)
     small = font('CormorantGaramond-Italic[wght].ttf', 44, 400)
     m = text_mask([('A PARTE', big, H / 2 - 18, 34), ('aside', small, H / 2 + 92, 10)])
-    img = ink(img, pencil(m) * 0.92, GRAPHITE)
+    img = ink(img, pencil(m, seed) * 0.92, GRAPHITE)
     # him, from the car park, small at the right — a parte
-    red = red_from(passdir, '02')
+    red = red_from(passdir, '02', seed=seed)
     ys, xs = np.nonzero(red > 0.5)
     if len(xs):
         crop = red[ys.min() - 4:ys.max() + 4, xs.min() - 4:xs.max() + 4]
@@ -97,17 +97,17 @@ def title_card(passdir):
         # the ground he sits on: one short pencil stroke
         line = np.zeros((H, W), np.float32)
         cv2.line(line, (x0 - 60, y0 + ch + 2), (x0 + cw + 70, y0 + ch + 2), 1.0, 2, cv2.LINE_AA)
-        img = ink(img, pencil(line, 9, 1.2) * 0.8, GRAPHITE)
+        img = ink(img, pencil(line, seed + 6, 1.2) * 0.8, GRAPHITE)
         img = ink(img, mm, RED)
     return np.clip(img, 0, 1)
 
 
-def end_card():
+def end_card(seed=5):
     """28 — black. Then, very small, the title again."""
     img = paper(dark=0.96, seed=21)
     f = font('CormorantGaramond[wght].ttf', 46, 500)
     m = text_mask([('A PARTE', f, H / 2, 14)])
-    img = ink(img, pencil(m, 5, 1.0) * 0.55, (0.86, 0.84, 0.8))
+    img = ink(img, pencil(m, seed, 1.0) * 0.55, (0.86, 0.84, 0.8))
     return np.clip(img, 0, 1)
 
 

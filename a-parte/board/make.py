@@ -33,7 +33,7 @@ TINT = {
     '24': DAWN, '25': DAWN, '26': DAWN, '27': DAWN,
 }
 RENDERED = sorted(TINT)
-CARDS = {'04': lambda seed: cards.title_card(PASSES), '28': lambda seed: cards.end_card()}
+CARDS = {'04': lambda seed: cards.title_card(PASSES, seed + 2), '28': lambda seed: cards.end_card(seed + 4)}
 ALL = sorted(RENDERED + list(CARDS))
 # what happens to a panel after it is drawn
 POST = {

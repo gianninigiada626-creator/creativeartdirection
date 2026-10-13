@@ -8,5 +8,15 @@ window.renderPanel = async (id, opts = {}) => {
   const cam = { fov: camera.fov, aspect: camera.aspect, pos: camera.position.toArray() };
   return { ...renderPasses(scene, camera, { far }), meta: JSON.stringify({ far, cam }) };
 };
+// animated shots: build once, then move the clock and render frame after frame
+let cur = null;
+window.buildAnim = async (id, opts = {}) => {
+  cur = await PANELS[id]({ ...opts, anim: true });
+  return { far: cur.far ?? 200, dur: cur.dur ?? null, animated: !!cur.update };
+};
+window.renderFrame = (k, t) => {
+  cur.update?.(k, t);
+  return renderPasses(cur.scene, cur.camera, { far: cur.far ?? 200 });
+};
 window.__ready = true;
 </script>
