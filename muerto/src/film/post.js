@@ -117,3 +117,52 @@ export const GradeShader = {
       gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
     }`,
 };
+
+/**
+ * Kuwahara filter: each pixel takes the mean colour of the calmest of four neighbourhoods.
+ * Edges stay crisp, everything else flattens into strokes of paint.
+ */
+export const PaintShader = {
+  uniforms: {
+    tDiffuse: { value: null },
+    uRes: { value: [1920, 1080] },
+    uRadius: { value: 4 },
+    uStep: { value: 1.25 },
+    uAmount: { value: 1 },
+  },
+  vertexShader: GradeShader.vertexShader,
+  fragmentShader: /* glsl */ `
+    uniform sampler2D tDiffuse;
+    uniform vec2 uRes;
+    uniform float uRadius;
+    uniform float uStep;
+    uniform float uAmount;
+    varying vec2 vUv;
+    void main() {
+      vec2 px = uStep / uRes;
+      int R = int(uRadius);
+      vec3 m0 = vec3(0.0), m1 = vec3(0.0), m2 = vec3(0.0), m3 = vec3(0.0);
+      vec3 s0 = vec3(0.0), s1 = vec3(0.0), s2 = vec3(0.0), s3 = vec3(0.0);
+      float n0 = 0.0, n1 = 0.0, n2 = 0.0, n3 = 0.0;
+      for (int j = -6; j <= 6; j++) {
+        for (int i = -6; i <= 6; i++) {
+          if (abs(i) > R || abs(j) > R) continue;
+          vec3 c = texture2D(tDiffuse, vUv + vec2(float(i), float(j)) * px).rgb;
+          vec3 cc = c * c;
+          if (i <= 0 && j <= 0) { m0 += c; s0 += cc; n0 += 1.0; }
+          if (i >= 0 && j <= 0) { m1 += c; s1 += cc; n1 += 1.0; }
+          if (i <= 0 && j >= 0) { m2 += c; s2 += cc; n2 += 1.0; }
+          if (i >= 0 && j >= 0) { m3 += c; s3 += cc; n3 += 1.0; }
+        }
+      }
+      m0 /= n0; m1 /= n1; m2 /= n2; m3 /= n3;
+      vec3 v0 = s0 / n0 - m0 * m0, v1 = s1 / n1 - m1 * m1, v2 = s2 / n2 - m2 * m2, v3 = s3 / n3 - m3 * m3;
+      float q0 = v0.r + v0.g + v0.b, q1 = v1.r + v1.g + v1.b, q2 = v2.r + v2.g + v2.b, q3 = v3.r + v3.g + v3.b;
+      vec3 best = m0; float bq = q0;
+      if (q1 < bq) { bq = q1; best = m1; }
+      if (q2 < bq) { bq = q2; best = m2; }
+      if (q3 < bq) { bq = q3; best = m3; }
+      vec3 src = texture2D(tDiffuse, vUv).rgb;
+      gl_FragColor = vec4(mix(src, best, uAmount), 1.0);
+    }`,
+};

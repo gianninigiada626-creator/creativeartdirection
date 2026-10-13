@@ -1,364 +1,349 @@
 import { canvas, rng } from './util.js';
-import { crumpledPaper } from './paper.js';
 
-let FACETS = null;
-
-// PLACEHOLDER heads in the collage-sculpture style: cut-paper silhouettes, glossy dark clay,
-// heavy-lidded faces lit from the upper left. Replaced by the artist's heads when they arrive.
+// PLACEHOLDER heads in the painted-collage style: oversized heads cut out with a clean paper edge,
+// skin airbrushed like dark clay, lit softly from the front-left, heavy-lidded and still.
+// Three views: front, three-quarter (turned toward image-left; mirror it for the other side) and back.
+// They are replaced by the artist's own heads when those arrive (see README).
 
 const W = 512;
 const H = 640;
-
-function silhouette(ctx, p, r, { back = false } = {}) {
-  // cut-paper outline: a jaw-weighted oval, ears, and a hair mass; edges slightly jagged
-  const cx = W / 2;
-  const cy = H * 0.54;
-  const rx = 150 * p.width;
-  const ry = 205 * p.length;
-  ctx.beginPath();
-  const n = 46;
-  for (let i = 0; i <= n; i++) {
-    const a = (i / n) * Math.PI * 2;
-    const jaw = Math.sin(a) > 0 ? 1 - 0.18 * p.jawTaper * Math.pow(Math.sin(a), 3) : 1;
-    const jag = 1 + (r() - 0.5) * 0.025;
-    const x = cx + Math.cos(a) * rx * jaw * jag;
-    const y = cy + Math.sin(a) * ry * jag;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.closePath();
-  // ears
-  for (const s of [-1, 1]) {
-    ctx.moveTo(cx + s * rx * 0.95, cy - 20);
-    ctx.ellipse(cx + s * rx * 0.98, cy, 26, 48, 0, 0, Math.PI * 2);
-  }
-  return { cx, cy, rx, ry, back };
-}
-
-function hairShape(ctx, g, p, r) {
-  const { cx, cy, rx, ry } = g;
-  ctx.beginPath();
-  switch (p.hair) {
-    case 'crop':
-      ctx.ellipse(cx, cy - ry * 0.42, rx * 1.02, ry * 0.62, 0, Math.PI, Math.PI * 2);
-      break;
-    case 'flattop':
-      ctx.moveTo(cx - rx * 1.02, cy - ry * 0.3);
-      ctx.lineTo(cx - rx * 0.98, cy - ry * 1.08);
-      ctx.lineTo(cx + rx * 0.98, cy - ry * 1.08);
-      ctx.lineTo(cx + rx * 1.02, cy - ry * 0.3);
-      ctx.closePath();
-      break;
-    case 'afro':
-      ctx.ellipse(cx, cy - ry * 0.55, rx * 1.35, ry * 0.85, 0, 0, Math.PI * 2);
-      break;
-    case 'spikes': {
-      ctx.moveTo(cx - rx, cy - ry * 0.35);
-      const n = 7;
-      for (let i = 0; i <= n; i++) {
-        const x = cx - rx + (i / n) * rx * 2;
-        const tip = i % 2 === 0 ? 1.0 : 1.55 + r() * 0.2;
-        ctx.lineTo(x, cy - ry * tip);
-      }
-      ctx.lineTo(cx + rx, cy - ry * 0.35);
-      ctx.closePath();
-      break;
-    }
-    case 'crown': {
-      // the artist's crown of spikes: a jagged, slightly irregular star of hair
-      const n = 9;
-      ctx.moveTo(cx - rx * 1.02, cy - ry * 0.32);
-      for (let i = 0; i <= n; i++) {
-        const t = i / n;
-        const x = cx - rx * 1.05 + t * rx * 2.1;
-        const arc = Math.sin(t * Math.PI);
-        const tip = i % 2 === 1;
-        const y = cy - ry * (0.62 + arc * 0.32) - (tip ? ry * (0.35 + r() * 0.22) * (0.6 + arc * 0.5) : 0);
-        ctx.lineTo(x + (tip ? (t - 0.5) * rx * 0.25 : 0), y);
-      }
-      ctx.lineTo(cx + rx * 1.02, cy - ry * 0.32);
-      ctx.closePath();
-      break;
-    }
-    case 'cap':
-      ctx.ellipse(cx, cy - ry * 0.45, rx * 1.05, ry * 0.6, 0, Math.PI, Math.PI * 2);
-      ctx.moveTo(cx - rx * 0.2, cy - ry * 0.5);
-      ctx.ellipse(cx + rx * 0.55, cy - ry * 0.48, rx * 0.75, ry * 0.12, -0.05, 0, Math.PI * 2);
-      break;
-    default:
-      return false;
-  }
-  return true;
-}
-
-function soft(ctx, blur, fn) {
-  ctx.save();
-  ctx.filter = `blur(${blur}px)`;
-  fn();
-  ctx.restore();
-}
 
 function rgbaOf(color) {
   const v = color.match(/rgba?\(([^)]+)\)/)[1].split(',').map(Number);
   return [v[0], v[1], v[2], v[3] ?? 1];
 }
 
-/** A soft ellipse drawn with a radial gradient: the look of a blurred blob without the cost of a blur filter. */
-function glow(ctx, x, y, rx, ry, color, feather) {
+/** Airbrush: a soft ellipse made with a radial gradient. */
+function air(ctx, x, y, rx, ry, color, feather = 0.6, rot = 0) {
   const [r, g, b, a] = rgbaOf(color);
-  const R = Math.max(rx, ry) + feather;
-  const inner = Math.max(0.05, Math.min(rx, ry) / (Math.min(rx, ry) + feather) - 0.15);
   ctx.save();
   ctx.translate(x, y);
-  ctx.scale((rx + feather) / R, (ry + feather) / R);
-  const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+  ctx.rotate(rot);
+  ctx.scale(1, ry / rx);
+  const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
   grad.addColorStop(0, `rgba(${r},${g},${b},${a})`);
-  grad.addColorStop(inner, `rgba(${r},${g},${b},${a * 0.8})`);
+  grad.addColorStop(Math.max(0.01, 1 - feather), `rgba(${r},${g},${b},${a * 0.75})`);
   grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
   ctx.fillStyle = grad;
   ctx.beginPath();
-  ctx.arc(0, 0, R, 0, Math.PI * 2);
+  ctx.arc(0, 0, rx, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }
 
-function blob(ctx, x, y, rx, ry, color, rot = 0) {
-  ctx.fillStyle = color;
+/** A soft stroke along a quadratic curve (lids, lips, folds). */
+function stroke(ctx, pts, width, color, blur = 2) {
+  ctx.save();
+  ctx.filter = `blur(${blur}px)`;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = 'round';
   ctx.beginPath();
-  ctx.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  if (pts.length === 3) ctx.quadraticCurveTo(pts[1][0], pts[1][1], pts[2][0], pts[2][1]);
+  else pts.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
+  ctx.stroke();
+  ctx.restore();
+}
+
+function geometry(p) {
+  const cx = W / 2;
+  const cy = H * 0.57;
+  const rx = 138 * p.width;
+  const ry = 188 * p.length;
+  const t = p.turn ?? 0;
+  // three-quarter: features slide toward the far side, the far half compresses
+  const X = (dx) => cx - t * rx * 0.42 + (dx < 0 ? dx * (1 - 0.58 * t) : dx * (1 + 0.08 * t));
+  return { cx, cy, rx, ry, t, X };
+}
+
+function headPath(ctx, g, p) {
+  const { cx, cy, rx, ry, t } = g;
+  ctx.beginPath();
+  const n = 72;
+  for (let i = 0; i <= n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const s = Math.sin(a);
+    const c = Math.cos(a);
+    let k = 1;
+    if (s > 0) k -= 0.2 * p.jawTaper * Math.pow(s, 3); // jaw narrows to the chin
+    k += 0.04 * Math.exp(-Math.pow((s - 0.05) / 0.18, 2)); // cheekbones
+    let x = cx + c * rx * k;
+    if (t) x += (c < 0 ? -0.12 : 0.03) * t * rx * Math.abs(c); // far side slightly flatter
+    const y = cy + s * ry * (s < 0 ? 1.02 : 1);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+}
+
+function earPath(ctx, g, side) {
+  const { cy, rx, X } = g;
+  const x = X(side * rx * 0.97);
+  ctx.moveTo(x + 22, cy - 6);
+  ctx.ellipse(x, cy - 6, 24, 46, side * 0.15, 0, Math.PI * 2);
+}
+
+function hairPath(ctx, g, p, r) {
+  const { cx, cy, rx, ry, t } = g;
+  const top = cy - ry * 1.02;
+  ctx.beginPath();
+  switch (p.hair) {
+    case 'crop':
+      ctx.ellipse(cx - t * 8, cy - ry * 0.5, rx * 1.03, ry * 0.58, 0, Math.PI, Math.PI * 2);
+      ctx.lineTo(cx + rx * 1.03, cy - ry * 0.42);
+      ctx.lineTo(cx - rx * 1.03, cy - ry * 0.42);
+      break;
+    case 'flattop':
+      ctx.moveTo(cx - rx * 1.02, cy - ry * 0.35);
+      ctx.lineTo(cx - rx * 0.96, top - ry * 0.12);
+      ctx.lineTo(cx + rx * 0.96, top - ry * 0.12);
+      ctx.lineTo(cx + rx * 1.02, cy - ry * 0.35);
+      break;
+    case 'afro':
+      ctx.ellipse(cx - t * 10, cy - ry * 0.62, rx * 1.38, ry * 0.82, 0, 0, Math.PI * 2);
+      break;
+    case 'cap':
+      ctx.ellipse(cx, cy - ry * 0.48, rx * 1.06, ry * 0.6, 0, Math.PI, Math.PI * 2);
+      ctx.moveTo(cx - rx * 0.1, cy - ry * 0.52);
+      ctx.ellipse(cx + rx * 0.5 - t * rx * 0.9, cy - ry * 0.5, rx * 0.78, ry * 0.11, -0.05, 0, Math.PI * 2);
+      break;
+    case 'crown': {
+      // the artist's crown of spikes, cut from black paper: a jagged band over the dome
+      const ex = rx * 1.02;
+      const ey = ry * 0.88;
+      const oy = cy - ry * 0.16;
+      const n = 14;
+      const a0 = Math.PI + 0.12;
+      const a1 = Math.PI * 2 - 0.12;
+      for (let i = 0; i <= n; i++) {
+        const a = a0 + ((a1 - a0) * i) / n;
+        let x = cx + Math.cos(a) * ex;
+        let y = oy + Math.sin(a) * ey;
+        if (i % 2 === 1) {
+          const nxv = Math.cos(a) / ex;
+          const nyv = Math.sin(a) / ey;
+          const l = Math.hypot(nxv, nyv);
+          const len = ry * (0.34 + r() * 0.2);
+          x += (nxv / l) * len * 0.75;
+          y += (nyv / l) * len - len * 0.25;
+        }
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      // hairline across the forehead, back to the start
+      ctx.quadraticCurveTo(cx + rx * 0.5, cy - ry * 0.5, cx, cy - ry * 0.56);
+      ctx.quadraticCurveTo(cx - rx * 0.5, cy - ry * 0.5, cx + Math.cos(a0) * ex, oy + Math.sin(a0) * ey);
+      break;
+    }
+    default:
+      return false;
+  }
+  ctx.closePath();
+  return true;
 }
 
 /**
- * Draw a head. p: { seed, width, length, jawTaper, tone (0 dark → 1 light), hair, nose, lips, eyes, brow, moustache, beard, lines }
+ * p: { seed, width, length, jawTaper, tone (0 dark → 1 light), hair, nose, lips, eyes, brow,
+ *      moustache, beard, lines, eyeColor, turn }
  */
-const CACHE = new Map();
-
-export function drawHead(p = {}, opts = {}) {
-  const key = JSON.stringify([p, opts]);
-  if (!CACHE.has(key)) CACHE.set(key, paintHead(p, opts));
-  return CACHE.get(key);
-}
-
-function paintHead(p = {}, { back = false } = {}) {
-  p = { seed: 1, width: 1, length: 1, jawTaper: 1, tone: 0.25, hair: 'crop', nose: 1, lips: 1, eyes: 1, brow: 1, moustache: false, beard: false, lines: 0, eyeGlow: 0, ...p };
+function paint(p, { back = false } = {}) {
+  p = { seed: 1, width: 1, length: 1, jawTaper: 1, tone: 0.25, hair: 'crop', nose: 1, lips: 1, eyes: 1, brow: 1, lines: 0, turn: 0, ...p };
+  if (back) p.turn = 0;
   const [c, ctx] = canvas(W, H);
   const r = rng(p.seed);
-  const base = Math.round(30 + p.tone * 70);
-  const skin = `rgb(${base},${base + 1},${base + 3})`;
-  const lit = `rgb(${base + 125},${base + 127},${base + 130})`;
-  const deep = `rgb(${Math.max(4, base - 28)},${Math.max(4, base - 27)},${Math.max(5, base - 25)})`;
+  const g = geometry(p);
+  const { cx, cy, rx, ry, t, X } = g;
+  const b = Math.round(40 + p.tone * 66);
+  const skin = `rgb(${b},${b + 2},${b + 5})`;
+  const hi = (a) => `rgba(${Math.min(255, b + 120)},${Math.min(255, b + 122)},${Math.min(255, b + 124)},${a})`;
+  const lo = (a) => `rgba(${Math.max(0, b - 30)},${Math.max(0, b - 29)},${Math.max(0, b - 26)},${a})`;
 
-  // 1. silhouette fill
-  const g = silhouette(ctx, p, r, { back });
+  // ── the cut-out ──
+  headPath(ctx, g, p);
+  if (!back) {
+    if (t < 0.4) earPath(ctx, g, -1);
+    earPath(ctx, g, 1);
+  } else {
+    earPath(ctx, g, -1);
+    earPath(ctx, g, 1);
+  }
   ctx.fillStyle = skin;
   ctx.fill();
-  const hairOn = hairShape(ctx, g, p, r);
+  const hairOn = hairPath(ctx, g, p, rng(p.seed));
   if (hairOn) {
-    ctx.fillStyle = '#0d0e10';
+    ctx.fillStyle = '#0c0d0f';
     ctx.fill();
   }
 
-  // everything else is painted inside the cut-out
   ctx.save();
   ctx.globalCompositeOperation = 'source-atop';
-  const { cx, cy, rx, ry } = g;
 
   if (back) {
-    glow(ctx, cx - rx * 0.4, cy - ry * 0.5, rx * 0.5, ry * 0.4, 'rgba(255,255,255,0.12)', 30);
-    if (p.hair !== 'none') {
-      // the whole back of the head is hair, with the nape showing
-      ctx.fillStyle = '#0e0f11';
+    air(ctx, cx - rx * 0.35, cy - ry * 0.35, rx * 0.6, ry * 0.5, hi(0.14));
+    air(ctx, cx + rx * 0.5, cy + ry * 0.2, rx * 0.7, ry * 0.9, lo(0.8));
+    air(ctx, cx, cy + ry * 0.85, rx * 0.5, ry * 0.25, hi(0.12));
+    if (hairOn) {
+      ctx.fillStyle = 'rgba(12,13,15,0.92)';
       ctx.beginPath();
-      ctx.ellipse(cx, cy - ry * 0.15, rx * 1.1, ry * 0.95, 0, 0, Math.PI * 2);
+      ctx.ellipse(cx, cy - ry * 0.25, rx * 1.04, ry * 0.9, 0, 0, Math.PI * 2);
       ctx.fill();
-      for (let i = 0; i < 900; i++) {
-        ctx.fillStyle = `rgba(255,255,255,${0.02 + r() * 0.05})`;
-        ctx.fillRect(cx + (r() - 0.5) * rx * 2, cy - ry + r() * ry * 1.6, 2, 5);
-      }
     }
-    glow(ctx, cx, cy + ry * 0.8, rx * 0.5, ry * 0.25, skin, 18);
-    glow(ctx, cx - rx * 0.6, cy - ry * 0.5, rx * 0.25, ry * 0.2, 'rgba(255,255,255,0.18)', 20);
     ctx.restore();
+    rim(ctx, g, p, back);
     return c;
   }
 
-  // 2. sculpted light: upper-left key, deep core shadow on the right
-  glow(ctx, cx + rx * 0.55, cy + ry * 0.1, rx * 0.6, ry * 0.9, deep, 40);
-  glow(ctx, cx - rx * 0.35, cy - ry * 0.45, rx * 0.45, ry * 0.28, lit, 46);
-  glow(ctx, cx - rx * 0.5, cy + ry * 0.08, rx * 0.22, ry * 0.14, lit, 26); // cheekbone
-  glow(ctx, cx + rx * 0.42, cy + ry * 0.1, rx * 0.12, ry * 0.1, `rgba(${base + 60},${base + 60},${base + 62},0.6)`, 26);
-  glow(ctx, cx, cy + ry * 0.78, rx * 0.5, ry * 0.18, deep, 30); // under-jaw
+  // ── broad form: light from front-left, core shadow on the far right, under the jaw ──
+  for (let i = 0; i < 14; i++) air(ctx, cx + (r() - 0.5) * rx * 1.6, cy + (r() - 0.5) * ry * 1.6, 30 + r() * 50, 30 + r() * 50, r() < 0.5 ? hi(0.05) : lo(0.12), 0.9); // mottling
+  air(ctx, X(rx * 0.66), cy + ry * 0.05, rx * 0.72, ry * 1.0, lo(1), 0.65);
+  air(ctx, X(-rx * 0.25), cy - ry * 0.42, rx * 0.6, ry * 0.3, hi(0.62), 0.75); // forehead
+  air(ctx, X(-rx * 0.05), cy - ry * 0.55, rx * 0.35, ry * 0.12, hi(0.35), 0.8);
+  air(ctx, X(0), cy + ry * 0.94, rx * 0.85, ry * 0.26, lo(0.95), 0.55); // under the jaw
+  air(ctx, X(-rx * 0.55), cy + ry * 0.06, rx * 0.3, ry * 0.16, hi(0.78), 0.75); // near cheekbone
+  air(ctx, X(-rx * 0.5), cy + ry * 0.3, rx * 0.26, ry * 0.14, lo(0.55), 0.8); // hollow under it
+  air(ctx, X(rx * 0.52), cy + ry * 0.06, rx * 0.2, ry * 0.12, hi(0.4 * (1 - t)), 0.75); // far cheekbone
+  air(ctx, X(-rx * 0.82), cy - ry * 0.25, rx * 0.16, ry * 0.2, lo(0.5), 0.8); // temple
+  air(ctx, X(0), cy + ry * 0.7, rx * 0.26, ry * 0.12, hi(0.55), 0.75); // chin
+  air(ctx, X(-rx * 0.78), cy + ry * 0.4, rx * 0.2, ry * 0.3, lo(0.45), 0.8); // near jaw side
+  air(ctx, X(rx * 0.92), cy + ry * 0.2, rx * 0.08, ry * 0.5, hi(0.16), 0.8); // bounce on the far edge
 
-  // 3. brow ridge and eye sockets
-  const ey = cy - ry * 0.1;
+  // ── brow and sockets ──
+  const ey = cy - ry * 0.12;
   const ex = rx * 0.4;
-  glow(ctx, cx - ex, ey, 44 * p.eyes, 26, deep, 16);
-  glow(ctx, cx + ex, ey, 44 * p.eyes, 26, deep, 16);
-  soft(ctx, 10, () => {
-    ctx.strokeStyle = lit;
-    ctx.lineWidth = 12 * p.brow;
-    ctx.globalAlpha = 0.6;
+  const farEye = 1 - 0.3 * t;
+  air(ctx, X(-ex), ey + 4, 46 * p.eyes, 26, lo(0.95), 0.7);
+  air(ctx, X(ex), ey + 4, 46 * p.eyes * farEye, 26, lo(0.95), 0.7);
+  air(ctx, X(-ex), ey - 34 * p.brow, 56, 15, hi(0.6), 0.8); // brow ridge catches light
+  air(ctx, X(ex * 0.9), ey - 34 * p.brow, 42 * farEye, 12, hi(0.32), 0.85);
+  air(ctx, X(0), ey - 18, 18, 30, hi(0.25), 0.9); // glabella
+
+  // eyes: heavy lids, a wet glint
+  for (const [s, sc] of [[-1, 1], [1, farEye]]) {
+    const x = X(s * ex);
+    const w = 24 * p.eyes * sc;
+    ctx.save();
+    ctx.fillStyle = p.eyeColor ?? 'rgba(178,176,170,0.55)';
     ctx.beginPath();
-    ctx.moveTo(cx - ex - 46, ey - 26);
-    ctx.quadraticCurveTo(cx - ex, ey - 44 * p.brow, cx - 12, ey - 28);
-    ctx.stroke();
-    ctx.globalAlpha = 0.35;
+    ctx.ellipse(x, ey + 6, w, 6.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#060607';
     ctx.beginPath();
-    ctx.moveTo(cx + 12, ey - 28);
-    ctx.quadraticCurveTo(cx + ex, ey - 44 * p.brow, cx + ex + 46, ey - 26);
-    ctx.stroke();
-  });
-  // heavy lids, eyes almost closed
-  for (const s of [-1, 1]) {
-    const x = cx + s * ex;
-    const shine = s < 0 ? 0.55 : 0.3;
-    soft(ctx, 3, () => {
-      ctx.fillStyle = p.eyeColor ?? (p.eyeGlow ? `rgba(235,235,235,${0.75 + p.eyeGlow * 0.25})` : 'rgba(200,200,200,0.55)');
-      ctx.beginPath();
-      ctx.ellipse(x, ey + 5, 22 * p.eyes, 6 + p.eyeGlow * 4, 0, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    soft(ctx, 2, () => {
-      ctx.fillStyle = '#060607';
-      ctx.beginPath();
-      ctx.arc(x + s * 2, ey + 6, 5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = `rgba(${base + 110},${base + 110},${base + 112},${shine})`;
-      ctx.beginPath();
-      ctx.ellipse(x, ey - 6, 26 * p.eyes, 9, 0, Math.PI, Math.PI * 2);
-      ctx.fill();
-    });
+    ctx.arc(x - t * 6, ey + 7, 5.5 * sc, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // upper lid: a lit, heavy crescent
+    stroke(ctx, [[x - w * 1.1, ey + 2], [x, ey - 11], [x + w * 1.1, ey + 2]], 10, hi(s < 0 ? 0.8 : 0.5), 2.5);
+    stroke(ctx, [[x - w, ey + 4], [x, ey - 3], [x + w, ey + 4]], 3, 'rgba(0,0,0,0.8)', 1);
+    // lower lid and bag
+    stroke(ctx, [[x - w * 0.9, ey + 15], [x, ey + 21], [x + w * 0.9, ey + 15]], 5, hi(0.18), 3);
+    air(ctx, x + 4, ey + 4, 3, 2, 'rgba(255,255,255,0.7)', 0.4);
   }
 
-  // 4. nose
-  const ny = cy + ry * 0.2;
-  soft(ctx, 8, () => {
-    ctx.fillStyle = lit;
-    ctx.globalAlpha = 0.55;
-    ctx.beginPath();
-    ctx.ellipse(cx - 6, ny - 34, 9, 40, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
-    blob(ctx, cx - 24 * p.nose, ny + 6, 16 * p.nose, 12, deep);
-    blob(ctx, cx + 24 * p.nose, ny + 6, 16 * p.nose, 12, deep);
-    blob(ctx, cx, ny + 22, 36 * p.nose, 9, deep);
-  });
-  glow(ctx, cx - 4, ny - 2, 10 * p.nose, 7, `rgba(255,255,255,0.28)`, 4);
-
-  // 5. mouth
-  const my = cy + ry * 0.5;
-  soft(ctx, 5, () => {
-    ctx.fillStyle = deep;
-    ctx.beginPath();
-    ctx.ellipse(cx, my, 46 * p.lips, 14 * p.lips, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#050506';
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(cx - 44 * p.lips, my);
-    ctx.quadraticCurveTo(cx, my + 4, cx + 44 * p.lips, my);
-    ctx.stroke();
-  });
-  glow(ctx, cx - 10, my + 13 * p.lips, 24 * p.lips, 5, `rgba(255,255,255,0.25)`, 6);
-
-  // 6. age, moustache, beard
+  // ── nose ──
+  const nx = X(-t * rx * 0.12);
+  const ny = cy + ry * 0.22;
+  stroke(ctx, [[X(-4), ey + 4], [nx - 6, ny - 36], [nx - 4, ny - 6]], 13 * p.nose, hi(0.62), 5); // bridge
+  air(ctx, nx - 2, ny - 2, 22 * p.nose, 16, hi(0.8), 0.7); // tip
+  air(ctx, nx - 28 * p.nose * (1 - 0.3 * t), ny + 8, 17 * p.nose, 13, lo(0.95), 0.6); // near wing
+  air(ctx, nx + 28 * p.nose, ny + 8, 17 * p.nose * (1 - 0.3 * t), 13, lo(0.95), 0.6); // far wing
+  air(ctx, nx + 10, ny + 26, 44 * p.nose, 11, lo(0.95), 0.6); // cast shadow under the nose
+  air(ctx, nx - 18 * p.nose, ny + 10, 7, 5, 'rgba(0,0,0,0.9)', 0.4); // nostril
+  air(ctx, nx + 18 * p.nose, ny + 10, 7 * (1 - 0.3 * t), 5, 'rgba(0,0,0,0.9)', 0.4);
   if (p.lines) {
-    ctx.strokeStyle = `rgba(0,0,0,${0.35 * p.lines})`;
-    ctx.lineWidth = 3;
-    for (const s of [-1, 1]) {
-      ctx.beginPath();
-      ctx.moveTo(cx + s * 40, ny + 20);
-      ctx.quadraticCurveTo(cx + s * 62, my - 6, cx + s * 54, my + 26);
-      ctx.stroke();
-    }
-    for (let i = 0; i < 3; i++) {
-      ctx.beginPath();
-      ctx.moveTo(cx - 60, cy - ry * 0.45 + i * 12);
-      ctx.quadraticCurveTo(cx, cy - ry * 0.5 + i * 12, cx + 60, cy - ry * 0.45 + i * 12);
-      ctx.stroke();
-    }
+    stroke(ctx, [[nx - 40, ny + 14], [X(-rx * 0.48), cy + ry * 0.45], [X(-rx * 0.4), cy + ry * 0.62]], 4, `rgba(0,0,0,${0.45 * p.lines})`, 2);
+    stroke(ctx, [[nx + 40, ny + 14], [X(rx * 0.48), cy + ry * 0.45], [X(rx * 0.4), cy + ry * 0.62]], 4, `rgba(0,0,0,${0.35 * p.lines})`, 2);
+    for (let i = 0; i < 3; i++) stroke(ctx, [[X(-rx * 0.45), cy - ry * 0.52 + i * 13], [X(0), cy - ry * 0.56 + i * 13], [X(rx * 0.45), cy - ry * 0.52 + i * 13]], 2.5, `rgba(0,0,0,${0.3 * p.lines})`, 1.5);
   }
+
+  // ── mouth ──
+  const my = cy + ry * 0.5;
+  const mw = 50 * p.lips;
+  air(ctx, X(0), my - 10, mw, 13 * p.lips, lo(0.85), 0.7); // upper lip
+  stroke(ctx, [[X(-mw * 0.95), my], [X(0), my + 5], [X(mw * 0.95), my]], 5, 'rgba(0,0,0,0.92)', 1.5);
+  air(ctx, X(-6), my + 13 * p.lips, mw * 0.65, 9 * p.lips, hi(0.65), 0.75); // lower lip shine
+  air(ctx, X(-mw), my + 2, 8, 6, 'rgba(0,0,0,0.6)', 0.6); // mouth corners
+  air(ctx, X(mw), my + 2, 8, 6, 'rgba(0,0,0,0.6)', 0.6);
+  air(ctx, X(0), my + 30 * p.lips, mw * 0.6, 9, lo(0.7), 0.7); // under the lip
   if (p.moustache) {
-    soft(ctx, 2, () => {
-      ctx.fillStyle = '#0b0c0d';
-      ctx.beginPath();
-      ctx.moveTo(cx - 64, my - 2);
-      ctx.quadraticCurveTo(cx - 30, my - 34, cx, my - 18);
-      ctx.quadraticCurveTo(cx + 30, my - 34, cx + 64, my - 2);
-      ctx.quadraticCurveTo(cx, my - 10, cx - 64, my - 2);
-      ctx.fill();
-    });
+    ctx.fillStyle = '#0b0c0d';
+    ctx.beginPath();
+    ctx.moveTo(X(-62), my - 2);
+    ctx.quadraticCurveTo(X(-30), my - 34, X(0), my - 20);
+    ctx.quadraticCurveTo(X(30), my - 34, X(62), my - 2);
+    ctx.quadraticCurveTo(X(0), my - 12, X(-62), my - 2);
+    ctx.fill();
   }
   if (p.beard) {
-    soft(ctx, 3, () => {
-      ctx.fillStyle = 'rgba(10,10,11,0.92)';
-      ctx.beginPath();
-      ctx.ellipse(cx, cy + ry * 0.7, rx * 0.72, ry * 0.36, 0, 0, Math.PI);
-      ctx.fill();
-    });
+    ctx.fillStyle = 'rgba(10,10,11,0.93)';
+    ctx.beginPath();
+    ctx.ellipse(X(0), cy + ry * 0.72, rx * 0.72, ry * 0.34, 0, 0, Math.PI);
+    ctx.fill();
   }
 
-  // crumpled-paper facets, so the head reads as a collage cut-out
-  FACETS ??= crumpledPaper(W, H, { cell: 22, seed: 4, crease: 0.9 });
-  // overlay paints transparent pixels too, so keep a copy of the cut-out alpha and restore it
-  const [mc, mctx] = canvas(W, H);
-  mctx.drawImage(c, 0, 0);
-  ctx.globalAlpha = 0.6;
-  ctx.globalCompositeOperation = 'overlay';
-  ctx.drawImage(FACETS, 0, 0);
-  ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = 'destination-in';
-  ctx.drawImage(mc, 0, 0);
-  ctx.globalCompositeOperation = 'source-atop';
-  // hair keeps its facets too
+  // ear shading
+  air(ctx, X(rx * 0.97), cy - 6, 18, 36, lo(0.7), 0.7);
+  if (t < 0.4) air(ctx, X(-rx * 0.97), cy - 10, 14, 30, hi(0.3), 0.7);
+
+  // hair keeps a little sheen
   if (hairOn) {
     ctx.save();
-    hairShape(ctx, g, p, rng(p.seed));
+    hairPath(ctx, g, p, rng(p.seed));
     ctx.clip();
-    ctx.fillStyle = 'rgba(10,11,13,0.55)';
+    ctx.fillStyle = '#0c0d0f';
     ctx.fillRect(0, 0, W, H);
+    air(ctx, X(-rx * 0.4), cy - ry * 0.9, rx * 0.5, ry * 0.2, 'rgba(120,124,130,0.18)', 0.9);
     ctx.restore();
   }
 
-  // 7. clay gloss specks and paper grain
-  for (let i = 0; i < 40; i++) {
-    blob(ctx, cx - rx * 0.5 + r() * rx * 0.6, cy - ry * 0.7 + r() * ry * 1.2, 2 + r() * 4, 1 + r() * 2, `rgba(255,255,255,${0.08 + r() * 0.15})`);
-  }
+  // airbrush grain
   const img = ctx.getImageData(0, 0, W, H);
   for (let i = 0; i < img.data.length; i += 4) {
     if (img.data[i + 3] === 0) continue;
-    const n = (r() - 0.5) * 16;
+    const n = (r() - 0.5) * 10;
     img.data[i] += n;
     img.data[i + 1] += n;
     img.data[i + 2] += n;
   }
   ctx.putImageData(img, 0, 0);
   ctx.restore();
-
-  // 8. cut edge: a thin pale paper rim, like the head was cut from a magazine
-  ctx.save();
-  ctx.globalCompositeOperation = 'destination-over';
-  ctx.filter = 'blur(0.6px)';
-  ctx.translate(W / 2, H / 2);
-  ctx.scale(1.025, 1.02);
-  ctx.translate(-W / 2, -H / 2);
-  silhouette(ctx, p, rng(p.seed), { back });
-  ctx.fillStyle = 'rgba(205,205,200,0.9)';
-  ctx.fill();
-  if (hairShape(ctx, g, p, rng(p.seed))) ctx.fill();
-  ctx.restore();
+  rim(ctx, g, p, back);
   return c;
 }
 
+/** The clean paper edge of the cut-out. */
+function rim(ctx, g, p) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.translate(W / 2, H * 0.55);
+  ctx.scale(1.018, 1.014);
+  ctx.translate(-W / 2, -H * 0.55);
+  headPath(ctx, g, p);
+  earPath(ctx, g, 1);
+  if ((g.t ?? 0) < 0.4) earPath(ctx, g, -1);
+  ctx.fillStyle = 'rgba(214,212,204,0.95)';
+  ctx.fill();
+  if (hairPath(ctx, g, p, rng(p.seed))) ctx.fill();
+  ctx.restore();
+}
+
+const CACHE = new Map();
+
+/** Cached head painter. opts.back for the back of the head; p.turn for a three-quarter view. */
+export function drawHead(p = {}, opts = {}) {
+  const key = JSON.stringify([p, opts]);
+  if (!CACHE.has(key)) CACHE.set(key, paint(p, opts));
+  return CACHE.get(key);
+}
+
 export const HEADS = {
-  mercy: { seed: 11, width: 0.92, length: 1.04, jawTaper: 1.15, tone: 0.1, hair: 'crown', nose: 1.05, lips: 1.05, eyes: 1, brow: 1.15, eyeGlow: 1, eyeColor: 'rgba(225,38,48,0.95)' },
-  barber: { seed: 23, width: 1, length: 1.02, jawTaper: 0.8, tone: 0.22, hair: 'crown', nose: 1.2, lips: 0.9, eyes: 0.85, brow: 1.3, lines: 0.6 },
+  mercy: { seed: 11, width: 0.92, length: 1.04, jawTaper: 1.15, tone: 0.12, hair: 'crown', nose: 1.05, lips: 1.05, eyes: 1, brow: 1.15, eyeColor: 'rgba(214,40,48,0.95)' },
+  barber: { seed: 23, width: 1.0, length: 1.04, jawTaper: 0.8, tone: 0.22, hair: 'crown', nose: 1.2, lips: 0.95, eyes: 0.85, brow: 1.3, lines: 0.7 },
   client: { seed: 29, width: 0.96, length: 1, jawTaper: 1, tone: 0.3, hair: 'crop', nose: 1, lips: 1, eyes: 0.9, brow: 1 },
-  barista: { seed: 31, width: 1.12, length: 0.92, jawTaper: 0.5, tone: 0.55, hair: 'none', nose: 1.3, lips: 0.8, eyes: 0.85, brow: 1, moustache: true, lines: 1 },
+  barista: { seed: 31, width: 1.1, length: 0.94, jawTaper: 0.5, tone: 0.5, hair: 'none', nose: 1.3, lips: 0.85, eyes: 0.85, brow: 1, moustache: true, lines: 1 },
   driver: { seed: 47, width: 1, length: 1, jawTaper: 0.9, tone: 0.2, hair: 'cap', nose: 1.1, lips: 1.1, eyes: 0.9, brow: 1, beard: true },
-  oldwoman: { seed: 53, width: 0.9, length: 0.95, jawTaper: 1.3, tone: 0.6, hair: 'afro', nose: 1, lips: 0.7, eyes: 0.8, brow: 0.8, lines: 1.2 },
-  kid: { seed: 61, width: 0.95, length: 0.85, jawTaper: 1.2, tone: 0.18, hair: 'afro', nose: 0.85, lips: 0.95, eyes: 1.15, brow: 0.8 },
-  stranger: { seed: 71, width: 1.15, length: 1.1, jawTaper: 0.4, tone: 0.05, hair: 'none', nose: 1.4, lips: 1.3, eyes: 0.7, brow: 1.4, eyeGlow: 1 },
-  old: { seed: 83, width: 1.05, length: 1, jawTaper: 0.7, tone: 0.45, hair: 'none', nose: 1.35, lips: 0.85, eyes: 0.8, brow: 1.2, lines: 1.3 },
+  oldwoman: { seed: 53, width: 0.9, length: 0.95, jawTaper: 1.3, tone: 0.55, hair: 'afro', nose: 1, lips: 0.75, eyes: 0.8, brow: 0.8, lines: 1.2 },
+  kid: { seed: 61, width: 0.95, length: 0.88, jawTaper: 1.2, tone: 0.18, hair: 'afro', nose: 0.85, lips: 0.95, eyes: 1.1, brow: 0.8 },
+  stranger: { seed: 71, width: 1.12, length: 1.12, jawTaper: 0.45, tone: 0.05, hair: 'none', nose: 1.35, lips: 1.25, eyes: 0.75, brow: 1.45, eyeColor: 'rgba(235,235,230,0.95)' },
+  old: { seed: 83, width: 1.05, length: 1, jawTaper: 0.7, tone: 0.42, hair: 'none', nose: 1.35, lips: 0.85, eyes: 0.8, brow: 1.2, lines: 1.3 },
 };

@@ -113,3 +113,39 @@ export async function fontsReady(specs) {
     /* system fallback */
   }
 }
+
+/**
+ * Dry-brush strokes over a canvas region: long soft strokes with bristle lines,
+ * so flat surfaces read as painted. tone: [r,g,b] of the paint; spread varies it.
+ */
+export function brushOver(ctx, x0, y0, w, h, { n = 200, len = [30, 140], wid = [6, 20], alpha = [0.08, 0.2], tone = [128, 128, 128], spread = 30, angle = 0, jitter = 0.35, seed = 1 } = {}) {
+  const r = rng(seed);
+  ctx.save();
+  ctx.lineCap = 'round';
+  for (let i = 0; i < n; i++) {
+    const x = x0 + r() * w;
+    const y = y0 + r() * h;
+    const L = len[0] + r() * (len[1] - len[0]);
+    const a = angle + (r() - 0.5) * jitter;
+    const dx = (Math.cos(a) * L) / 2;
+    const dy = (Math.sin(a) * L) / 2;
+    const k = (r() - 0.5) * spread;
+    const col = `rgba(${tone[0] + k},${tone[1] + k},${tone[2] + k},${alpha[0] + r() * (alpha[1] - alpha[0])})`;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = wid[0] + r() * (wid[1] - wid[0]);
+    ctx.beginPath();
+    ctx.moveTo(x - dx, y - dy);
+    ctx.quadraticCurveTo(x + (r() - 0.5) * 12, y + (r() - 0.5) * 12, x + dx, y + dy);
+    ctx.stroke();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = `rgba(${tone[0] + k - 25},${tone[1] + k - 25},${tone[2] + k - 25},0.12)`;
+    for (let b = 0; b < 3; b++) {
+      const o = (r() - 0.5) * 8;
+      ctx.beginPath();
+      ctx.moveTo(x - dx - Math.sin(a) * o, y - dy + Math.cos(a) * o);
+      ctx.lineTo(x + dx - Math.sin(a) * o, y + dy + Math.cos(a) * o);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}

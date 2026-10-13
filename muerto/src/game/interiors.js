@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Reflector } from 'three/addons/objects/Reflector.js';
-import { canvas, rng, texture } from '../textures/util.js';
+import { brushOver, canvas, rng, texture } from '../textures/util.js';
 import { flat, signTexture } from '../objects/city.js';
 import { drawHead } from '../textures/heads.js';
 
@@ -8,29 +8,34 @@ function checker(n = 8) {
   const [c, ctx] = canvas(1024);
   const s = 1024 / n;
   const r = rng(4);
+  ctx.fillStyle = '#e2ddd0';
+  ctx.fillRect(0, 0, 1024, 1024);
+  brushOver(ctx, 0, 0, 1024, 1024, { n: 500, tone: [222, 218, 205], spread: 26, alpha: [0.2, 0.4], seed: 2 });
+  // black squares painted by hand: wobbly edges, brushed fill
   for (let y = 0; y < n; y++) {
     for (let x = 0; x < n; x++) {
-      const v = (x + y) % 2 ? 228 - r() * 20 : 26 + r() * 10;
-      ctx.fillStyle = `rgb(${v},${v - 2},${v - 6})`;
-      ctx.fillRect(x * s, y * s, s, s);
+      if ((x + y) % 2 === 0) continue;
+      const w = () => (r() - 0.5) * 6;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x * s + w(), y * s + w());
+      ctx.lineTo((x + 1) * s + w(), y * s + w());
+      ctx.lineTo((x + 1) * s + w(), (y + 1) * s + w());
+      ctx.lineTo(x * s + w(), (y + 1) * s + w());
+      ctx.closePath();
+      ctx.fillStyle = '#1c1c1d';
+      ctx.fill();
+      ctx.clip();
+      brushOver(ctx, x * s, y * s, s, s, { n: 14, len: [40, 120], wid: [8, 18], tone: [40, 40, 42], spread: 22, alpha: [0.2, 0.45], seed: x * 31 + y });
+      ctx.restore();
     }
   }
-  // grime and scuffs
-  for (let i = 0; i < 500; i++) {
-    ctx.fillStyle = `rgba(60,55,45,${r() * 0.12})`;
+  // scuffs
+  for (let i = 0; i < 260; i++) {
+    ctx.fillStyle = `rgba(90,84,70,${r() * 0.1})`;
     ctx.beginPath();
-    ctx.ellipse(r() * 1024, r() * 1024, 4 + r() * 40, 2 + r() * 12, r() * 3, 0, Math.PI * 2);
+    ctx.ellipse(r() * 1024, r() * 1024, 4 + r() * 40, 2 + r() * 10, r() * 3, 0, Math.PI * 2);
     ctx.fill();
-  }
-  ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-  ctx.lineWidth = 2;
-  for (let i = 0; i <= n; i++) {
-    ctx.beginPath();
-    ctx.moveTo(i * s, 0);
-    ctx.lineTo(i * s, 1024);
-    ctx.moveTo(0, i * s);
-    ctx.lineTo(1024, i * s);
-    ctx.stroke();
   }
   return c;
 }
@@ -40,16 +45,12 @@ function plaster(tone = 150, seed = 6, W = 1024, H = 512) {
   const r = rng(seed);
   ctx.fillStyle = `rgb(${tone},${tone + 2},${tone - 6})`;
   ctx.fillRect(0, 0, W, H);
-  for (let i = 0; i < 400; i++) {
-    const v = tone + (r() - 0.5) * 50;
-    ctx.fillStyle = `rgba(${v},${v + 2},${v - 8},0.18)`;
-    ctx.beginPath();
-    ctx.ellipse(r() * W, r() * H, 10 + r() * 80, 5 + r() * 40, r() * 3, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  for (let i = 0; i < 40; i++) {
-    ctx.fillStyle = 'rgba(30,28,22,0.1)';
-    ctx.fillRect(r() * W, 0, 2 + r() * 8, H * (0.2 + r() * 0.8));
+  // painted wall: broad strokes in two directions, then a few drips
+  brushOver(ctx, 0, 0, W, H, { n: 260, len: [80, 260], wid: [16, 40], tone: [tone, tone + 2, tone - 6], spread: 26, alpha: [0.18, 0.36], angle: 0, jitter: 0.5, seed });
+  brushOver(ctx, 0, 0, W, H, { n: 120, len: [60, 200], wid: [10, 28], tone: [tone, tone + 2, tone - 6], spread: 30, alpha: [0.12, 0.25], angle: Math.PI / 2, jitter: 0.4, seed: seed + 9 });
+  for (let i = 0; i < 24; i++) {
+    ctx.fillStyle = 'rgba(30,28,22,0.08)';
+    ctx.fillRect(r() * W, 0, 2 + r() * 6, H * (0.2 + r() * 0.8));
   }
   return c;
 }
@@ -295,8 +296,9 @@ export function buildBarbershop(skylineCanvas) {
 
   // barber chair facing the mirror
   const chair = chairBarber();
-  chair.position.set(-2.2, 0, 51.4);
-  chair.rotation.y = -Math.PI / 2;
+  // facing the room, like the painting: the client reads, the barber works behind him
+  chair.position.set(-1.4, 0, 52.2);
+  chair.rotation.y = Math.PI;
   g.add(chair);
 
   // waiting chairs along the left wall
@@ -376,6 +378,17 @@ export function buildBar() {
   roof.rotation.x = Math.PI / 2;
   roof.position.set(14, H, 50.8);
   g.add(roof);
+  // the shopfront from inside: daylight through the window, the door
+  const [fc, fctx] = canvas(2048, 768);
+  fctx.drawImage(plaster(96, 12, 2048, 768), 0, 0);
+  fctx.fillStyle = '#f4f3ee';
+  fctx.fillRect(700, 140, 1200, 420);
+  brushOver(fctx, 700, 140, 1200, 420, { n: 80, tone: [235, 235, 230], spread: 20, alpha: [0.2, 0.4], seed: 5 });
+  fctx.fillStyle = '#2a2420';
+  fctx.fillRect(220, 140, 330, 628);
+  const front = new THREE.Mesh(new THREE.PlaneGeometry(9, H), new THREE.MeshStandardMaterial({ map: texture(fc), roughness: 0.9, emissive: 0xffffff, emissiveIntensity: 0.12, emissiveMap: texture(fc) }));
+  front.position.set(14, H / 2, 47.64);
+  g.add(front);
 
   const wood = flat(0x3a2418, { roughness: 0.45 });
   const counter = new THREE.Mesh(new THREE.BoxGeometry(7.4, 1.1, 0.7), wood);

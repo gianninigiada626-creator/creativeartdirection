@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { canvas, rng, texture } from '../textures/util.js';
+import { brushOver, canvas, rng, texture } from '../textures/util.js';
 
 // West Coast city kit, low-poly and faceted. Everything is built from code.
 
-export const flat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, flatShading: true, roughness: 0.85, metalness: 0, ...o });
+export const flat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0, ...o });
 
 /** Painted sign board. */
 export function signTexture(text, { font = '700 120px "Oswald"', fg = '#f2efe6', bg = '#1b1b1d', w = 1024, h = 256, border = '#f2efe6', sub = '' } = {}) {
@@ -45,6 +45,7 @@ export function facadeTexture({ w, h, seed = 1, tone = 200, shop = true, floors 
     ctx.ellipse(r() * W, r() * H, 10 + r() * 60, 6 + r() * 30, r() * 3, 0, Math.PI * 2);
     ctx.fill();
   }
+  brushOver(ctx, 0, 0, W, H, { n: Math.round((W * H) / 2500), len: [40, 160], wid: [8, 26], tone: [t, t - 6, t - 16], spread: 30, alpha: [0.15, 0.3], jitter: 0.6, seed });
   for (let i = 0; i < 30; i++) {
     ctx.fillStyle = 'rgba(40,36,30,0.12)';
     ctx.fillRect(r() * W, r() * H * 0.5, 2 + r() * 5, H * (0.2 + r() * 0.5));
@@ -282,49 +283,39 @@ function bodyShape(len, belt) {
   return s;
 }
 
-/** Lowrider: candy paint, chrome, wire wheels; an open cabin so heads show through the glass. */
+/** Lowrider convertible: candy paint, chrome, wire wheels, top down. */
 export function lowrider({ color = 0x9e1018, len = 5.6 } = {}) {
   const group = new THREE.Group();
   const body = new THREE.Group();
   group.add(body);
   const belt = 0.98;
-  const roofY = 1.46;
   const W = 1.95;
-  const paint = new THREE.MeshPhysicalMaterial({ color, metalness: 0.4, roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.08, flatShading: true });
+  const paint = new THREE.MeshPhysicalMaterial({ color, metalness: 0.4, roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.08 });
   const geo = new THREE.ExtrudeGeometry(bodyShape(len, belt), { depth: W, bevelEnabled: true, bevelSize: 0.04, bevelThickness: 0.04, bevelSegments: 1 });
   geo.translate(0, 0, -W / 2);
   const shell = new THREE.Mesh(geo, paint);
   shell.castShadow = true;
   body.add(shell);
-  // roof slab and pillars
-  const roof = new THREE.Mesh(new THREE.BoxGeometry(len * 0.24, 0.06, W - 0.06), paint);
-  roof.position.set(len * 0.01, roofY, 0);
-  roof.castShadow = true;
-  body.add(roof);
-  const pillar = (x0, x1) => {
-    const dx = x1 - x0;
-    const dy = roofY - belt;
-    const L = Math.hypot(dx, dy);
-    for (const z of [-W / 2 + 0.05, W / 2 - 0.05]) {
-      const p = new THREE.Mesh(new THREE.BoxGeometry(0.07, L, 0.07), paint);
-      p.position.set((x0 + x1) / 2, (belt + roofY) / 2, z);
-      p.rotation.z = -Math.atan2(dx, dy);
-      body.add(p);
-    }
-  };
-  pillar(len * 0.22, len * 0.12);
-  pillar(-len * 0.19, -len * 0.11);
-  pillar(0.02, 0.02);
-  // glass all round, tinted and see-through
-  const gs = new THREE.Shape();
-  gs.moveTo(-len * 0.19, belt);
-  gs.lineTo(-len * 0.11, roofY);
-  gs.lineTo(len * 0.13, roofY);
-  gs.lineTo(len * 0.22, belt);
-  const glassGeo = new THREE.ExtrudeGeometry(gs, { depth: W - 0.08, bevelEnabled: false });
-  glassGeo.translate(0, 0, -(W - 0.08) / 2);
-  const glass = new THREE.Mesh(glassGeo, new THREE.MeshPhysicalMaterial({ color: 0x9fb0b8, metalness: 0, roughness: 0.05, transparent: true, opacity: 0.18, clearcoat: 1, depthWrite: false }));
-  body.add(glass);
+  // a convertible: only the raked windshield in its chrome frame
+  const shieldH = 0.5;
+  const rake = 0.55;
+  const shield = new THREE.Mesh(
+    new THREE.BoxGeometry(0.02, shieldH, W - 0.12),
+    new THREE.MeshPhysicalMaterial({ color: 0x9fb0b8, metalness: 0, roughness: 0.05, transparent: true, opacity: 0.16, envMapIntensity: 0.05, depthWrite: false }),
+  );
+  shield.position.set(len * 0.2 - Math.sin(rake) * shieldH * 0.5, belt + Math.cos(rake) * shieldH * 0.5, 0);
+  shield.rotation.z = rake;
+  body.add(shield);
+  const frameMat = new THREE.MeshStandardMaterial({ color: 0x9a9da2, metalness: 0.6, roughness: 0.45, envMapIntensity: 0.15 });
+  for (const z of [-(W - 0.12) / 2, (W - 0.12) / 2]) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.04, shieldH, 0.04), frameMat);
+    post.position.copy(shield.position).setZ(z);
+    post.rotation.z = rake;
+    body.add(post);
+  }
+  const top = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, W - 0.08), frameMat);
+  top.position.set(len * 0.2 - Math.sin(rake) * shieldH, belt + Math.cos(rake) * shieldH, 0);
+  body.add(top);
   // seats
   const seatMat = flat(0xd8d2c4, { roughness: 0.5 });
   for (const x of [-len * 0.08, len * 0.08]) {

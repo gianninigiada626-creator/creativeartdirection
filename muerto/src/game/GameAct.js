@@ -3,7 +3,8 @@ import { Act } from '../acts/Act.js';
 import { Puppet } from '../objects/puppet.js';
 import { flat } from '../objects/city.js';
 import { drawHead, HEADS } from '../textures/heads.js';
-import { tryImage } from '../textures/util.js';
+import { texture, tryImage } from '../textures/util.js';
+import { newspaperPages } from '../textures/newspaper.js';
 import { buildWorld } from './world.js';
 import { Hud } from '../overlay/hud.js';
 import { SONG } from '../data/album.js';
@@ -68,6 +69,9 @@ export class GameAct extends Act {
   async build(film) {
     const scene = this.scene;
     scene.fog = new THREE.Fog(0xcfd5d8, 70, 460);
+    // soft studio reflections give the skin its airbrushed sheen
+    scene.environment = film.env;
+    scene.environmentIntensity = 0.5;
     const discAct = film.acts.find((a) => a.name === 'disc');
     const labelTexture = discAct.disc.children[0].material.map;
     let clock = performance.now();
@@ -89,16 +93,16 @@ export class GameAct extends Act {
     });
 
     // lights
-    this.sun = new THREE.DirectionalLight(0xfff2de, 2.4);
+    this.sun = new THREE.DirectionalLight(0xfff2de, 1.5);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
     Object.assign(this.sun.shadow.camera, { left: -32, right: 32, top: 32, bottom: -32, near: 1, far: 220 });
     this.sun.shadow.bias = -0.0006;
-    this.hemi = new THREE.HemisphereLight(0xdfe6ee, 0x5e584c, 1.0);
+    this.hemi = new THREE.HemisphereLight(0xdfe6ee, 0x6a6458, 1.6);
     this.moonLight = new THREE.DirectionalLight(0x9db4ff, 0);
     this.moonLight.position.set(500, 60, 60);
     this.strangerLamp = new THREE.PointLight(0xffd8a0, 0, 16, 1.3);
-    this.strangerLamp.position.set(398.5, 6.6, 45.2);
+    this.strangerLamp.position.set(397.5, 6.2, 44.4);
     this.carLight = new THREE.PointLight(0xffe8c0, 0, 4, 1.5); // cabin light for the windshield shot at night
     scene.add(this.sun, this.sun.target, this.hemi, this.moonLight, this.strangerLamp, this.carLight);
 
@@ -108,12 +112,13 @@ export class GameAct extends Act {
       return {
         head: img ?? drawHead(HEADS[key]),
         back: (await tryImage(`assets/heads/${file}-back.png`)) ?? drawHead(HEADS[key], { back: true }),
+        side: (await tryImage(`assets/heads/${file}-side.png`)) ?? (img ? null : drawHead({ ...HEADS[key], turn: 0.6 })),
       };
     };
     const mk = async (key, outfit, extra = {}) => new Puppet({ ...(await head(key, key)), outfit, name: key, ...extra });
-    this.mercy = await mk('mercy', { shirt: 'patchwork', pants: '#141416', baggy: 1.3, shoes: '#0b0b0b', skin: '#202228' }, { headHeight: 0.7 });
-    this.barber = await mk('barber', { shirt: '#d8d4ca', pants: '#141416', baggy: 1.35, skin: '#2c2e33' }, { headHeight: 0.68 });
-    this.client = await mk('client', { shirt: '#333', cape: true, pants: '#26262a' });
+    this.mercy = await mk('mercy', { shirt: 'patchwork', pants: '#141416', baggy: 1.45, shoes: '#0b0b0b', skin: '#2a2d33' }, { headHeight: 0.76 });
+    this.barber = await mk('barber', { shirt: '#121214', pants: 'pinstripe', baggy: 1.45, skin: '#30333a' }, { headHeight: 0.74 });
+    this.client = await mk('client', { shirt: '#333', cape: true, pants: '#26262a' }, { headHeight: 0.72 });
     this.barista = await mk('barista', { shirt: '#2a2a2c', apron: true, pants: '#1d1d1f' });
     this.patron = await mk('old', { coat: '#3a3a3a', pants: 'pinstripe', bulk: 1.1 });
     this.oldwoman = await mk('oldwoman', { coat: '#5c5753', pants: '#5c5753' });
@@ -126,6 +131,7 @@ export class GameAct extends Act {
       const p = new Puppet({
         head: drawHead({ seed: 400 + i * 7, hair: ['crop', 'afro', 'cap', 'none', 'flattop'][i], tone: 0.15 + i * 0.12, moustache: i === 3, lines: i === 3 ? 1 : 0 }),
         back: drawHead({ seed: 400 + i * 7, hair: ['crop', 'afro', 'cap', 'none', 'flattop'][i] }, { back: true }),
+        side: drawHead({ seed: 400 + i * 7, hair: ['crop', 'afro', 'cap', 'none', 'flattop'][i], tone: 0.15 + i * 0.12, moustache: i === 3, lines: i === 3 ? 1 : 0, turn: 0.6 }),
         outfit: { shirt: ['#3a3a3c', '#d6d1c4', '#1c1c1e', '#5a554f', '#2b3b4b'][i], pants: i % 2 ? 'pinstripe' : '#202024', baggy: 1 + (i % 3) * 0.15 },
         name: `extra${i}`,
       });
@@ -176,6 +182,21 @@ export class GameAct extends Act {
     );
     this.smoke.frustumCulled = false;
     scene.add(this.smoke);
+
+    // the client's newspaper: two pages open toward the room, like in the painting
+    const [pl, pr] = newspaperPages(discAct.portrait);
+    const paperMat = (c) => new THREE.MeshStandardMaterial({ map: texture(c), roughness: 0.95, side: THREE.DoubleSide });
+    const news = new THREE.Group();
+    const pageGeo = new THREE.PlaneGeometry(0.42, 0.56);
+    pageGeo.translate(0.21, 0, 0);
+    const pgL = new THREE.Mesh(pageGeo, paperMat(pl));
+    pgL.rotation.y = Math.PI + 0.32;
+    const pgR = new THREE.Mesh(pageGeo, paperMat(pr));
+    pgR.rotation.y = -0.32;
+    news.add(pgL, pgR);
+    news.position.set(0, 0.22, 0.46);
+    news.rotation.x = -0.12;
+    this.client.torso.add(news);
 
     // kid's bike and the old woman's cart
     const bike = new THREE.Group();
@@ -284,14 +305,14 @@ export class GameAct extends Act {
     const nod = Math.sin(bp * Math.PI * 2) * 0.05;
 
     // barbershop regulars
-    barber.root.position.set(-1.35, 0, 51.45);
-    barber.root.rotation.y = -Math.PI / 2;
+    barber.root.position.set(-0.85, 0, 52.95);
+    barber.root.rotation.y = -2.45;
     const snip = Math.max(0, Math.sin(beatPhase(Q(st, 24)) * Math.PI * 2));
-    barber.pose({ armR: [-1.75 - snip * 0.12, 0.35, 0.5], elbowR: 1.15, armL: [-1.3, -0.3, -0.35], elbowL: 0.9, lean: 0.12 });
+    barber.pose({ armR: [-1.6 - snip * 0.12, 0.2, 0.35], elbowR: 1.0, armL: [-1.15, -0.2, -0.3], elbowL: 0.75, lean: 0.1 });
     this.scissors.blade2.rotation.z = 0.05 + snip * 0.45;
-    client.root.position.set(-2.2, 0, 51.4);
-    client.root.rotation.y = -Math.PI / 2;
-    client.pose({ sit: 1, armL: [-0.5, 0, 0], armR: [-0.5, 0, 0], elbowL: 0.4, elbowR: 0.4 });
+    client.root.position.set(-1.4, 0, 52.2);
+    client.root.rotation.y = Math.PI;
+    client.pose({ sit: 1, armL: [-1.05, 0.15, 0.35], armR: [-1.05, -0.15, -0.35], elbowL: 1.15, elbowR: 1.15, lean: 0.05 });
 
     // the bar
     barista.root.position.set(14.45, 0, 53.15);
@@ -470,11 +491,12 @@ export class GameAct extends Act {
     const n = st < 66.6 ? 0 : st < 80 ? span(st, 66.6, 80) : st < 87.9 ? 1 + span(st, 80, 87.9) : 2;
     const w = this.world;
     w.sky.mat.uniforms.uNight.value = n;
-    const sunI = n < 1 ? lerp(2.4, 1.0, n) : lerp(1.0, 0, n - 1);
+    const sunI = n < 1 ? lerp(1.5, 0.8, n) : lerp(0.8, 0, n - 1);
     this.sun.intensity = sunI;
     this.sun.color.setRGB(1, lerp(0.95, 0.62, Math.min(1, n)), lerp(0.87, 0.42, Math.min(1, n)));
-    this.hemi.intensity = n < 1 ? lerp(1.0, 0.55, n) : lerp(0.55, 0.32, n - 1);
-    this.moonLight.intensity = n > 1 ? (n - 1) * 1.3 : 0;
+    this.hemi.intensity = n < 1 ? lerp(1.6, 0.7, n) : lerp(0.7, 0.18, n - 1);
+    this.scene.environmentIntensity = n < 1 ? lerp(0.5, 0.3, n) : lerp(0.3, 0.04, n - 1);
+    this.moonLight.intensity = n > 1 ? (n - 1) * 0.9 : 0;
     const fog = this.scene.fog;
     const day = new THREE.Color(0xcfd5d8);
     const dusk = new THREE.Color(0xb27a5a);
@@ -486,8 +508,8 @@ export class GameAct extends Act {
     w.lamps.poolMat.opacity = lampsOn * 0.8;
     w.lamps.bulbMat.color.setRGB(0.3 + lampsOn * 1.9, 0.3 + lampsOn * 1.7, 0.3 + lampsOn * 1.3);
     w.ride.lightMat.color.setRGB(0.4 + lampsOn * 2.2, 0.4 + lampsOn * 2.0, 0.4 + lampsOn * 1.6);
-    this.strangerLamp.intensity = st > 86 ? 70 : 0;
-    this.strangerLamp.distance = 24;
+    this.strangerLamp.intensity = st > 86 ? 18 : 0;
+    this.strangerLamp.distance = 14;
     this.night = n;
   }
 
@@ -503,7 +525,7 @@ export class GameAct extends Act {
       return c([lerp(-6, 1.5, k), h, 51.2 - h * 0.16], [0.4, 0, 51.2], 40);
     }
     if (st < 23.0) return c([lerp(0.6, 0.2, u(17.7, 23)), 1.62, lerp(46.2, 46.9, u(17.7, 23))], [lerp(0.15, -0.1, u(17.7, 23)), 1.22, 53], 42);
-    if (st < 25.5) return c([-0.55, 1.88, 50.2], [-1.85, 1.78, 51.4], 30);
+    if (st < 25.5) return c([-0.35, 1.72, 50.15], [-1.15, 1.72, 52.6], 32);
     if (st < 27.0) {
       const ch = this.world.shop.waits[0];
       const fy = ch.rotation.y;
@@ -577,7 +599,7 @@ export class GameAct extends Act {
     this.sun.target.position.copy(focus);
     this.sun.position.copy(focus).add(new THREE.Vector3(-30, 55, -22));
     this.carLight.position.set(sim.carX - 0.2, 1.4, 42.2);
-    this.carLight.intensity = st > 62.85 && st < 87.2 ? 1.6 : 0;
+    this.carLight.intensity = 0;
 
     this.updateSmoke(st);
 
@@ -588,18 +610,21 @@ export class GameAct extends Act {
     g.tv = Math.min(on, off);
     g.white = 1 - span(t, this.start, this.start + 0.45);
     g.fade = 0;
-    g.mono = 0.86;
-    g.keepRed = 1;
-    g.tint = [0.97, 1.0, 0.92];
-    g.contrast = 1.12 - this.night * 0.04;
-    g.paper = 0.24;
+    g.mono = 0.9;
+    g.keepRed = 0.55;
+    g.tint = [0.96, 0.985, 0.9];
+    g.contrast = 1.02 - this.night * 0.03;
+    g.paper = 0.42;
+    film.paint.radius = 3;
+    film.paint.step = 1.3;
+    film.paint.amount = 1;
     g.bars = cut;
-    g.grain = 0.085;
-    g.vignette = 0.58;
-    g.scan = st < 12 ? 0.18 - span(st, 10.2, 12) * 0.12 : 0.06;
+    g.grain = 0.05;
+    g.vignette = 0.42;
+    g.scan = st < 12 ? 0.14 - span(st, 10.2, 12) * 0.14 : 0;
     film.bloom.strength = 0.45 + this.night * 0.35 + (st > 95.4 && st < 101.7 ? 0.5 : 0);
     film.bloom.threshold = 0.82;
-    film.renderer.toneMappingExposure = 1 + this.night * 0.3;
+    film.renderer.toneMappingExposure = 1 + this.night * 0.08;
     film.bloom.radius = 0.6;
 
     // HUD

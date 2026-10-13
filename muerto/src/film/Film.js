@@ -5,10 +5,10 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { GradeShader, createGradeParams } from './post.js';
+import { GradeShader, PaintShader, createGradeParams } from './post.js';
 import { AudioEngine } from './audio.js';
 import { buildStudioEnvironment } from './environment.js';
-import { crumpledPaper } from '../textures/paper.js';
+import { paintedCanvas } from '../textures/canvasTex.js';
 
 /**
  * The film is a pure function of time. Everything visible is set by:
@@ -24,6 +24,7 @@ export class Film {
     this.fps = fps;
     this.grade = createGradeParams();
     this.bloom = { strength: 0, radius: 0.5, threshold: 0.9 };
+    this.paint = { radius: 0, step: 1.25, amount: 1 }; // Kuwahara: 0 = off
     this.tl = gsap.timeline({ paused: true });
     this.audio = new AudioEngine();
     this.acts = [];
@@ -52,12 +53,14 @@ export class Film {
     this.renderPass = new RenderPass(new THREE.Scene(), new THREE.PerspectiveCamera());
     this.bloomPass = new UnrealBloomPass(new THREE.Vector2(1920, 1080), 0, 0.5, 0.9);
     this.gradePass = new ShaderPass(GradeShader);
-    const paper = new THREE.CanvasTexture(crumpledPaper());
+    const paper = new THREE.CanvasTexture(paintedCanvas());
     paper.minFilter = THREE.LinearFilter;
     this.gradePass.uniforms.tPaper.value = paper;
     composer.addPass(this.renderPass);
     composer.addPass(this.bloomPass);
     composer.addPass(new OutputPass());
+    this.paintPass = new ShaderPass(PaintShader);
+    composer.addPass(this.paintPass);
     composer.addPass(this.gradePass);
     this.composer = composer;
 
@@ -99,6 +102,8 @@ export class Film {
     this.composer.setPixelRatio(dpr);
     this.composer.setSize(width, height);
     this.gradePass.uniforms.uRes.value = [width * dpr, height * dpr];
+    this.paintPass.uniforms.uRes.value = [width * dpr, height * dpr];
+    this.paintScale = (height * dpr) / 1080; // brush size follows the output resolution
     for (const act of this.acts) {
       act.camera.aspect = width / height;
       act.camera.updateProjectionMatrix();
@@ -116,6 +121,7 @@ export class Film {
     // each act restores its own static look, so jumping between acts never inherits a stale grade
     if (act.look) Object.assign(this.grade, act.look);
     if (act.bloomLook) Object.assign(this.bloom, act.bloomLook);
+    this.paint.radius = 0;
     act.update(this.time, this);
     this.renderPass.scene = act.scene;
     this.renderPass.camera = act.camera;
@@ -143,6 +149,11 @@ export class Film {
     this.bloomPass.radius = this.bloom.radius;
     this.bloomPass.threshold = this.bloom.threshold;
     this.bloomPass.enabled = this.bloom.strength > 0.001;
+    const pu = this.paintPass.uniforms;
+    pu.uRadius.value = this.paint.radius;
+    pu.uStep.value = this.paint.step * (this.paintScale ?? 1);
+    pu.uAmount.value = this.paint.amount;
+    this.paintPass.enabled = this.paint.radius > 0.5;
     this.composer.render();
     // the DOM layers share the same fade, flash and cinema bars
     const v = this.veils;
