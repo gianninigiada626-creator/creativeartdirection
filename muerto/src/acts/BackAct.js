@@ -15,7 +15,7 @@ function producersHTML(text) {
 export class BackAct extends Act {
   constructor(s) {
     super('back', { start: s.back, end: s.end + 0.001 });
-    this.look = { mono: 0, keepRed: 0, paper: 0, bars: 0, tv: 1, white: 0, scan: 0, grain: 0.07, vignette: 0.7, contrast: 1, tint: [1, 1, 1] };
+    this.look = { sat: 1, split: 0, scratch: 0, mono: 0, keepRed: 0, paper: 0, bars: 0, tv: 1, white: 0, scan: 0, grain: 0.07, vignette: 0.7, contrast: 1, tint: [1, 1, 1] };
     this.bloomLook = { strength: 0.2, threshold: 0.9, radius: 0.5 };
     this.tilt = { rx: 9, ry: -7, s: 1.06, sheen: -40 };
   }

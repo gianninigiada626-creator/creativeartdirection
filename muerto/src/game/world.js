@@ -14,7 +14,7 @@ export const STREET = { z: 40, north: 47.5, south: 32.5, x0: -70, x1: 432 };
 function asphalt() {
   const [c, ctx] = canvas(1024, 512);
   const r = rng(31);
-  ctx.fillStyle = '#4b4c4e';
+  ctx.fillStyle = '#4a4744';
   ctx.fillRect(0, 0, 1024, 512);
   for (let i = 0; i < 3000; i++) {
     const v = 60 + r() * 30;
@@ -41,11 +41,11 @@ function asphalt() {
 function concrete() {
   const [c, ctx] = canvas(512, 256);
   const r = rng(32);
-  ctx.fillStyle = '#9b9890';
+  ctx.fillStyle = '#b0a592';
   ctx.fillRect(0, 0, 512, 256);
   for (let i = 0; i < 1500; i++) {
-    const v = 130 + r() * 40;
-    ctx.fillStyle = `rgba(${v},${v - 2},${v - 8},0.4)`;
+    const v = 140 + r() * 40;
+    ctx.fillStyle = `rgba(${v},${v - 8},${v - 20},0.4)`;
     ctx.fillRect(r() * 512, r() * 256, 2, 2);
   }
   ctx.strokeStyle = 'rgba(40,40,38,0.5)';
@@ -71,18 +71,20 @@ function shopFacade(x0, x1, h, name, sub, seed, tone = 196) {
   sign.position.set((x0 + x1) / 2, 3.7, STREET.north - 0.06);
   sign.rotation.y = Math.PI;
   // side walls and roof so the shop reads as a solid block from the street
-  const side = flat(0x8f8a80);
+  const rgb = Array.isArray(tone) ? tone : [tone, tone - 6, tone - 16];
+  const side = flat(new THREE.Color(`rgb(${rgb[0] - 22},${rgb[1] - 24},${rgb[2] - 26})`));
   const depth = 7.2;
-  for (const x of [x0, x1]) {
+  // the shell sits just outside the interior's own walls, never in front of them
+  for (const x of [x0 - 0.15, x1 + 0.15]) {
     const s = new THREE.Mesh(new THREE.BoxGeometry(0.3, h, depth), side);
     s.position.set(x, h / 2, STREET.north + depth / 2);
     s.castShadow = true;
     g.add(s);
   }
   const back = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.3), side);
-  back.position.set((x0 + x1) / 2, h / 2, STREET.north + depth);
-  const roof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.3, 0.3, depth), flat(0x3a3a3c));
-  roof.position.set((x0 + x1) / 2, h, STREET.north + depth / 2);
+  back.position.set((x0 + x1) / 2, h / 2, STREET.north + depth + 0.15);
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.6, 0.3, depth + 0.3), flat(0x4a3e36));
+  roof.position.set((x0 + x1) / 2, h, STREET.north + (depth + 0.3) / 2);
   roof.castShadow = true;
   g.add(front, sign, back, roof);
   return { group: g, front, roof };
@@ -226,7 +228,7 @@ export function buildWorld({ portrait, labelTexture }) {
   const r = rng(99);
 
   // ground: road, sidewalks with curbs, dirt beyond
-  const dirt = new THREE.Mesh(new THREE.PlaneGeometry(1400, 600), flat(0x6d6658));
+  const dirt = new THREE.Mesh(new THREE.PlaneGeometry(1400, 600), flat(0x857158));
   dirt.rotation.x = -Math.PI / 2;
   dirt.position.set(180, -0.02, 40);
   dirt.receiveShadow = true;
@@ -245,8 +247,8 @@ export function buildWorld({ portrait, labelTexture }) {
   }
 
   // special shopfronts (hollow, with interiors)
-  const barberFront = shopFacade(-4.6, 4.6, 6.5, 'BARBERSHOP', 'CORTES · NAVAJA · 1987', 3, 205);
-  const barFront = shopFacade(9.4, 18.6, 6.5, 'EL ÚLTIMO TRAGO', 'LIQUOR · BAR · CERVEZA', 5, 180);
+  const barberFront = shopFacade(-4.6, 4.6, 6.5, 'BARBERSHOP', 'CORTES · NAVAJA · 1987', 3, [172, 196, 170]);
+  const barFront = shopFacade(9.4, 18.6, 6.5, 'EL ÚLTIMO TRAGO', 'LIQUOR · BAR · CERVEZA', 5, [196, 120, 90]);
   scene.add(barberFront.group, barFront.group);
   const pole = barberPole();
   pole.group.position.set(-4.0, 2.4, STREET.north - 0.25);
@@ -322,7 +324,7 @@ export function buildWorld({ portrait, labelTexture }) {
   scene.add(fun);
 
   // motel: low block + tall sign
-  const motel = building({ w: 30, h: 4.2, d: 9, seed: 7, tone: 214, shop: true, floors: 0 });
+  const motel = building({ w: 30, h: 4.2, d: 9, seed: 7, tone: [226, 196, 160], shop: true, floors: 0 });
   motel.position.set(73, 2.1, STREET.south - 9);
   scene.add(motel);
   const msign = new THREE.Group();

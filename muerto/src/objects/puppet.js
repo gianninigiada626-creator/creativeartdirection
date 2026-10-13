@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import { canvas, texture } from '../textures/util.js';
+import { crumple } from '../textures/crumple.js';
 
-// Collage mannequin, after the painted references: a flat black paper torso, smooth rubbery
-// airbrushed arms and big mitten hands, wide trousers, and an oversized cut-out head that always
-// faces the camera — front, three-quarter (mirrored per side) or back, chosen by viewing angle.
+// Collage mannequin, after the painted references: a full chest and shoulders, wide trousers,
+// big mitten hands, every surface folded like crumpled paper, and an oversized cut-out head that
+// always faces the camera — front, three-quarter (mirrored per side) or back, by viewing angle.
 
 const SEG = 16;
 
@@ -59,13 +60,23 @@ function patchwork() {
   return texture(c, { repeat: [1.5, 1] });
 }
 
-function mat(color, opts = {}) {
-  return new THREE.MeshStandardMaterial({ color, roughness: 0.95, metalness: 0, ...opts });
+/** Cloth: matte, folded like paper. */
+function mat(color, opts = {}, fold = 0.6) {
+  return crumple(new THREE.MeshStandardMaterial({ color, roughness: 0.92, metalness: 0, ...opts }), 2, fold);
 }
 
-/** Smooth rubbery skin, like airbrushed clay. */
+/** Skin like painted clay, with a softer fold. */
 function skinMat(color) {
-  return new THREE.MeshPhysicalMaterial({ color, roughness: 0.48, metalness: 0, clearcoat: 0.18, clearcoatRoughness: 0.6, sheen: 0.15, sheenRoughness: 0.7, sheenColor: new THREE.Color(0.45, 0.47, 0.5), envMapIntensity: 0.6 });
+  return crumple(new THREE.MeshPhysicalMaterial({ color, roughness: 0.55, metalness: 0, clearcoat: 0.12, clearcoatRoughness: 0.6, sheen: 0.2, sheenRoughness: 0.7, sheenColor: new THREE.Color(0.6, 0.42, 0.32), envMapIntensity: 0.5 }), 2.5, 0.22);
+}
+
+/** Chest from waist to collar, turned on a lathe: tapered waist, full ribcage, rounded shoulders. */
+function chestGeometry(bulk) {
+  const prof = [
+    [0.16, 0], [0.175, 0.08], [0.2, 0.2], [0.228, 0.33], [0.245, 0.43],
+    [0.238, 0.5], [0.2, 0.556], [0.12, 0.592], [0.06, 0.605], [0.0, 0.61],
+  ].map(([x, y]) => new THREE.Vector2(x * bulk, y));
+  return new THREE.LatheGeometry(prof, SEG + 4);
 }
 
 function capsule(r, len, material) {
@@ -107,17 +118,16 @@ export class Puppet {
     pelvis.position.y = 0.95;
     root.add(pelvis);
 
-    const hips = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.16, 0.2, SEG), pants);
+    const hips = new THREE.Mesh(new THREE.CylinderGeometry(0.168 * (o.bulk ?? 1), 0.18 * Math.min(1.25, o.baggy), 0.22, SEG), pants);
     hips.castShadow = true;
     pelvis.add(hips);
 
     const torso = new THREE.Group();
     torso.position.y = 0.08;
     pelvis.add(torso);
-    const chestGeo = new THREE.CylinderGeometry(0.235 * (o.bulk ?? 1), 0.165 * (o.bulk ?? 1), 0.52, SEG);
-    chestGeo.translate(0, 0.26, 0);
-    const chest = new THREE.Mesh(chestGeo, o.coat ? mat(o.coat) : shirt);
-    chest.scale.z = 0.72;
+    const chest = new THREE.Mesh(chestGeometry(o.bulk ?? 1), o.coat ? mat(o.coat) : shirt);
+    chest.position.y = -0.02;
+    chest.scale.z = 0.7;
     chest.castShadow = true;
     torso.add(chest);
 
@@ -137,7 +147,8 @@ export class Puppet {
       sideFlip.offset.x = 1;
     }
     const aspect = (head.width ?? 512) / (head.height ?? 640);
-    const headMat = new THREE.MeshStandardMaterial({ map: front, transparent: true, alphaTest: 0.4, roughness: 0.45, metalness: 0.1, side: THREE.DoubleSide });
+    // the painted head carries a little of its own light, so the face reads in any shot
+    const headMat = crumple(new THREE.MeshStandardMaterial({ map: front, emissiveMap: front, emissive: 0xffffff, emissiveIntensity: 0.2, transparent: true, alphaTest: 0.4, roughness: 0.62, metalness: 0, side: THREE.DoubleSide }), 2.2, 0.28);
     const headMesh = new THREE.Mesh(new THREE.PlaneGeometry(headHeight * aspect, headHeight), headMat);
     headMesh.castShadow = true;
     const headPivot = new THREE.Group();
@@ -152,20 +163,25 @@ export class Puppet {
       shoulder.position.set(sd * 0.25, 0.47, 0);
       // short sleeve, then bare airbrushed arm (long sleeves for coats)
       const sleeveMat = o.coat ? mat(o.coat) : shirt;
-      shoulder.add(limb(0.078, 0.07, o.coat ? 0.3 : 0.14, sleeveMat));
+      // a rounded shoulder cap, then the sleeve
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.098, SEG, 10), sleeveMat);
+      cap.scale.set(1, 0.9, 0.95);
+      cap.castShadow = true;
+      shoulder.add(cap);
+      shoulder.add(limb(0.094, 0.082, o.coat ? 0.31 : 0.17, sleeveMat));
       if (!o.coat) {
-        const bare = capsule(0.052, 0.16, skin);
+        const bare = capsule(0.058, 0.16, skin);
         bare.position.y = -0.1;
         shoulder.add(bare);
       }
       const elbow = new THREE.Group();
       elbow.position.y = -0.3;
       shoulder.add(elbow);
-      elbow.add(o.coat ? limb(0.062, 0.052, 0.25, sleeveMat) : capsule(0.047, 0.2, skin));
+      elbow.add(o.coat ? limb(0.074, 0.062, 0.25, sleeveMat) : capsule(0.052, 0.2, skin));
       // big mitten hand with a thumb
       const hand = new THREE.Group();
       hand.position.y = -0.31;
-      const palm = new THREE.Mesh(new THREE.SphereGeometry(0.06, SEG, 12), skin);
+      const palm = new THREE.Mesh(new THREE.SphereGeometry(0.064, SEG, 12), skin);
       palm.scale.set(1.0, 1.45, 0.72);
       palm.castShadow = true;
       const thumb = capsule(0.022, 0.05, skin);
@@ -179,15 +195,19 @@ export class Puppet {
     const leg = (side) => {
       const hip = new THREE.Group();
       hip.position.set(side * 0.095, -0.05, 0);
-      hip.add(limb(0.085 * o.baggy, 0.07 * o.baggy, 0.45, pants));
+      hip.add(limb(0.094 * o.baggy, 0.08 * o.baggy, 0.45, pants));
+      const kneeCap = new THREE.Mesh(new THREE.SphereGeometry(0.08 * o.baggy, SEG, 8), pants);
+      kneeCap.position.y = -0.45;
+      hip.add(kneeCap);
       const knee = new THREE.Group();
       knee.position.y = -0.45;
       hip.add(knee);
-      knee.add(limb(0.068 * o.baggy, 0.06 * o.baggy, 0.43, pants));
-      const foot = new THREE.Mesh(new THREE.CapsuleGeometry(0.06, 0.16, 6, SEG), shoes);
+      // wide trousers fall straight and pool a little over the shoe
+      knee.add(limb(0.078 * o.baggy, 0.086 * o.baggy, 0.42, pants));
+      const foot = new THREE.Mesh(new THREE.CapsuleGeometry(0.066, 0.17, 6, SEG), shoes);
       foot.rotation.x = Math.PI / 2;
-      foot.scale.set(1.15, 1, 0.75);
-      foot.position.set(0, -0.45, 0.07);
+      foot.scale.set(1.2, 1, 0.8);
+      foot.position.set(0, -0.44, 0.08);
       foot.castShadow = true;
       knee.add(foot);
       pelvis.add(hip);
@@ -197,13 +217,13 @@ export class Puppet {
     this.R = { arm: arm(-1), leg: leg(-1) };
 
     if (o.apron) {
-      const apron = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.75, 0.02), mat('#d9d9d4'));
-      apron.position.set(0, 0.12, 0.13);
+      const apron = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.75, 0.02), mat('#d9d4c6'));
+      apron.position.set(0, 0.12, 0.17);
       torso.add(apron);
     }
     if (o.cape) {
       const capeGeo = new THREE.ConeGeometry(0.62, 0.95, 10, 1, true);
-      this.cape = new THREE.Mesh(capeGeo, mat('#8f8b84', { side: THREE.DoubleSide }));
+      this.cape = new THREE.Mesh(capeGeo, mat(o.capeColor ?? '#8f8b84', { side: THREE.DoubleSide }, 1.2));
       this.cape.position.y = 0.2;
       this.cape.castShadow = true;
       torso.add(this.cape);
@@ -265,6 +285,7 @@ export class Puppet {
     }
     if (head.material.map !== want) {
       head.material.map = want;
+      head.material.emissiveMap = want;
       head.material.needsUpdate = true;
     }
   }

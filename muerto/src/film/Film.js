@@ -139,6 +139,9 @@ export class Film {
     u.uBars.value = g.bars;
     u.uTint.value = g.tint;
     u.uContrast.value = g.contrast;
+    u.uSat.value = g.sat;
+    u.uSplit.value = g.split;
+    u.uScratch.value = g.scratch;
     u.uGrain.value = g.grain;
     u.uVignette.value = g.vignette;
     u.uScan.value = g.scan;

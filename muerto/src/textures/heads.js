@@ -1,12 +1,23 @@
 import { canvas, rng } from './util.js';
 
 // PLACEHOLDER heads in the painted-collage style: oversized heads cut out with a clean paper edge,
-// skin airbrushed like dark clay, lit softly from the front-left, heavy-lidded and still.
+// warm skin airbrushed like painted clay, lit softly from the front-left, heavy-lidded and still.
 // Three views: front, three-quarter (turned toward image-left; mirror it for the other side) and back.
 // They are replaced by the artist's own heads when those arrive (see README).
 
 const W = 512;
 const H = 640;
+
+/** Skin from deep brown (tone 0) to light tan (tone 1), as [r, g, b]. */
+export function skinRGB(tone) {
+  const k = Math.max(0, Math.min(1, tone));
+  const dark = [64, 40, 30];
+  const light = [214, 166, 132];
+  return dark.map((d, i) => Math.round(d + (light[i] - d) * Math.pow(k, 0.85)));
+}
+
+/** The same skin as a CSS colour, for bodies to match their heads. */
+export const skinHex = (tone) => `rgb(${skinRGB(tone).join(',')})`;
 
 function rgbaOf(color) {
   const v = color.match(/rgba?\(([^)]+)\)/)[1].split(',').map(Number);
@@ -154,10 +165,12 @@ function paint(p, { back = false } = {}) {
   const r = rng(p.seed);
   const g = geometry(p);
   const { cx, cy, rx, ry, t, X } = g;
-  const b = Math.round(40 + p.tone * 66);
-  const skin = `rgb(${b},${b + 2},${b + 5})`;
-  const hi = (a) => `rgba(${Math.min(255, b + 120)},${Math.min(255, b + 122)},${Math.min(255, b + 124)},${a})`;
-  const lo = (a) => `rgba(${Math.max(0, b - 30)},${Math.max(0, b - 29)},${Math.max(0, b - 26)},${a})`;
+  const [R, G, B] = skinRGB(p.tone);
+  const skin = `rgb(${R},${G},${B})`;
+  // warm light, deep red-brown shade
+  const hi = (a) => `rgba(${Math.min(255, R + 112)},${Math.min(255, G + 96)},${Math.min(255, B + 80)},${a})`;
+  const lo = (a) => `rgba(${Math.round(R * 0.48)},${Math.round(G * 0.38)},${Math.round(B * 0.36)},${a})`;
+  const HAIR = '#16110e';
 
   // ── the cut-out ──
   headPath(ctx, g, p);
@@ -172,7 +185,7 @@ function paint(p, { back = false } = {}) {
   ctx.fill();
   const hairOn = hairPath(ctx, g, p, rng(p.seed));
   if (hairOn) {
-    ctx.fillStyle = '#0c0d0f';
+    ctx.fillStyle = HAIR;
     ctx.fill();
   }
 
@@ -184,7 +197,7 @@ function paint(p, { back = false } = {}) {
     air(ctx, cx + rx * 0.5, cy + ry * 0.2, rx * 0.7, ry * 0.9, lo(0.8));
     air(ctx, cx, cy + ry * 0.85, rx * 0.5, ry * 0.25, hi(0.12));
     if (hairOn) {
-      ctx.fillStyle = 'rgba(12,13,15,0.92)';
+      ctx.fillStyle = 'rgba(22,17,14,0.92)';
       ctx.beginPath();
       ctx.ellipse(cx, cy - ry * 0.25, rx * 1.04, ry * 0.9, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -207,6 +220,9 @@ function paint(p, { back = false } = {}) {
   air(ctx, X(0), cy + ry * 0.7, rx * 0.26, ry * 0.12, hi(0.55), 0.75); // chin
   air(ctx, X(-rx * 0.78), cy + ry * 0.4, rx * 0.2, ry * 0.3, lo(0.45), 0.8); // near jaw side
   air(ctx, X(rx * 0.92), cy + ry * 0.2, rx * 0.08, ry * 0.5, hi(0.16), 0.8); // bounce on the far edge
+  air(ctx, X(-rx * 0.45), cy + ry * 0.22, rx * 0.3, ry * 0.16, 'rgba(160,52,38,0.16)', 0.9); // blood under the skin
+  air(ctx, X(rx * 0.45), cy + ry * 0.22, rx * 0.26, ry * 0.15, 'rgba(150,48,36,0.12)', 0.9);
+  air(ctx, X(0), cy + ry * 0.05, rx * 0.2, ry * 0.3, 'rgba(150,56,40,0.1)', 0.9);
 
   // ── brow and sockets ──
   const ey = cy - ry * 0.12;
@@ -223,13 +239,17 @@ function paint(p, { back = false } = {}) {
     const x = X(s * ex);
     const w = 24 * p.eyes * sc;
     ctx.save();
-    ctx.fillStyle = p.eyeColor ?? 'rgba(178,176,170,0.55)';
+    ctx.fillStyle = p.eyeColor ?? 'rgba(214,202,184,0.62)';
     ctx.beginPath();
     ctx.ellipse(x, ey + 6, w, 6.5, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#060607';
+    ctx.fillStyle = '#4a2a1c';
     ctx.beginPath();
-    ctx.arc(x - t * 6, ey + 7, 5.5 * sc, 0, Math.PI * 2);
+    ctx.arc(x - t * 6, ey + 7, 6.5 * sc, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#080605';
+    ctx.beginPath();
+    ctx.arc(x - t * 6, ey + 7, 3.5 * sc, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
     // upper lid: a lit, heavy crescent
@@ -260,13 +280,14 @@ function paint(p, { back = false } = {}) {
   const my = cy + ry * 0.5;
   const mw = 50 * p.lips;
   air(ctx, X(0), my - 10, mw, 13 * p.lips, lo(0.85), 0.7); // upper lip
-  stroke(ctx, [[X(-mw * 0.95), my], [X(0), my + 5], [X(mw * 0.95), my]], 5, 'rgba(0,0,0,0.92)', 1.5);
+  air(ctx, X(0), my + 8, mw * 0.9, 13 * p.lips, 'rgba(120,48,40,0.45)', 0.8); // lip colour
+  stroke(ctx, [[X(-mw * 0.95), my], [X(0), my + 5], [X(mw * 0.95), my]], 5, 'rgba(34,12,8,0.92)', 1.5);
   air(ctx, X(-6), my + 13 * p.lips, mw * 0.65, 9 * p.lips, hi(0.65), 0.75); // lower lip shine
   air(ctx, X(-mw), my + 2, 8, 6, 'rgba(0,0,0,0.6)', 0.6); // mouth corners
   air(ctx, X(mw), my + 2, 8, 6, 'rgba(0,0,0,0.6)', 0.6);
   air(ctx, X(0), my + 30 * p.lips, mw * 0.6, 9, lo(0.7), 0.7); // under the lip
   if (p.moustache) {
-    ctx.fillStyle = '#0b0c0d';
+    ctx.fillStyle = HAIR;
     ctx.beginPath();
     ctx.moveTo(X(-62), my - 2);
     ctx.quadraticCurveTo(X(-30), my - 34, X(0), my - 20);
@@ -275,7 +296,7 @@ function paint(p, { back = false } = {}) {
     ctx.fill();
   }
   if (p.beard) {
-    ctx.fillStyle = 'rgba(10,10,11,0.93)';
+    ctx.fillStyle = 'rgba(22,17,14,0.93)';
     ctx.beginPath();
     ctx.ellipse(X(0), cy + ry * 0.72, rx * 0.72, ry * 0.34, 0, 0, Math.PI);
     ctx.fill();
@@ -290,9 +311,9 @@ function paint(p, { back = false } = {}) {
     ctx.save();
     hairPath(ctx, g, p, rng(p.seed));
     ctx.clip();
-    ctx.fillStyle = '#0c0d0f';
+    ctx.fillStyle = HAIR;
     ctx.fillRect(0, 0, W, H);
-    air(ctx, X(-rx * 0.4), cy - ry * 0.9, rx * 0.5, ry * 0.2, 'rgba(120,124,130,0.18)', 0.9);
+    air(ctx, X(-rx * 0.4), cy - ry * 0.9, rx * 0.5, ry * 0.2, 'rgba(150,130,110,0.2)', 0.9);
     ctx.restore();
   }
 
@@ -300,10 +321,10 @@ function paint(p, { back = false } = {}) {
   const img = ctx.getImageData(0, 0, W, H);
   for (let i = 0; i < img.data.length; i += 4) {
     if (img.data[i + 3] === 0) continue;
-    const n = (r() - 0.5) * 10;
+    const n = (r() - 0.5) * 12;
     img.data[i] += n;
-    img.data[i + 1] += n;
-    img.data[i + 2] += n;
+    img.data[i + 1] += n * 0.9;
+    img.data[i + 2] += n * 0.8;
   }
   ctx.putImageData(img, 0, 0);
   ctx.restore();
@@ -321,7 +342,7 @@ function rim(ctx, g, p) {
   headPath(ctx, g, p);
   earPath(ctx, g, 1);
   if ((g.t ?? 0) < 0.4) earPath(ctx, g, -1);
-  ctx.fillStyle = 'rgba(214,212,204,0.95)';
+  ctx.fillStyle = 'rgba(226,218,200,0.95)';
   ctx.fill();
   if (hairPath(ctx, g, p, rng(p.seed))) ctx.fill();
   ctx.restore();
@@ -337,7 +358,7 @@ export function drawHead(p = {}, opts = {}) {
 }
 
 export const HEADS = {
-  mercy: { seed: 11, width: 0.92, length: 1.04, jawTaper: 1.15, tone: 0.12, hair: 'crown', nose: 1.05, lips: 1.05, eyes: 1, brow: 1.15, eyeColor: 'rgba(214,40,48,0.95)' },
+  mercy: { seed: 11, width: 0.92, length: 1.04, jawTaper: 1.15, tone: 0.18, hair: 'crown', nose: 1.05, lips: 1.05, eyes: 1, brow: 1.15, eyeColor: 'rgba(214,40,48,0.95)' },
   barber: { seed: 23, width: 1.0, length: 1.04, jawTaper: 0.8, tone: 0.22, hair: 'crown', nose: 1.2, lips: 0.95, eyes: 0.85, brow: 1.3, lines: 0.7 },
   client: { seed: 29, width: 0.96, length: 1, jawTaper: 1, tone: 0.3, hair: 'crop', nose: 1, lips: 1, eyes: 0.9, brow: 1 },
   barista: { seed: 31, width: 1.1, length: 0.94, jawTaper: 0.5, tone: 0.5, hair: 'none', nose: 1.3, lips: 0.85, eyes: 0.85, brow: 1, moustache: true, lines: 1 },

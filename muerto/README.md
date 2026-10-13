@@ -40,10 +40,10 @@ Testi, tracklist, crediti e tempi del brano: `src/data/album.js`.
 ## Struttura
 
 ```
-src/film/       motore: orologio unico, grade (B/N con rossi, carta stropicciata, bande cinema, TV), audio, foley sintetizzato
+src/film/       motore: orologio unico, grade (colore dipinto caldo con rossi, pennellata Kuwahara, graffi e polvere, bande cinema, TV), audio, foley sintetizzato
 src/acts/       I disco · II lettore · IV retro del disco
 src/game/       III il gioco: mondo (strada West Coast, barbiere, bar, camposanto), regia delle inquadrature, simulazione
-src/objects/    disco, lettore CD, personaggi low-poly con teste a collage, kit città, lowrider
+src/objects/    disco, lettore CD, personaggi in "carta stropicciata" con teste a collage, kit città, lowrider
 src/textures/   texture procedurali: ritratto, etichetta, teste, carta, facciate
 src/overlay/    HUD di gioco e cornice barocca del retro
 scripts/        export MP4

@@ -6,6 +6,10 @@ import { brushOver, canvas, rng, texture } from '../textures/util.js';
 
 export const flat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0, ...o });
 
+/** West Coast stucco, sun-faded: peach, mint, cream, terracotta, rose, sky, mustard, lilac. */
+const STUCCO = [[214, 172, 140], [168, 192, 164], [222, 206, 172], [192, 118, 88], [218, 170, 164], [152, 180, 192], [208, 168, 96], [184, 158, 192]];
+export const stucco = (seed) => STUCCO[((seed % STUCCO.length) + STUCCO.length) % STUCCO.length];
+
 /** Painted sign board. */
 export function signTexture(text, { font = '700 120px "Oswald"', fg = '#f2efe6', bg = '#1b1b1d', w = 1024, h = 256, border = '#f2efe6', sub = '' } = {}) {
   const [c, ctx] = canvas(w, h);
@@ -34,18 +38,18 @@ export function facadeTexture({ w, h, seed = 1, tone = 200, shop = true, floors 
   const H = Math.min(2048, Math.round(h * ppm));
   const [c, ctx] = canvas(W, H);
   const r = rng(seed);
-  const t = tone;
-  ctx.fillStyle = `rgb(${t},${t - 6},${t - 16})`;
+  const [R, G, B] = Array.isArray(tone) ? tone : [tone, tone - 6, tone - 16];
+  ctx.fillStyle = `rgb(${R},${G},${B})`;
   ctx.fillRect(0, 0, W, H);
   // stucco blotches and grime streaks
   for (let i = 0; i < 260; i++) {
-    const v = t + (r() - 0.5) * 40;
-    ctx.fillStyle = `rgba(${v},${v - 6},${v - 16},0.25)`;
+    const k = (r() - 0.5) * 40;
+    ctx.fillStyle = `rgba(${R + k},${G + k},${B + k},0.25)`;
     ctx.beginPath();
     ctx.ellipse(r() * W, r() * H, 10 + r() * 60, 6 + r() * 30, r() * 3, 0, Math.PI * 2);
     ctx.fill();
   }
-  brushOver(ctx, 0, 0, W, H, { n: Math.round((W * H) / 2500), len: [40, 160], wid: [8, 26], tone: [t, t - 6, t - 16], spread: 30, alpha: [0.15, 0.3], jitter: 0.6, seed });
+  brushOver(ctx, 0, 0, W, H, { n: Math.round((W * H) / 2500), len: [40, 160], wid: [8, 26], tone: [R, G, B], spread: 30, alpha: [0.15, 0.3], jitter: 0.6, seed });
   for (let i = 0; i < 30; i++) {
     ctx.fillStyle = 'rgba(40,36,30,0.12)';
     ctx.fillRect(r() * W, r() * H * 0.5, 2 + r() * 5, H * (0.2 + r() * 0.5));
@@ -108,15 +112,15 @@ export function facadeTexture({ w, h, seed = 1, tone = 200, shop = true, floors 
 const FACADES = new Map();
 
 export function building({ w, h, d = 10, seed = 1, tone, shop = true, floors }) {
-  const r = rng(seed * 13);
-  tone ??= 150 + Math.floor(r() * 90);
+  tone ??= stucco(seed);
+  const rgb = Array.isArray(tone) ? tone : [tone, tone - 6, tone - 16];
   floors ??= Math.max(0, Math.round((h - 3.4) / 3.2));
-  // facades are shared between buildings of the same size: a handful of variants per size
-  const key = `${w}|${h}|${shop}|${floors}|${seed % 5}`;
-  if (!FACADES.has(key)) FACADES.set(key, new THREE.MeshStandardMaterial({ map: facadeTexture({ w, h, seed: seed % 5 + w, tone: 160 + (seed % 5) * 16, shop, floors, ppm: 36 }), roughness: 0.9 }));
+  // facades are shared between buildings of the same size and colour
+  const key = `${w}|${h}|${shop}|${floors}|${rgb.join(',')}`;
+  if (!FACADES.has(key)) FACADES.set(key, new THREE.MeshStandardMaterial({ map: facadeTexture({ w, h, seed: (seed % 5) + w, tone: rgb, shop, floors, ppm: 36 }), roughness: 0.9 }));
   const front = FACADES.get(key);
-  const side = flat(new THREE.Color(`rgb(${tone - 20},${tone - 26},${tone - 36})`));
-  const roof = flat(0x3a3a3c);
+  const side = flat(new THREE.Color(`rgb(${rgb[0] - 22},${rgb[1] - 24},${rgb[2] - 26})`));
+  const roof = flat(0x4a3e36);
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [side, side, roof, roof, front, side]);
   mesh.castShadow = mesh.receiveShadow = true;
   return mesh;
@@ -181,8 +185,8 @@ export function palms(positions) {
   const group = new THREE.Group();
   // three palm shapes, reused
   const variants = [palmGeometries(9, 0.8, 3), palmGeometries(11, -0.6, 7), palmGeometries(7.5, 0.4, 11)];
-  const trunkMat = flat(0x5a4a3c);
-  const frondMat = flat(0x2f3d2b, { side: THREE.DoubleSide });
+  const trunkMat = flat(0x6a5440);
+  const frondMat = flat(0x3e5a2e, { side: THREE.DoubleSide });
   variants.forEach((v, vi) => {
     const list = positions.filter((_, i) => i % 3 === vi);
     if (!list.length) return;
@@ -296,8 +300,8 @@ export function lowrider({ color = 0x9e1018, len = 5.6 } = {}) {
   const shell = new THREE.Mesh(geo, paint);
   shell.castShadow = true;
   body.add(shell);
-  // a convertible: only the raked windshield in its chrome frame
-  const shieldH = 0.5;
+  // a convertible: only a raked, frameless windshield between two chrome posts
+  const shieldH = 0.34; // chopped low, lowrider style: the frame stays under the faces
   const rake = 0.55;
   const shield = new THREE.Mesh(
     new THREE.BoxGeometry(0.02, shieldH, W - 0.12),
@@ -313,9 +317,6 @@ export function lowrider({ color = 0x9e1018, len = 5.6 } = {}) {
     post.rotation.z = rake;
     body.add(post);
   }
-  const top = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, W - 0.08), frameMat);
-  top.position.set(len * 0.2 - Math.sin(rake) * shieldH, belt + Math.cos(rake) * shieldH, 0);
-  body.add(top);
   // seats
   const seatMat = flat(0xd8d2c4, { roughness: 0.5 });
   for (const x of [-len * 0.08, len * 0.08]) {
@@ -379,7 +380,7 @@ export function skyDome() {
       uniform float uNight; varying vec3 vP;
       void main(){
         float h = clamp(vP.y, 0.0, 1.0);
-        vec3 dayZ = vec3(0.32,0.5,0.74), dayH = vec3(0.82,0.85,0.86);
+        vec3 dayZ = vec3(0.34,0.5,0.7), dayH = vec3(0.95,0.85,0.7);
         vec3 duskZ = vec3(0.16,0.14,0.26), duskH = vec3(0.85,0.45,0.26);
         vec3 nightZ = vec3(0.01,0.015,0.03), nightH = vec3(0.08,0.09,0.12);
         vec3 z = uNight < 1.0 ? mix(dayZ, duskZ, uNight) : mix(duskZ, nightZ, uNight - 1.0);
@@ -387,7 +388,10 @@ export function skyDome() {
         gl_FragColor = vec4(mix(hz, z, pow(h, 0.6)), 1.0);
       }`,
   });
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(900, 24, 12), mat);
+  // inside the camera's far plane; the game keeps it centred on the camera
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(380, 24, 12), mat);
+  mesh.frustumCulled = false;
+  mesh.renderOrder = -1;
   return { mesh, mat };
 }
 

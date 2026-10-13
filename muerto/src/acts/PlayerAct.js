@@ -10,7 +10,7 @@ const pad = (n) => String(Math.max(0, Math.floor(n))).padStart(2, '0');
 export class PlayerAct extends Act {
   constructor(s) {
     super('player', { start: s.player, end: s.game });
-    this.look = { mono: 0, keepRed: 0, paper: 0, bars: 0, tv: 1, scan: 0, grain: 0.06, vignette: 0.55, contrast: 1.05, tint: [1, 1, 1] };
+    this.look = { sat: 1, split: 0, scratch: 0, mono: 0, keepRed: 0, paper: 0, bars: 0, tv: 1, scan: 0, grain: 0.06, vignette: 0.55, contrast: 1.05, tint: [1, 1, 1] };
     this.s = s;
     this.cam = { x: 6.5, y: 4.8, z: 10.5, tx: -0.4, ty: 0.9, tz: 2.2 };
     this.m = { tray: 0, discY: 6, discTilt: 0.5, discSpin: 0, openBtn: 0, playBtn: 0 };

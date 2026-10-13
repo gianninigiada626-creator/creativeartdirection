@@ -11,7 +11,7 @@ import { ALBUM, ARTIST, LABEL } from '../data/album.js';
 export class DiscAct extends Act {
   constructor(s) {
     super('disc', { start: s.disc, end: s.player });
-    this.look = { mono: 0, keepRed: 0, paper: 0, bars: 0, tv: 1, white: 0, scan: 0, grain: 0.07, vignette: 0.6, contrast: 1, tint: [1, 1, 1] };
+    this.look = { sat: 1, split: 0, scratch: 0, mono: 0, keepRed: 0, paper: 0, bars: 0, tv: 1, white: 0, scan: 0, grain: 0.07, vignette: 0.6, contrast: 1, tint: [1, 1, 1] };
     this.bloomLook = { threshold: 0.9, radius: 0.5 };
     this.cam = { x: -0.16, y: 0.31, z: 0.5, tx: -0.18, ty: 0.28, tz: 0 };
     this.d = { rx: -0.1, ry: 0.22, x: 0, y: 0, z: 0, flip: 0 };

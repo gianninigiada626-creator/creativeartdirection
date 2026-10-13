@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { Act } from '../acts/Act.js';
 import { Puppet } from '../objects/puppet.js';
 import { flat } from '../objects/city.js';
-import { drawHead, HEADS } from '../textures/heads.js';
+import { drawHead, HEADS, skinHex } from '../textures/heads.js';
 import { texture, tryImage } from '../textures/util.js';
+import { crumple } from '../textures/crumple.js';
 import { newspaperPages } from '../textures/newspaper.js';
 import { buildWorld } from './world.js';
 import { Hud } from '../overlay/hud.js';
@@ -68,7 +69,7 @@ export class GameAct extends Act {
 
   async build(film) {
     const scene = this.scene;
-    scene.fog = new THREE.Fog(0xcfd5d8, 70, 460);
+    scene.fog = new THREE.Fog(0xd8c8ac, 70, 460);
     // soft studio reflections give the skin its airbrushed sheen
     scene.environment = film.env;
     scene.environmentIntensity = 0.5;
@@ -115,24 +116,26 @@ export class GameAct extends Act {
         side: (await tryImage(`assets/heads/${file}-side.png`)) ?? (img ? null : drawHead({ ...HEADS[key], turn: 0.6 })),
       };
     };
-    const mk = async (key, outfit, extra = {}) => new Puppet({ ...(await head(key, key)), outfit, name: key, ...extra });
-    this.mercy = await mk('mercy', { shirt: 'patchwork', pants: '#141416', baggy: 1.45, shoes: '#0b0b0b', skin: '#2a2d33' }, { headHeight: 0.76 });
-    this.barber = await mk('barber', { shirt: '#121214', pants: 'pinstripe', baggy: 1.45, skin: '#30333a' }, { headHeight: 0.74 });
-    this.client = await mk('client', { shirt: '#333', cape: true, pants: '#26262a' }, { headHeight: 0.72 });
-    this.barista = await mk('barista', { shirt: '#2a2a2c', apron: true, pants: '#1d1d1f' });
-    this.patron = await mk('old', { coat: '#3a3a3a', pants: 'pinstripe', bulk: 1.1 });
-    this.oldwoman = await mk('oldwoman', { coat: '#5c5753', pants: '#5c5753' });
-    this.kid = await mk('kid', { shirt: '#d9d4c8', pants: '#2a3a4a' });
+    // bodies wear the same skin as their painted heads
+    const mk = async (key, outfit, extra = {}) => new Puppet({ ...(await head(key, key)), outfit: { skin: skinHex(HEADS[key].tone), ...outfit }, name: key, ...extra });
+    this.mercy = await mk('mercy', { shirt: 'patchwork', pants: '#17171a', baggy: 1.45, shoes: '#20150f', bulk: 1.06 }, { headHeight: 0.76 });
+    this.barber = await mk('barber', { shirt: '#d2c8b2', pants: '#141416', baggy: 1.5, shoes: '#0d0d0e', bulk: 1.08 }, { headHeight: 0.74 });
+    this.client = await mk('client', { shirt: '#5b4636', cape: true, capeColor: '#8e1f22', pants: '#2c2a33' }, { headHeight: 0.72 });
+    this.barista = await mk('barista', { shirt: '#3d4a3a', apron: true, pants: '#22201e', bulk: 1.12 });
+    this.patron = await mk('old', { coat: '#5a4532', pants: 'pinstripe', bulk: 1.1 });
+    this.oldwoman = await mk('oldwoman', { coat: '#6a5470', pants: '#4a3c50', shoes: '#2a201a' });
+    this.kid = await mk('kid', { shirt: '#d1a23e', pants: '#2c3d5c', shoes: '#e6e1d4' });
     this.kid.root.scale.setScalar(0.74);
-    this.driver = await mk('driver', { shirt: '#141416', pants: '#141416' });
-    this.stranger = await mk('stranger', { coat: '#0b0b0c', pants: '#0b0b0c', shoes: '#000' }, { headHeight: 0.86 });
+    this.driver = await mk('driver', { shirt: '#e2ddd0', pants: '#1e2a40', bulk: 1.12 });
+    this.stranger = await mk('stranger', { coat: '#121012', pants: '#121012', shoes: '#000' }, { headHeight: 0.86 });
     this.extras = [];
     for (let i = 0; i < 5; i++) {
+      const tone = 0.15 + i * 0.12;
       const p = new Puppet({
-        head: drawHead({ seed: 400 + i * 7, hair: ['crop', 'afro', 'cap', 'none', 'flattop'][i], tone: 0.15 + i * 0.12, moustache: i === 3, lines: i === 3 ? 1 : 0 }),
-        back: drawHead({ seed: 400 + i * 7, hair: ['crop', 'afro', 'cap', 'none', 'flattop'][i] }, { back: true }),
-        side: drawHead({ seed: 400 + i * 7, hair: ['crop', 'afro', 'cap', 'none', 'flattop'][i], tone: 0.15 + i * 0.12, moustache: i === 3, lines: i === 3 ? 1 : 0, turn: 0.6 }),
-        outfit: { shirt: ['#3a3a3c', '#d6d1c4', '#1c1c1e', '#5a554f', '#2b3b4b'][i], pants: i % 2 ? 'pinstripe' : '#202024', baggy: 1 + (i % 3) * 0.15 },
+        head: drawHead({ seed: 400 + i * 7, hair: ['crop', 'afro', 'cap', 'none', 'flattop'][i], tone, moustache: i === 3, lines: i === 3 ? 1 : 0 }),
+        back: drawHead({ seed: 400 + i * 7, hair: ['crop', 'afro', 'cap', 'none', 'flattop'][i], tone }, { back: true }),
+        side: drawHead({ seed: 400 + i * 7, hair: ['crop', 'afro', 'cap', 'none', 'flattop'][i], tone, moustache: i === 3, lines: i === 3 ? 1 : 0, turn: 0.6 }),
+        outfit: { shirt: ['#6b3a2a', '#d6d1c4', '#2d4a5a', '#7a6a3a', '#4a2a3a'][i], pants: i % 2 ? 'pinstripe' : ['#202024', '#3a3226', '#2a3340'][i % 3], baggy: 1 + (i % 3) * 0.15, skin: skinHex(tone) },
         name: `extra${i}`,
       });
       this.extras.push(p);
@@ -183,20 +186,22 @@ export class GameAct extends Act {
     this.smoke.frustumCulled = false;
     scene.add(this.smoke);
 
-    // the client's newspaper: two pages open toward the room, like in the painting
+    // the neighbourhood paper, left open on the waiting table: MERCY V. IS BACK
     const [pl, pr] = newspaperPages(discAct.portrait);
-    const paperMat = (c) => new THREE.MeshStandardMaterial({ map: texture(c), roughness: 0.95, side: THREE.DoubleSide });
+    const paperMat = (c) => crumple(new THREE.MeshStandardMaterial({ map: texture(c), roughness: 0.95, side: THREE.DoubleSide }), 1, 0.45);
     const news = new THREE.Group();
-    const pageGeo = new THREE.PlaneGeometry(0.42, 0.56);
-    pageGeo.translate(0.21, 0, 0);
-    const pgL = new THREE.Mesh(pageGeo, paperMat(pl));
-    pgL.rotation.y = Math.PI + 0.32;
-    const pgR = new THREE.Mesh(pageGeo, paperMat(pr));
-    pgR.rotation.y = -0.32;
+    const pgL = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.56).translate(-0.21, 0, 0), paperMat(pl));
+    const pgR = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.56).translate(0.21, 0, 0), paperMat(pr));
+    pgL.rotation.y = -0.06;
+    pgR.rotation.y = 0.06;
     news.add(pgL, pgR);
-    news.position.set(0, 0.22, 0.46);
-    news.rotation.x = -0.12;
-    this.client.torso.add(news);
+    news.rotation.x = -Math.PI / 2;
+    const holder = new THREE.Group();
+    holder.add(news);
+    const tb = this.world.shop.table.position;
+    holder.position.set(tb.x - 0.02, tb.y + 0.06, tb.z);
+    holder.rotation.y = Math.PI + 0.22; // tops of the pages away from the door, readable from it
+    this.world.shop.group.add(holder);
 
     // kid's bike and the old woman's cart
     const bike = new THREE.Group();
@@ -305,14 +310,15 @@ export class GameAct extends Act {
     const nod = Math.sin(bp * Math.PI * 2) * 0.05;
 
     // barbershop regulars
-    barber.root.position.set(-0.85, 0, 52.95);
-    barber.root.rotation.y = -2.45;
+    // the barber stands behind the chair in profile, the client faces the mirror
+    barber.root.position.set(-1.02, 0, 52.42);
+    barber.root.rotation.y = -Math.PI / 2 - 0.42;
     const snip = Math.max(0, Math.sin(beatPhase(Q(st, 24)) * Math.PI * 2));
-    barber.pose({ armR: [-1.6 - snip * 0.12, 0.2, 0.35], elbowR: 1.0, armL: [-1.15, -0.2, -0.3], elbowL: 0.75, lean: 0.1 });
+    barber.pose({ armR: [-1.75 - snip * 0.12, 0.25, 0.25], elbowR: 0.85, armL: [-1.35, -0.25, -0.3], elbowL: 0.9, lean: 0.16 });
     this.scissors.blade2.rotation.z = 0.05 + snip * 0.45;
-    client.root.position.set(-1.4, 0, 52.2);
-    client.root.rotation.y = Math.PI;
-    client.pose({ sit: 1, armL: [-1.05, 0.15, 0.35], armR: [-1.05, -0.15, -0.35], elbowL: 1.15, elbowR: 1.15, lean: 0.05 });
+    client.root.position.set(-1.75, 0, 52.1);
+    client.root.rotation.y = -Math.PI / 2 - 0.35;
+    client.pose({ sit: 1, armL: [-0.55, 0.1, 0.2], armR: [-0.55, -0.1, -0.2], elbowL: 0.7, elbowR: 0.7, lean: 0.04, roll: -0.04 });
 
     // the bar
     barista.root.position.set(14.45, 0, 53.15);
@@ -498,7 +504,7 @@ export class GameAct extends Act {
     this.scene.environmentIntensity = n < 1 ? lerp(0.5, 0.3, n) : lerp(0.3, 0.04, n - 1);
     this.moonLight.intensity = n > 1 ? (n - 1) * 0.9 : 0;
     const fog = this.scene.fog;
-    const day = new THREE.Color(0xcfd5d8);
+    const day = new THREE.Color(0xd8c8ac);
     const dusk = new THREE.Color(0xb27a5a);
     const night = new THREE.Color(0x1b2029);
     fog.color.copy(n < 1 ? day.lerp(dusk, n) : dusk.lerp(night, n - 1));
@@ -524,12 +530,12 @@ export class GameAct extends Act {
       const h = lerp(46, 11, k);
       return c([lerp(-6, 1.5, k), h, 51.2 - h * 0.16], [0.4, 0, 51.2], 40);
     }
-    if (st < 23.0) return c([lerp(0.6, 0.2, u(17.7, 23)), 1.62, lerp(46.2, 46.9, u(17.7, 23))], [lerp(0.15, -0.1, u(17.7, 23)), 1.22, 53], 42);
+    if (st < 23.0) return c([lerp(1.0, 0.6, u(17.7, 23)), 1.66, lerp(45.2, 45.8, u(17.7, 23))], [lerp(0.05, -0.15, u(17.7, 23)), 1.2, 53], 44);
     if (st < 25.5) return c([-0.35, 1.72, 50.15], [-1.15, 1.72, 52.6], 32);
     if (st < 27.0) {
       const ch = this.world.shop.waits[0];
       const fy = ch.rotation.y;
-      return c([ch.position.x + Math.sin(fy) * 1.45, 1.45, ch.position.z + Math.cos(fy) * 1.45], [ch.position.x, 1.42, ch.position.z], 30);
+      return c([ch.position.x + Math.sin(fy) * 2.3, 1.38, ch.position.z + Math.cos(fy) * 2.3], [ch.position.x, 1.3, ch.position.z], 32);
     }
     if (st < 30.24) return c([-0.6, 1.8, 53.3], [m.x, 1.25, m.z], 38);
     if (st < 33.6) return c([m.x - 4.6, 2.4, m.z - 1.7], [m.x + 2.6, 1.2, m.z + 0.3], 42);
@@ -592,6 +598,7 @@ export class GameAct extends Act {
       cam.updateProjectionMatrix();
     }
     cam.lookAt(shot.target[0], shot.target[1], shot.target[2]);
+    world.sky.mesh.position.copy(cam.position);
     for (const p of this.cast) p.face(cam);
 
     // sun and shadow follow the action
@@ -610,20 +617,24 @@ export class GameAct extends Act {
     g.tv = Math.min(on, off);
     g.white = 1 - span(t, this.start, this.start + 0.45);
     g.fade = 0;
-    g.mono = 0.9;
-    g.keepRed = 0.55;
-    g.tint = [0.96, 0.985, 0.9];
-    g.contrast = 1.02 - this.night * 0.03;
-    g.paper = 0.42;
+    // painted colour, muted and warm: a little mono under sepia, reds kept, olive shadows
+    g.mono = 0.28;
+    g.keepRed = 0.35;
+    g.tint = [1.02, 0.96, 0.84];
+    g.sat = 1.08;
+    g.split = 1;
+    g.contrast = 1.1 - this.night * 0.04;
+    g.paper = 0.1;
+    g.scratch = 1;
     film.paint.radius = 3;
-    film.paint.step = 1.3;
+    film.paint.step = 1.2;
     film.paint.amount = 1;
     g.bars = cut;
-    g.grain = 0.05;
-    g.vignette = 0.42;
+    g.grain = 0.075;
+    g.vignette = 0.72;
     g.scan = st < 12 ? 0.14 - span(st, 10.2, 12) * 0.14 : 0;
-    film.bloom.strength = 0.45 + this.night * 0.35 + (st > 95.4 && st < 101.7 ? 0.5 : 0);
-    film.bloom.threshold = 0.82;
+    film.bloom.strength = (st < 50.31 ? 0.3 : 0.45) + this.night * 0.35 + (st > 95.4 && st < 101.7 ? 0.5 : 0);
+    film.bloom.threshold = st < 50.31 ? 0.92 : 0.84;
     film.renderer.toneMappingExposure = 1 + this.night * 0.08;
     film.bloom.radius = 0.6;
 

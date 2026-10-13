@@ -1,6 +1,7 @@
 // Final grade pass, applied in display space after tone mapping.
-// The game look: desaturated green-sepia where only the reds survive, printed on crumpled paper,
-// with cinema bars for cutscenes, film grain, vignette, scanlines and a CRT power transition.
+// The game look: muted, warm painted colour (olive shadows, cream highlights) with the reds kept,
+// worn like an old print: cinema bars for cutscenes, grain, scratches and dust, vignette,
+// scanlines and a CRT power transition.
 
 export function createGradeParams() {
   return {
@@ -8,7 +9,10 @@ export function createGradeParams() {
     keepRed: 0, // how much saturated red survives the monochrome
     tint: [1, 1, 1], // multiplies the mono image
     contrast: 1,
-    paper: 0, // crumpled-paper relief strength
+    sat: 1, // saturation after the mono mix
+    split: 0, // split-tone: olive shadows, cream highlights
+    scratch: 0, // film scratches and dust
+    paper: 0, // canvas relief strength
     bars: 0, // 0 none → 1 full 2.39:1 letterbox
     grain: 0.06,
     vignette: 0.45,
@@ -29,6 +33,9 @@ export const GradeShader = {
     uKeepRed: { value: 0 },
     uTint: { value: [1, 1, 1] },
     uContrast: { value: 1 },
+    uSat: { value: 1 },
+    uSplit: { value: 0 },
+    uScratch: { value: 0 },
     uPaper: { value: 0 },
     uBars: { value: 0 },
     uGrain: { value: 0.06 },
@@ -53,6 +60,9 @@ export const GradeShader = {
     uniform float uKeepRed;
     uniform vec3 uTint;
     uniform float uContrast;
+    uniform float uSat;
+    uniform float uSplit;
+    uniform float uScratch;
     uniform float uPaper;
     uniform float uBars;
     uniform float uGrain;
@@ -63,10 +73,11 @@ export const GradeShader = {
     uniform float uFade;
     varying vec2 vUv;
 
+    // hash12 (Dave Hoskins): stable on integer pixel coordinates, no column patterns
     float hash(vec2 p) {
-      p = fract(p * vec2(123.34, 456.21));
-      p += dot(p, p + 45.32);
-      return fract(p.x * p.y);
+      vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+      p3 += dot(p3, p3.yzx + 33.33);
+      return fract((p3.x + p3.y) * p3.z);
     }
 
     void main() {
@@ -99,11 +110,40 @@ export const GradeShader = {
       graded = mix(graded, mix(c, vec3(l), 0.25) * vec3(1.05, 0.92, 0.9), red);
       c = (graded - 0.5) * uContrast + 0.5;
 
+      float lum = dot(c, vec3(0.299, 0.587, 0.114));
+      c = max(mix(vec3(lum), c, uSat), 0.0);
+      vec3 split = mix(vec3(0.84, 0.95, 0.88), vec3(1.07, 1.0, 0.86), smoothstep(0.04, 0.72, lum));
+      c *= mix(vec3(1.0), split, uSplit);
+
+      // an old print: hairline scratches that jump every other frame, and dust
+      if (uScratch > 0.0) {
+        float f = floor(uFrame / 2.0);
+        for (int i = 0; i < 2; i++) {
+          float fi = float(i);
+          float on = step(0.7, hash(vec2(fi * 3.1, f * 1.3)));
+          float xs = hash(vec2(f * 0.71, fi * 7.1)) + sin(vUv.y * 7.0 + f) * 0.0015;
+          float line = 1.0 - smoothstep(0.0, 1.2 / uRes.x, abs(vUv.x - xs));
+          // a scratch runs only part of the frame
+          float y0 = hash(vec2(f, fi + 4.0));
+          float run = smoothstep(y0 - 0.05, y0, vUv.y) * (1.0 - smoothstep(y0 + 0.3, y0 + 0.4, vUv.y));
+          vec3 ink = hash(vec2(fi, f)) < 0.5 ? vec3(0.93, 0.9, 0.82) : vec3(0.06, 0.05, 0.04);
+          c = mix(c, ink, line * run * on * 0.3 * uScratch);
+        }
+        vec2 grid = vec2(48.0, 27.0);
+        vec2 cell = floor(vUv * grid);
+        if (hash(cell + f * 3.7) > 0.994) {
+          vec2 ctr = (cell + vec2(hash(cell + 1.3 + f), hash(cell + 2.1 + f))) / grid;
+          float rad = 1.2 + hash(cell + f) * 3.0;
+          float speck = 1.0 - smoothstep(rad * 0.5, rad, length((vUv - ctr) * uRes));
+          c = mix(c, vec3(0.05, 0.04, 0.03), speck * 0.75 * uScratch);
+        }
+      }
+
       // crumpled paper relief, fixed to the frame like the image was printed on it
       float p = texture2D(tPaper, vUv).r;
       c *= mix(1.0, 0.45 + p * 1.1, uPaper);
 
-      float n = hash(floor(vUv * uRes) + uFrame * 17.0) - 0.5;
+      float n = hash(floor(vUv * uRes) + vec2(mod(uFrame, 97.0) * 131.0, mod(uFrame, 89.0) * 71.0)) - 0.5;
       c += n * uGrain;
 
       c *= 1.0 - uScan * (0.5 + 0.5 * sin(vUv.y * uRes.y * 1.5708));
