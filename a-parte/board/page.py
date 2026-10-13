@@ -314,7 +314,7 @@ footer { margin-top: 72px; padding-top: 22px; border-top: 1px solid var(--rule);
     </div>
     <div>
       <h4>Il rosso</h4>
-      <p>Lui è una sagoma rossa piena: niente linee, niente ombra, niente volto. Il rosso compare solo altre tre volte: il pastello (06), i fanali (03), il sole (25).</p>
+      <p>Lui è una sagoma rossa piena: niente pennellate, niente ombra, niente volto. Gli altri hanno volti ed espressioni dipinti. Il rosso compare solo altre tre volte: il pastello (06), i fanali (03), il sole (25).</p>
     </div>
     <div>
       <h4>La camera</h4>
@@ -324,13 +324,13 @@ footer { margin-top: 72px; padding-top: 22px; border-top: 1px solid var(--rule);
 
   %SECTIONS%
 
-  <footer><span>A PARTE · storyboard · tavole disegnate da scene 3D, passate a grafite</span><span>ispirazione: Spolu sami (D. Cam Van Nguyen, 2018)</span></footer>
+  <footer><span>A PARTE · storyboard · tavole dipinte a pennellate su scene 3D</span><span>ispirazione: Spolu sami (D. Cam Van Nguyen, 2018)</span></footer>
 </div>
 '''
 
 PLAYER = r'''<section class="animatic" aria-label="Animatic">
     <div>
-      <h4>Animatic · 8 disegni al secondo · suono provvisorio</h4>
+      <h4>Animatic · 8 dipinti al secondo · suono provvisorio</h4>
       <div class="screen"><video id="anim" controls playsinline preload="metadata" poster="img/s-04.jpg"></video></div>
     </div>
     <div class="chapters"><h4>Capitoli</h4>%BTNS%</div>

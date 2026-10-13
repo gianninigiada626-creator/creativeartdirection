@@ -43,7 +43,7 @@ POST = {
 }
 
 
-def draw(tag, seed=1, passdir=None, frame=None):
+def draw(tag, seed=1, passdir=None, frame=None, post_seed=None):
     """One panel as a float image: a card, or a rendered set painted in the colour of its world."""
     if tag[:2] in CARDS:
         return CARDS[tag[:2]](seed)
@@ -55,7 +55,7 @@ def draw(tag, seed=1, passdir=None, frame=None):
     far = json.load(open(meta))['far'] if os.path.exists(meta) else 200.0
     img = paint(passdir, name, far=far, look=LOOK.get(tag[:2], 'night'), seed=seed)
     post = POST.get(tag[:2])
-    return post(img, seed) if post else img
+    return post(img, seed if post_seed is None else post_seed) if post else img
 
 
 def one(tag, seed=1, out=None):

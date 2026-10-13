@@ -78,7 +78,8 @@ def _draw(job):
     if sid in CARD:
         img = make.draw(sid, seed)
     else:
-        img = make.draw(sid, seed, passdir=os.path.join(ANIM, sid), frame=f'f{r:04d}')
+        # the rain falls: a new rain for every drawing
+        img = make.draw(sid, seed, passdir=os.path.join(ANIM, sid), frame=f'f{r:04d}', post_seed=int(os.path.basename(out)[1:5]) * 7 + seed)
     cv2.imwrite(out, cv2.cvtColor((np.clip(img, 0, 1) * 255 + 0.5).astype(np.uint8), cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, 92])
     return out
 
