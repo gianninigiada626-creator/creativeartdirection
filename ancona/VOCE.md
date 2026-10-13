@@ -1,6 +1,6 @@
-# ANCONA — fauna urbana · guida per la voce narrante
+# ANCONA · guida per la voce narrante
 
-Durata totale **1:13.5** (24 fps). I tempi sono quelli del montaggio attuale: la voce si incide sopra
+Durata totale **1:02.7** (24 fps). I tempi sono quelli del montaggio attuale: la voce si incide sopra
 `out/ancona.mp4`, oppure si mixa con gli stem in `out/stems/` (musica, effetti, audio dei clip),
 che sono già allineati e partono tutti da 0:00.
 
@@ -10,22 +10,21 @@ Le righe stanno nei tempi a una lettura tranquilla; i secondi tra parentesi sono
 | tempo | immagine | testo proposto |
 |---|---|---|
 | 0:00 – 0:03 | coda della pellicola, 3… 2… | *(silenzio, solo il proiettore)* |
-| 0:03 – 0:08 | titolo: ANCONA, fauna urbana | *(musica)* — oppure: «Ancona. Dal greco *ankón*, il gomito.» (5 s) |
-| 0:08 – 0:14 | il gatto entra in skate, si ferma, cartellino | «Questo è il nostro esploratore. *Felis rotulans*. Non sta mai fermo.» (6 s) |
-| 0:14 – 0:18 | la mappa della città, si avvicina al Passetto | «Oggi attraverserà la città, dal mare al porto, per osservarne gli abitanti.» (4 s) |
-| 0:18 – 0:23 | volo sulla città, discesa verso le grotte | «Il viaggio comincia dove la città finisce: sulle rocce del Passetto.» (5 s) |
-| 0:23 – 0:28.5 | il polpo con la sciarpa, fermo immagine | «Nelle grotte dei pescatori vive il polpo del Passetto. Tifoso. Molto tifoso.» (5 s) |
-| 0:28.5 – 0:31 | mappa: dalle grotte agli scogli | *(musica, rotelle)* |
-| 0:31 – 0:36 | i lupi si tuffano dagli scogli | «Più in là, i tuffatori. Nessuno sa perché lo facciano. Lo fanno da sempre.» (5 s) |
-| 0:36 – 0:39.5 | mappa: lungo il Viale della Vittoria | «Il nostro esploratore risale il viale, verso il centro.» (3 s) |
-| 0:39.5 – 0:44.5 | il vecchio alla fontana | «In piazza, il pensatore. Osserva. Commenta. Non si sposta.» (5 s) |
-| 0:44.5 – 0:47 | mappa: verso il Corso | *(musica)* |
-| 0:47 – 0:52 | il gatto al bar con la Gazzetta | «Anche gli esploratori si fermano. Una birra, la Gazzetta… la sosta può durare.» (5 s) |
-| 0:52 – 0:55 | mappa al tramonto, verso il porto | «Ma il giorno finisce, e la città scende al mare.» (3 s) |
-| 0:55 – 1:00 | l'orso sul molo, al tramonto | «Sul molo, l'orso del porto apre i suoi moscioli. Come ogni sera.» (5 s) |
-| 1:00 – 1:04 | il gatto arriva accanto all'orso | «Il viaggio è finito. Ma domani, la città sarà ancora qui.» (4 s) |
-| 1:04 – 1:08.5 | la mappa con tutto il percorso | «Ancona. Una città piccola, abitata da creature straordinarie.» (4 s) |
-| 1:08.5 – 1:13.5 | FINE | *(musica che chiude, proiettore)* |
+| 0:03 – 0:07 | titolo: ANCONA | *(musica)* — oppure: «Ancona. Dal greco *ankón*, il gomito.» (4 s) |
+| 0:07 – 0:12.5 | il gatto entra in skate, si ferma, cartellino | «Questo è il nostro esploratore. *Felis rotulans*. Non sta mai fermo.» (5 s) |
+| 0:12.5 – 0:15.5 | la mappa, si avvicina al Passetto | «Oggi attraverserà la città, dal mare al porto.» (3 s) |
+| 0:15.5 – 0:20 | volo sulla città, discesa verso le grotte | «Il viaggio comincia dove la città finisce: sulle rocce del Passetto.» (4.5 s) |
+| 0:20 – 0:25.5 | il polpo con la sciarpa, fermo immagine | «Nelle grotte dei pescatori vive il polpo del Passetto. Tifoso. Molto tifoso.» (5 s) |
+| 0:25.5 – 0:27.5 | mappa: verso la Grotta Azzurra | *(musica, rotelle)* |
+| 0:27.5 – 0:32.5 | i lupi si tuffano | «Alla Grotta Azzurra, i tuffatori. Nessuno sa perché lo facciano. Lo fanno da sempre.» (5 s) |
+| 0:32.5 – 0:35.3 | mappa: lungo il Viale della Vittoria | «Su per il viale, verso il centro.» (2.5 s) |
+| 0:35.3 – 0:40.3 | Umbertì alla fontana | «In piazza c'è Umbertì. Osserva, commenta… e ti chiede una sigaretta.» (5 s) |
+| 0:40.3 – 0:42.3 | mappa: verso il Corso | *(musica)* |
+| 0:42.3 – 0:47.3 | il gatto al bar con la Gazzetta | «Anche gli esploratori si fermano. Una birra, la Gazzetta… la sosta può durare.» (5 s) |
+| 0:47.3 – 0:49.7 | mappa al tramonto, verso il porto | «Ma il giorno finisce, e la città scende al mare.» (2.5 s) |
+| 0:49.7 – 0:54.7 | l'orso sul molo, al tramonto | «Sul molo, l'orso del porto apre i suoi moscioli. Come ogni sera.» (5 s) |
+| 0:54.7 – 0:58.3 | la mappa con tutto il percorso | «Ancona. Piccola, e piena di creature straordinarie.» (3.5 s) |
+| 0:58.3 – 1:02.7 | Fine | *(musica che chiude, proiettore)* |
 
 ## Consigli per il mix
 

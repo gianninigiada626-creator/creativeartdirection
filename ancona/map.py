@@ -34,7 +34,7 @@ VIALE = [(1750, 900), (1950, 925), (2150, 950), (2320, 978)]
 
 STOPS = {
     'grotte': (2392, 1004, 'GROTTE DEL PASSETTO'),
-    'scogli': (2452, 1052, 'GLI SCOGLI'),
+    'scogli': (2452, 1052, 'GROTTA AZZURRA'),
     'piazza': (1612, 912, 'P.ZZA ROMA'),
     'bar': (1528, 878, 'IL BAR'),
     'porto': (1340, 612, 'IL MOLO'),
@@ -234,11 +234,9 @@ def main():
     compass(d, 420, 380)
     # cartouche
     cx, cy = 560, 1700
-    d.rectangle([(cx - 380) * SS, (cy - 150) * SS, (cx + 380) * SS, (cy + 150) * SS], fill=PAPER + (235,), outline=INK, width=3 * SS)
-    d.rectangle([(cx - 362) * SS, (cy - 132) * SS, (cx + 362) * SS, (cy + 132) * SS], outline=INK, width=SS)
-    spaced(d, (cx * SS, (cy - 50) * SS), 'ANCONA', font('im-fell.woff', 110), INK, 18)
-    d.text((cx * SS, (cy + 40) * SS), 'pianta della città', font=font('im-fell-italic.woff', 40), fill=INK, anchor='mm')
-    d.text((cx * SS, (cy + 90) * SS), "con l'itinerario dell'esploratore", font=font('im-fell-italic.woff', 30), fill=INK, anchor='mm')
+    d.rectangle([(cx - 380) * SS, (cy - 105) * SS, (cx + 380) * SS, (cy + 105) * SS], fill=PAPER + (235,), outline=INK, width=3 * SS)
+    d.rectangle([(cx - 362) * SS, (cy - 87) * SS, (cx + 362) * SS, (cy + 87) * SS], outline=INK, width=SS)
+    spaced(d, (cx * SS, cy * SS), 'ANCONA', font('im-fell.woff', 120), INK, 20)
     # stops: a small red ring and the name
     lab = font('im-fell.woff', 30)
     place = {'grotte': (30, -26, 'lm'), 'scogli': (30, 28, 'lm'), 'piazza': (0, 40, 'mm'), 'bar': (0, -38, 'mm'), 'porto': (0, 48, 'mm')}

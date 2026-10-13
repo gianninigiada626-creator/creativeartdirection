@@ -1,8 +1,9 @@
 """
-ANCONA — fauna urbana. A vintage nature-documentary short, 16:9, assembled entirely in code.
+ANCONA. A vintage nature-documentary short, 16:9, assembled entirely in code.
 
 The explorer (a puppet cat on a skateboard) crosses the city on an engraved map; at each stop
-the film cuts to one of the animated clips, and a museum specimen tag names the creature there.
+the film dives into one of the animated clips (zoom-through, whip pan, film slip, film burn),
+and a museum specimen tag names the creature there.
 Everything shares one 16mm print look: faded warm colour, halation, grain, gate weave, flicker,
 dust and the odd scratch. The narration is recorded later, so the soundtrack is delivered as stems
 (music, effects, clips) next to the mix, with a timed guide for the voice (VOCE.md).
@@ -243,8 +244,8 @@ def paper_tex(w, h, base=(239, 228, 200), seed=1):
 TAGS = {
     'gatto0': ('Felis rotulans', 'IL GATTO SKATER', ['HABITAT: tutta la città', 'ABITUDINI: non sta mai fermo']),
     'polpo': ('Octopus tifosus', 'IL POLPO DELLE GROTTE', ['HABITAT: grotte del Passetto', 'SEGNI PARTICOLARI: sciarpa biancorossa']),
-    'lupi': ('Canis tuffator', 'I TUFFATORI', ['HABITAT: gli scogli del Passetto', 'ABITUDINI: si buttano. Sempre.']),
-    'vecchio': ('Homo philosophus', 'IL PENSATORE DI PIAZZA', ['HABITAT: la fontana dei cavalli', 'ABITUDINI: osserva, commenta']),
+    'lupi': ('Canis tuffator', 'I TUFFATORI', ['HABITAT: la Grotta Azzurra', 'ABITUDINI: si buttano. Sempre.']),
+    'vecchio': ('Umbertì', 'IL PENSATORE DI PIAZZA', ['HABITAT: la fontana dei cavalli', "ABITUDINI: ce l'hai 'na sigaretta?"]),
     'gatto': ('Felis rotulans', 'SOSTA AL BAR', ['DIETA: birra e Gazzetta', 'DURATA DELLA SOSTA: incerta']),
     'orso': ('Ursus mosciolarius', "L'ORSO DEL PORTO", ['HABITAT: il molo, al tramonto', 'DIETA: moscioli']),
 }
@@ -325,14 +326,9 @@ def title_card(kind):
     d = ImageDraw.Draw(img)
     cream = (236, 224, 196, 255)
     if kind == 'title':
-        d.text((W / 2, 330), 'un documentario sulla', font=font('im-fell-italic.woff', 52), fill=cream, anchor='mm')
-        _spaced(d, (W / 2, 530), 'ANCONA', font('im-fell.woff', 230), cream, 40)
-        d.line([(W / 2 - 360, 680), (W / 2 + 360, 680)], fill=cream, width=2)
-        _spaced(d, (W / 2, 760), 'FAUNA URBANA', font('im-fell.woff', 64), cream, 22)
-        d.line([(W / 2 - 360, 840), (W / 2 + 360, 840)], fill=cream, width=2)
+        _spaced(d, (W / 2, H / 2), 'ANCONA', font('im-fell.woff', 250), cream, 44)
     elif kind == 'fine':
-        d.text((W / 2, 500), 'Fine', font=font('im-fell-italic.woff', 230), fill=cream, anchor='mm')
-        _spaced(d, (W / 2, 700), 'ANCONA  ·  FAUNA URBANA', font('im-fell.woff', 44), cream, 12)
+        d.text((W / 2, H / 2), 'Fine', font=font('im-fell-italic.woff', 230), fill=cream, anchor='mm')
     _CARDS[kind] = rgba_f(img)
     return _CARDS[kind]
 
@@ -404,7 +400,7 @@ def dots(pts, upto=1.0, step=16):
 LEG_ORDER = ['grotte-scogli', 'scogli-piazza', 'piazza-bar', 'bar-porto']
 
 
-def map_frame(cx, cy, zoom, done_legs=(), leg=None, leg_u=0.0, cat=True, t=0.0, dusk=0.0, cat_scale=1.0):
+def map_frame(cx, cy, zoom, done_legs=(), leg=None, leg_u=0.0, cat=True, t=0.0, dusk=0.0, cat_scale=1.0, cat_opacity=1.0):
     """The map through a camera centred on map point (cx, cy); zoom 1 = the whole map's width on screen."""
     s = W / 3200 * zoom
     M = np.float32([[s, 0, W / 2 - s * cx], [0, s, H / 2 - s * cy]])
@@ -421,9 +417,9 @@ def map_frame(cx, cy, zoom, done_legs=(), leg=None, leg_u=0.0, cat=True, t=0.0, 
         pos, dist = polyline_at(pts, leg_u)
     if dusk:
         f = f * (1 - 0.45 * dusk) * np.float32([1.0, 0.86, 0.72]) ** dusk
-    if cat and pos is not None:
+    if cat and pos is not None and cat_opacity > 0.01:
         px, py = M[0, 0] * pos[0] + M[0, 2], M[1, 1] * pos[1] + M[1, 2]
-        f = SKATER.draw(f, px, py, 150 * cat_scale, dist * s * 3, t, shadow=True)
+        f = SKATER.draw(f, px, py, 150 * cat_scale, dist * s * 3, t, shadow=True, opacity=cat_opacity)
     return f
 
 
@@ -444,102 +440,107 @@ def seg(name, dur):
 
 
 seg('leader', 3.0)
-seg('title', 5.0)
-seg('intro', 6.0)
-seg('overview', 4.0)
+seg('title', 4.0)
+seg('intro', 5.5)
+seg('overview', 3.0)
 seg('clip:polpo', 8.0)
-seg('freeze:polpo', 2.5)
-seg('leg:grotte-scogli', 2.5)
+seg('freeze:polpo', 2.0)
+seg('leg:grotte-scogli', 2.0)
 seg('clip:lupi', 5.0)
-seg('leg:scogli-piazza', 3.5)
+seg('leg:scogli-piazza', 2.8)
 seg('clip:vecchio', 5.0)
-seg('leg:piazza-bar', 2.5)
+seg('leg:piazza-bar', 2.0)
 seg('clip:gatto', 5.0)
-seg('leg:bar-porto', 3.0)
+seg('leg:bar-porto', 2.4)
 seg('clip:orso', 5.0)
-seg('crossing', 4.0)
-seg('recap', 4.5)
-seg('fine', 4.0)
-seg('runout', 1.0)
+seg('recap', 3.6)
+seg('fine', 3.6)
+seg('runout', 0.8)
 DURATION = SEG[-1][1]
 START = {name: a for (a, b, name) in SEG}
 END = {name: b for (a, b, name) in SEG}
 # tags: (segment it starts in, offset, duration, key, side)
 TAG_CUES = [
-    ('intro', 1.8, 3.8, 'gatto0', 'right'),
-    ('clip:polpo', 6.4, 3.9, 'polpo', 'right'),
-    ('clip:lupi', 0.5, 3.9, 'lupi', 'right'),
-    ('clip:vecchio', 0.6, 4.0, 'vecchio', 'right'),
-    ('clip:gatto', 0.6, 4.0, 'gatto', 'right'),
-    ('clip:orso', 0.6, 4.0, 'orso', 'right'),
+    ('intro', 1.6, 3.1, 'gatto0', 'right'),
+    ('clip:polpo', 6.3, 3.4, 'polpo', 'right'),
+    ('clip:lupi', 0.5, 4.1, 'lupi', 'right'),
+    ('clip:vecchio', 0.5, 4.1, 'vecchio', 'right'),
+    ('clip:gatto', 0.5, 4.1, 'gatto', 'right'),
+    ('clip:orso', 0.5, 4.1, 'orso', 'right'),
 ]
-# skate wipes: the cat crosses close to the lens on these cuts
-WIPES = ['clip:polpo', 'clip:lupi', 'clip:vecchio', 'clip:gatto', 'clip:orso']
-WIPE_D = 0.8
+# transitions on the cut INTO each segment: (segment, kind, seconds)
+TRANS = [
+    ('intro', 'slip', 0.32),
+    ('overview', 'whip', 0.42),
+    ('clip:polpo', 'zoom', 0.6),
+    ('leg:grotte-scogli', 'whip', 0.42),
+    ('clip:lupi', 'zoom', 0.6),
+    ('leg:scogli-piazza', 'slip', 0.32),
+    ('clip:vecchio', 'zoom', 0.6),
+    ('leg:piazza-bar', 'whip', 0.42),
+    ('clip:gatto', 'zoom', 0.6),
+    ('leg:bar-porto', 'slip', 0.32),
+    ('clip:orso', 'zoom', 0.6),
+    ('recap', 'burn', 0.8),
+]
+
+
+def leg_zoom(leg, k):
+    base = 2.6 if leg != 'scogli-piazza' else 2.2
+    return base * (1 - 0.24 * math.sin(math.pi * k))  # swoop out mid-leg, back in to land
 
 
 def picture(name, u, t):
-    """The frame of a segment, before tags, wipes and the film look."""
+    """The frame of a segment, before tags, transitions and the film look."""
     if name == 'leader':
         return leader(u)
-    if name in ('title', 'fine'):
-        f = title_card(name)[..., :3].copy()
-        fade = smooth(span(u, 0, 0.8)) * (1 - smooth(span(u, 3.6 if name == 'title' else 3.4, 4.6 if name == 'title' else 4.0)))
-        return f * fade
+    if name == 'title':
+        return title_card(name)[..., :3] * smooth(span(u, 0, 0.6))
+    if name == 'fine':
+        return title_card(name)[..., :3] * smooth(span(u, 0, 0.6)) * (1 - smooth(span(u, 3.0, 3.6)))
     if name == 'runout':
         v = 0.9 if (int(u * FPS) % 3 == 0) else 0.05
         return np.full((H, W, 3), v, np.float32) * np.float32([1, 0.95, 0.85])
     if name == 'intro':
-        # the studio: black velvet, a pool of light; the explorer rolls in, poses, rolls off
+        # the studio: black velvet, a pool of light; the explorer rolls in, poses, shoots off
         f = studio()
         x = W * 0.42
-        dist = 0.0
-        if u < 1.4:
-            k = ease_out(u / 1.4)
+        if u < 1.2:
+            k = ease_out(u / 1.2)
             x = lerp(-400, W * 0.42, k)
             dist = k * 1800
-        elif u > 5.2:
-            k = (u - 5.2) / 0.8
-            x = W * 0.42 + k * k * 1700
-            dist = 1800 + k * k * 1700
+        elif u > 4.8:
+            k = (u - 4.8) / 0.7
+            x = W * 0.42 + k * k * 1900
+            dist = 1800 + k * k * 1900
         else:
             dist = 1800
-        lean = -6 * (1 - ease_out(span(u, 1.2, 1.7))) * (u > 1.0) + 4 * span(u, 5.0, 5.4)
+        lean = -6 * (1 - ease_out(span(u, 1.0, 1.5))) * (u > 0.8) + 5 * span(u, 4.6, 5.0)
         return SKATER.draw(f, x, H * 0.9, H * 0.74, dist, u, lean=lean)
     if name == 'overview':
-        k = ease_in_out(span(u, 0.0, 4.0))
+        k = ease_in_out(span(u, 0.0, 2.7))
         cx, cy, zoom = lerp(1600, 2392, k), lerp(1000, 980, k), lerp(1.05, 2.6, k)
-        return map_frame(cx, cy, zoom, leg='grotte-scogli', leg_u=0.0, t=u, cat_scale=lerp(0.6, 1.0, k))
+        return map_frame(cx, cy, zoom, leg='grotte-scogli', leg_u=0.0, t=u, cat_scale=lerp(0.6, 1.0, k), cat_opacity=1 - span(u, 2.6, 2.8))
     if name.startswith('clip:'):
         key = name[5:]
         return clip(key).frame(int(u * FPS))
     if name == 'freeze:polpo':
         f = clip('polpo').frame(int(CLIPS['polpo'][1] * FPS) - 2)
-        z = 1 + 0.06 * smooth(u / 2.5)
+        z = 1 + 0.06 * smooth(u / 2.0)
         M = cv2.getRotationMatrix2D((W * 0.55, H * 0.45), 0, z)
         return cv2.warpAffine(f, M, (W, H), borderMode=cv2.BORDER_REFLECT_101)
     if name.startswith('leg:'):
         leg = name[4:]
         i = LEG_ORDER.index(leg)
         d = END[name] - START[name]
-        k = ease_in_out(span(u, 0.15, d - 0.25))
-        cx, cy, zoom = map_cam_for(leg, k, 2.6 if leg != 'scogli-piazza' else 2.2)
+        k = ease_in_out(span(u, 0.12, d - 0.35))
+        cx, cy, _ = map_cam_for(leg, k)
         dusk = span(u, 0, d) if leg == 'bar-porto' else 0.0
-        return map_frame(cx, cy, zoom, done_legs=LEG_ORDER[:i], leg=leg, leg_u=k, t=u, dusk=dusk)
-    if name == 'crossing':
-        # the last light on the pier: the explorer rolls up beside the bear and stops
-        f = clip('orso').frame(int(CLIPS['orso'][1] * FPS) - 2)
-        z = 1 + 0.04 * smooth(u / 4)
-        M = cv2.getRotationMatrix2D((W * 0.55, H * 0.5), 0, z)
-        f = cv2.warpAffine(f, M, (W, H), borderMode=cv2.BORDER_REFLECT_101)
-        k = ease_out(span(u, 0.1, 2.2))
-        x = lerp(W + 260, W * 0.75, k)
-        lean = 7 * (1 - ease_out(span(u, 1.9, 2.6))) * (u > 1.6)
-        return SKATER.draw(f, x, H * 0.95, H * 0.4, k * 2600, u, lean=lean, tint=(0.62, 0.56, 0.58))
+        return map_frame(cx, cy, leg_zoom(leg, k), done_legs=LEG_ORDER[:i], leg=leg, leg_u=k, t=u, dusk=dusk, cat_opacity=1 - span(u, d - 0.32, d - 0.18))
     if name == 'recap':
-        k = ease_in_out(span(u, 0, 3.2))
+        k = ease_in_out(span(u, 0, 2.8))
         cx, cy, zoom = lerp(1340, 1800, k), lerp(612, 900, k), lerp(2.6, 1.15, k)
-        return map_frame(cx, cy, zoom, done_legs=LEG_ORDER, leg='bar-porto', leg_u=1.0, t=u, dusk=1.0 - 0.5 * k, cat_scale=lerp(1, 0.7, k)) * (1 - smooth(span(u, 3.6, 4.5)))
+        return map_frame(cx, cy, zoom, done_legs=LEG_ORDER, t=u, dusk=1.0 - 0.5 * k, cat=False) * (1 - smooth(span(u, 3.0, 3.6)))
     raise ValueError(name)
 
 
@@ -564,23 +565,94 @@ def segment_at(t):
     return SEG[-1][2], t - SEG[-1][0]
 
 
+# ── transitions ──
+def zoom_blur(f, cx, cy, z, streak):
+    """Scale about (cx, cy) by z, smeared radially by `streak` (fraction of z) — a dolly at speed."""
+    n = 1 + int(min(8, streak * 40))
+    acc = np.zeros_like(f)
+    for j in range(n):
+        zz = z * (1 + streak * j / max(1, n - 1))
+        M = np.float32([[zz, 0, cx - zz * cx], [0, zz, cy - zz * cy]])
+        acc += cv2.warpAffine(f, M, (W, H), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+    return acc / n
+
+
+def whip_blur(f, dx, smear):
+    M = np.float32([[1, 0, dx], [0, 1, 0]])
+    g = cv2.warpAffine(f, M, (W, H), borderMode=cv2.BORDER_REFLECT_101)
+    k = int(smear)
+    return cv2.blur(g, (k, 1)) if k > 2 else g
+
+
+def flash(f, amount, warm=True):
+    tint = np.float32([1.0, 0.86, 0.62]) if warm else np.float32([1, 1, 1])
+    return f + (tint - f) * clamp01(amount)
+
+
+_BURN = None
+
+
+def burn(f, k, seed=3):
+    """Film burn: a hot orange bloom eats the frame from one corner along a ragged edge, then lets go."""
+    global _BURN
+    if _BURN is None:
+        r = np.random.default_rng(seed)
+        n = sum(cv2.resize(r.random((H // q, W // q)).astype(np.float32), (W, H), interpolation=cv2.INTER_CUBIC) * w
+                for q, w in ((180, 0.6), (60, 0.3), (20, 0.1)))
+        _BURN = cv2.GaussianBlur(n, (0, 0), 6)
+    cx, cy = W * 0.86, H * 0.12
+    reach = lerp(-0.05, 1.05, k)
+    d = np.sqrt(((_xx - cx) / W) ** 2 + ((_yy - cy) / W * 1.3) ** 2)
+    front = reach - d + (_BURN - 0.5) * 0.55
+    heat = np.clip(front * 2.2, 0, 1)[..., None]
+    rim = np.clip(1 - np.abs(front * 2.2 - 0.35) * 3, 0, 1)[..., None]  # the scorched edge
+    col = np.float32([0.95, 0.42, 0.1]) * heat * 0.9 + np.float32([1.0, 0.9, 0.7]) * heat ** 4 * 0.5
+    return f * (1 - heat * 0.8) * (1 - rim * 0.35) + col
+
+
+def transition(t, f):
+    for (into, kind, D) in TRANS:
+        c = START[into]
+        if not (c - D / 2 <= t < c + D / 2):
+            continue
+        k = (t - (c - D / 2)) / D  # 0 → 1 across the cut
+        prev = segment_at(c - 1e-3)[0]
+        last = END[prev] - START[prev] - 1e-3
+        if kind == 'zoom':  # dive into the stop on the map, burst out of the place itself
+            if t < c:
+                z = math.exp((k * 2) ** 2 * 1.6)
+                return flash(zoom_blur(f, W / 2, H / 2 + 40, z, 0.12 * k * 2), max(0, k * 2 - 0.7) * 1.6)
+            kk = (k - 0.5) * 2
+            z = lerp(1.7, 1.0, ease_out(kk))
+            return flash(zoom_blur(f, W / 2, H / 2, z, 0.1 * (1 - kk)), (1 - kk) * 0.55)
+        if kind == 'whip':  # a whip pan: everything smears sideways, the new shot lands
+            if t < c:
+                kk = k * 2
+                return whip_blur(f, -W * 0.45 * kk * kk, 320 * kk)
+            kk = (k - 0.5) * 2
+            return flash(whip_blur(f, W * 0.45 * (1 - ease_out(kk)) ** 2, 320 * (1 - kk)), (1 - kk) * 0.25)
+        if kind == 'slip':  # the projector loses its loop: the strip jumps a frame, frame line and all
+            a = f if t < c else picture(prev, last, t)
+            b = picture(into, 0.0, t) if t < c else f
+            off = ease_in_out(k) * (H + 70)
+            out = np.zeros_like(f)
+            ya = int(-off)
+            yb = int(H + 70 - off)
+            for img, y in ((a, ya), (b, yb)):
+                y0, y1 = max(0, y), min(H, y + H)
+                if y1 > y0:
+                    out[y0:y1] = img[y0 - y:y1 - y]
+            out = cv2.blur(out, (1, 1 + int(60 * math.sin(math.pi * k))))
+            return out * (0.85 + 0.3 * hash1(int(t * FPS)))
+        if kind == 'burn':
+            return burn(f, math.sin(math.pi * k) ** 1.4)
+    return f
+
+
 def compose(t):
     name, u = segment_at(t)
     f = picture(name, u, t)
-    # skate wipe across the cut into each clip: the cat passes close to the lens
-    for w in WIPES:
-        c = START[w]
-        if c - WIPE_D / 2 <= t < c + WIPE_D / 2:
-            k = (t - (c - WIPE_D / 2)) / WIPE_D
-            prev_name, _ = segment_at(c - 1e-3)
-            if t < c:  # the next shot waits on its first frame
-                prv, nxt = f, picture(w, 0.0, t)
-            else:  # the last shot holds its last frame
-                prv, nxt = picture(prev_name, END[prev_name] - START[prev_name] - 1e-3, t), f
-            x = lerp(-W * 0.35, W * 1.35, ease_in_out(k))
-            mask = np.clip((x - np.arange(W, dtype=np.float32)) / 30.0, 0, 1)[None, :, None]
-            f = prv * (1 - mask) + nxt * mask
-            f = SKATER.draw(f, x, H * 1.32, H * 1.55, k * 6000, t, lean=-8, shadow=False)
+    f = transition(t, f)
     for (segname, off, dur, key, side) in TAG_CUES:
         f = draw_tag(f, key, t - (START[segname] + off), dur, side)
     return f
@@ -755,14 +827,33 @@ def effects(n, rng):
     for (a, b, name) in SEG:
         if name.startswith('leg:'):
             roll(a + 0.1, b - 0.1, 0.18)
-    roll(START['crossing'] + 0.1, START['crossing'] + 2.3, 0.22)
-    for w in WIPES:
-        c = START[w]
-        m = int(WIPE_D * SR)
-        wh = band(rng.standard_normal(m).astype(np.float32), 300, 4000) * np.sin(np.pi * np.linspace(0, 1, m)) ** 2
-        i = int((c - WIPE_D / 2) * SR)
-        out[i:i + m] += wh * 0.25
-        roll(c - WIPE_D / 2, c + WIPE_D / 2, 0.35)
+    for (into, kind, D) in TRANS:
+        c = START[into]
+        if kind == 'zoom':  # a rising rush into the place, a soft thump as we land
+            m = int(0.45 * SR)
+            x = rng.standard_normal(m).astype(np.float32)
+            rush = np.concatenate([band(x[q * m // 6:(q + 1) * m // 6 + 2048], 300 * 1.6 ** q, 1200 * 1.6 ** q)[:m // 6] for q in range(6)])
+            rush *= np.linspace(0, 1, len(rush)) ** 2
+            i = int((c - 0.45) * SR)
+            out[i:i + len(rush)] += rush * 0.35
+            th = np.sin(2 * np.pi * 70 * np.arange(int(0.3 * SR)) / SR) * env(int(0.3 * SR), 0.002, 0.07)
+            out[int(c * SR):int(c * SR) + len(th)] += th.astype(np.float32) * 0.5
+        elif kind == 'whip':
+            m = int(D * SR)
+            wh = band(rng.standard_normal(m).astype(np.float32), 500, 6000) * np.sin(np.pi * np.linspace(0, 1, m)) ** 3
+            i = int((c - D / 2) * SR)
+            out[i:i + m] += wh * 0.45
+        elif kind == 'slip':  # the projector chatters as the loop slips
+            m = int(D * SR)
+            tt2 = np.arange(m) / SR
+            chat = band(rng.standard_normal(m).astype(np.float32), 800, 5000) * (0.5 + 0.5 * np.sin(2 * np.pi * 48 * tt2)) ** 8
+            i = int((c - D / 2) * SR)
+            out[i:i + m] += chat * 0.9
+        elif kind == 'burn':
+            m = int(D * SR)
+            sw = band(rng.standard_normal(m).astype(np.float32), 80, 1500) * np.sin(np.pi * np.linspace(0, 1, m)) ** 2
+            i = int((c - D / 2) * SR)
+            out[i:i + m] += sw * 0.4
     # typewriter on the tags
     for (segname, off, dur, key, side) in TAG_CUES:
         a = START[segname] + off + 0.6
