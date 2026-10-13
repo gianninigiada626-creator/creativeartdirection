@@ -3,3 +3,4 @@ engine3d/models/
 ref/
 build/
 out/
+__pycache__/
