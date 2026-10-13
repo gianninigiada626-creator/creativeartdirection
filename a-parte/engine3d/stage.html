@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#000}</style>
+<script type="importmap">{"imports":{"three":"/muerto/node_modules/three/build/three.module.js","three/addons/":"/muerto/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import { PANELS } from './panels3d.js';
+import { renderPasses } from './stage.js';
+window.renderPanel = async (id, opts = {}) => {
+  const { scene, camera, far } = await PANELS[id](opts);
+  return renderPasses(scene, camera, { far: far ?? 200 });
+};
+window.__ready = true;
+</script>
