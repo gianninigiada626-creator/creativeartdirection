@@ -71,6 +71,7 @@ export async function person(name, opts = {}) {
   const g = await gltf(name);
   const obj = SkeletonUtils.clone(g.scene);
   const bones = boneMap(obj);
+  if (opts.trimHead) trimHead(obj, bones, opts.trimHead);
   // sample a base clip for a natural rest pose — only on the rig it was made for; other rigs are
   // posed entirely by aiming (their bind poses differ, a borrowed clip would twist them)
   const [src, clipName] = CLIPS[opts.clip ?? 'idle'];
@@ -118,7 +119,23 @@ export async function person(name, opts = {}) {
     cap.castShadow = true;
     bones.Head.add(cap);
   }
+  if (opts.bob !== undefined && bones.Head && bones.HeadTop_End) {
+    // hair for a trimmed head: a full rounded mass over the skull and the nape, the face left clear
+    obj.updateMatrixWorld(true);
+    const hh = bones.HeadTop_End.getWorldPosition(new THREE.Vector3()).distanceTo(bones.Head.getWorldPosition(new THREE.Vector3()));
+    const ws = bones.Head.getWorldScale(new THREE.Vector3()).x;
+    const [R, y, z, sy] = opts.bobShape ?? [0.58, 0.5, -0.14, 1.12];
+    const bob = new THREE.Mesh(new THREE.SphereGeometry(hh * R, 28, 18), clay(opts.bob));
+    bob.scale.set(1 / ws, sy / ws, 1.02 / ws);
+    bob.position.set(0, (hh * y) / ws, (hh * z) / ws);
+    bob.castShadow = true;
+    bones.Head.add(bob);
+  }
   const tone = opts.tone ?? 0.7;
+  for (const n of opts.hide ?? []) {
+    const m = obj.getObjectByName(n);
+    if (m) m.visible = false;
+  }
   obj.traverse((o) => {
     if (o.isMesh && !o.material.userData?.keep) {
       o.material = clay(tone);
@@ -135,6 +152,54 @@ export async function person(name, opts = {}) {
   obj.updateMatrixWorld(true);
   obj.bones = bones;
   return obj;
+}
+
+/**
+ * Cut away what sticks out of a skull (Michelle's flower-shaped hair puffs): triangles bound to the head
+ * whose vertices lie further than `r` head-heights to either side of the head, or `up` above it.
+ */
+function trimHead(obj, bones, { r = 0.62, up = 9 } = {}) { // in the bind pose, before anything turns it
+  obj.updateMatrixWorld(true);
+  const head = bones.Head, top = bones.HeadTop_End;
+  if (!head || !top) return;
+  const hp = head.getWorldPosition(new THREE.Vector3());
+  const tp = top.getWorldPosition(new THREE.Vector3());
+  const hh = tp.distanceTo(hp);
+  const v = new THREE.Vector3();
+  obj.traverse((m) => {
+    if (!m.isSkinnedMesh) return;
+    const hi = m.skeleton.bones.indexOf(head);
+    const g = m.geometry;
+    const pos = g.attributes.position, si = g.attributes.skinIndex, sw = g.attributes.skinWeight;
+    const out = new Uint8Array(pos.count);
+    for (let i = 0; i < pos.count; i++) {
+      let w = 0;
+      for (let k = 0; k < 4; k++) if (si.getComponent(i, k) === hi) w += sw.getComponent(i, k);
+      if (w < 0.3) continue;
+      m.getVertexPosition(i, v);
+      v.applyMatrix4(m.matrixWorld);
+      if (Math.abs(v.x - hp.x) > r * hh || v.y - hp.y > up * hh) out[i] = 1;
+    }
+    const idx = g.index ? g.index.array : [...Array(pos.count).keys()];
+    // whole islands go: a puff whose tip sticks out takes its base with it (vertices welded by position)
+    const key = new Map(), root = new Int32Array(pos.count);
+    for (let i = 0; i < pos.count; i++) {
+      const k = `${pos.getX(i).toFixed(4)},${pos.getY(i).toFixed(4)},${pos.getZ(i).toFixed(4)}`;
+      root[i] = key.get(k) ?? (key.set(k, i), i);
+    }
+    const find = (a) => (root[a] === a ? a : (root[a] = find(root[a])));
+    for (let t = 0; t < idx.length; t += 3) {
+      const a = find(idx[t]), b = find(idx[t + 1]), c = find(idx[t + 2]);
+      root[b] = a;
+      root[find(c)] = a;
+    }
+    const bad = new Set();
+    for (let i = 0; i < pos.count; i++) if (out[i]) bad.add(find(i));
+    const keep = [];
+    for (let t = 0; t < idx.length; t += 3) if (!bad.has(find(idx[t]))) keep.push(idx[t], idx[t + 1], idx[t + 2]);
+    m.geometry = g.clone();
+    m.geometry.setIndex(keep);
+  });
 }
 
 const CHILD = {
@@ -183,6 +248,7 @@ export const POSE = {
       LeftArm: [0.25, -1, 0.1], LeftForeArm: [0.2, -0.5, 0.9], RightArm: [-0.25, -1, 0.05], RightForeArm: [-0.15, -0.9, 0.5],
     },
   },
+  lean: { drop: 0, aim: { Spine: [0, 1, -0.12], Spine1: [0, 1, -0.08], Neck: [0, 1, 0.12], Head: [0, 1, 0.1], LeftArm: [0.12, -1, -0.15], RightArm: [-0.12, -1, -0.15] } },
   sitChair: {
     drop: 0.5,
     aim: {

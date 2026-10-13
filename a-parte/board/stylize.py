@@ -61,6 +61,18 @@ def hatch_tex(h, w, angle, spacing, seed, length=(40, 160)):
     return np.clip(tex, 0, 1)
 
 
+def rubbed(h, w, seed, angle=-32, length=41):
+    """Charcoal rubbed with the side of the hand: noise dragged along one direction, not clouds."""
+    n = noise(h, w, 60, seed) * 0.45 + noise(h, w, 6, seed + 1, 2) * 0.55
+    k = np.zeros((length, length), np.float32)
+    c = length // 2
+    a = np.deg2rad(angle)
+    cv2.line(k, (int(c - np.cos(a) * c), int(c - np.sin(a) * c)), (int(c + np.cos(a) * c), int(c + np.sin(a) * c)), 1.0, 1)
+    k /= k.sum()
+    n = cv2.filter2D(n, -1, k, borderType=cv2.BORDER_REFLECT)
+    return np.clip((n - n.mean()) / (n.std() * 6 + 1e-6) + 0.5, 0, 1)
+
+
 _HATCH = {}
 
 
@@ -82,6 +94,7 @@ def stylize(passdir, tag, far=200.0, tint=(1, 1, 1), tint_amount=0.5, line_gain=
 
     # ── red: the protagonist and the rare red things ──
     red = ((ids[..., 0] > 0.6) & (ids[..., 1] < 0.2) & (ids[..., 2] < 0.2)).astype(np.float32)
+    prop = red * (ids[..., 2] > 0.5 / 255)
 
     # ── contours: depth jumps, creases, object boundaries ──
     lz = np.log(z)
@@ -109,9 +122,9 @@ def stylize(passdir, tag, far=200.0, tint=(1, 1, 1), tint_amount=0.5, line_gain=
     # ── tone: rubbed charcoal and hatching where the light falls off ──
     Y = col @ np.float32([0.299, 0.587, 0.114])
     Ys = cv2.GaussianBlur(Y, (0, 0), 1.2)
-    smudge = noise(h, w, 70, seed + 5)
+    smudge = rubbed(h, w, seed + 5)
     dark = np.clip((0.84 - Ys) / 0.8, 0, 1)
-    wash = dark * (0.78 + 0.35 * (smudge - 0.5))
+    wash = dark * (0.8 + 0.3 * (smudge - 0.5))
     h1, h2, h3 = hatches(h, w)
     hat = h1 * np.clip((0.5 - Ys) / 0.2, 0, 1) + h2 * np.clip((0.32 - Ys) / 0.15, 0, 1) + h3 * np.clip((0.18 - Ys) / 0.1, 0, 1)
     hat = wobble(hat, 1.0, 60, seed + 9) * 0.42
@@ -138,9 +151,11 @@ def stylize(passdir, tag, far=200.0, tint=(1, 1, 1), tint_amount=0.5, line_gain=
 
     # ── paint the red over everything: flat, a slightly blobby edge, no line, no shade ──
     if red.any():
-        m = cv2.GaussianBlur(red, (0, 0), red_rough)
+        m = cv2.GaussianBlur(red - prop, (0, 0), red_rough)
         m = ((m + (noise(h, w, 10, seed + 11, 2) - 0.5) * 0.45) > 0.5).astype(np.float32)
-        m = cv2.GaussianBlur(m, (0, 0), 0.7)[..., None]
+        mp = cv2.GaussianBlur(prop, (0, 0), 0.8)
+        mp = ((mp + (noise(h, w, 4, seed + 13, 2) - 0.5) * 0.3) > 0.45).astype(np.float32)
+        m = cv2.GaussianBlur(np.maximum(m, mp), (0, 0), 0.7)[..., None]
         paint = RED * (0.97 + 0.05 * noise(h, w, 5, seed + 12, 2)[..., None])
         img = img * (1 - m) + paint * m
     return np.clip(img, 0, 1)
