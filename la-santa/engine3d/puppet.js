@@ -75,8 +75,8 @@ export function felt(color, { sheen = 0.9, nap = 0.8, repeat = 4 } = {}) {
   // the sheen of fleece is its own colour, lifted a little: on black it stays a dark grey
   const lum = c.r * 0.3 + c.g * 0.59 + c.b * 0.11;
   const m = new THREE.MeshPhysicalMaterial({
-    color: c, roughness: 0.95, metalness: 0, sheen: sheen * (0.45 + 0.55 * Math.min(1, lum * 3)), sheenRoughness: 0.6,
-    sheenColor: c.clone().lerp(new THREE.Color('#ffffff'), 0.02 + 0.3 * Math.min(1, lum * 2)), normalMap: f.normal, normalScale: new THREE.Vector2(nap, nap),
+    color: c, roughness: 0.95, metalness: 0, sheen: sheen * (0.45 + 0.55 * Math.min(1, lum * 3)) * (1 - 0.4 * Math.min(1, Math.max(0, lum - 0.25) * 2)), sheenRoughness: 0.6,
+    sheenColor: c.clone().lerp(new THREE.Color('#ffffff'), 0.02 + 0.3 * Math.min(1, lum * 2) - 0.14 * Math.min(1, Math.max(0, lum - 0.25) * 2)), normalMap: f.normal, normalScale: new THREE.Vector2(nap, nap),
     map: f.mottle,
   });
   if (repeat !== 4) {
@@ -173,6 +173,60 @@ function striped(base = '#141416', stripe = '#f2f0ea', side = 1) {
   return m;
 }
 
+/** A sailor's singlet: horizontal stripes, navy on white. */
+function singlet(a = '#f2f0ea', b = '#1f2e4a') {
+  const c = document.createElement('canvas');
+  c.width = 64;
+  c.height = 256;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = a;
+  ctx.fillRect(0, 0, 64, 256);
+  ctx.fillStyle = b;
+  for (let y = 0; y < 256; y += 22) ctx.fillRect(0, y, 64, 11);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  const m = felt('#ffffff', { nap: 0.5 });
+  m.map = t;
+  m.sheen = 0.35;
+  m.sheenColor = new THREE.Color('#4a4448');
+  return m;
+}
+
+/** A printed foulard: a ground with flowers and a border. */
+function foulardMat(ground, motif) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 512;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = ground;
+  ctx.fillRect(0, 0, 512, 512);
+  let q = 3;
+  const R = () => ((q = (q * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < 70; i++) {
+    const x = R() * 512, y = R() * 512, rr = 8 + R() * 14;
+    ctx.fillStyle = motif;
+    for (let k = 0; k < 5; k++) {
+      const a = (k / 5) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.ellipse(x + Math.cos(a) * rr * 0.6, y + Math.sin(a) * rr * 0.6, rr * 0.45, rr * 0.28, a, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#2a5a3a';
+    ctx.beginPath();
+    ctx.arc(x, y, rr * 0.25, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(2, 2);
+  const m = felt('#ffffff', { nap: 0.5 });
+  m.map = t;
+  m.sheen = 0.35;
+  m.sheenColor = new THREE.Color('#5a3a30');
+  m.side = THREE.DoubleSide;
+  return m;
+}
+
 function glossy(color, clear = 1) {
   return new THREE.MeshPhysicalMaterial({ color, roughness: 0.25, clearcoat: clear, clearcoatRoughness: 0.08 });
 }
@@ -192,32 +246,60 @@ const pivot = (pos = [0, 0, 0]) => {
 };
 
 // ── Sayf ───────────────────────────────────────────────────────────────────────────────────────
-export const SAYF = { skin: '#cc8d66', lips: '#bf7a64', hair: '#4a2a1c', brows: '#3e2216', suit: '#141416', iris: '#4a2a14', shoes: '#f2f0ea' };
+export const SAYF = { name: 'sayf', skin: '#cc8d66', lips: '#bf7a64', hair: '#4a2a1c', brows: '#3e2216', suit: '#141416', iris: '#4a2a14', shoes: '#f2f0ea',
+  top: 'track', bottom: 'track', hairStyle: 'sayf', moustache: 'thin', beard: true };
+/** Nonna Zohra: a foulard of oranges and reds, gold glasses, a mustard cardigan, a long green skirt. */
+export const ZOHRA = { name: 'zohra', hsx: 0.95, hsy: 1.0, er: 0.032, skin: '#b98262', lips: '#b0645a', hair: '#cfc8c0', brows: '#8a7a70', suit: '#c9962e', iris: '#3a2412', shoes: '#3a2a22',
+  top: 'cardigan', bottom: 'skirt', skirt: '#2f5a3e', hairStyle: 'foulard', scarf: '#d2462a', scarf2: '#f0b42a', moustache: 'none', glasses: true, cheeks: '#d8806a', scale: 0.86 };
+/** The two camalli of the port: striped singlets, forearms like hams, a wool cap, a moustache to hang a coat on. */
+export const GINO = { name: 'gino', hsx: 1.0, hsy: 1.0, er: 0.029, skin: '#d99a78', lips: '#c07868', hair: '#b4542a', brows: '#9a4420', suit: '#1f2e4a', iris: '#2a4a6a', shoes: '#2a2018',
+  top: 'tank', bottom: 'trousers', trousers: '#3a4a6a', hairStyle: 'cap', cap: '#a8281e', moustache: 'handlebar', stubble: true, nose: '#d0705a', belly: 1.18, forearm: 1.7 };
+export const PIPPO = { ...GINO, name: 'pippo', skin: '#c88a64', hair: '#1e1a18', brows: '#1e1a18', cap: '#1f2e4a', nose: '#c07060', trousers: '#4a3a2a', iris: '#3a2412', belly: 1.25 };
+
 
 /**
  * A puppet. Returns its root (at the hips), its pivots, and controls:
  *   mouth(0..1)  lids(0..1, 0 open)  look(x, y)  pose({ ... rotations of the pivots ... })
  */
 export function puppet(C = SAYF, opts = {}) {
+  C = { ...SAYF, top: 'track', bottom: 'track', hairStyle: 'none', moustache: 'none', ...C };
   const skin = felt(C.skin);
   const suit = felt(C.suit, { nap: 0.45 });
   const root = new THREE.Group();
   root.userData.id = nextId();
   const P = {};
+  const belly = C.belly ?? 1, fa = C.forearm ?? 1;
+  // the body, scaled for the small ones; the root stays at the hips
+  const body = new THREE.Group();
+  root.add(body);
+  const S = C.scale ?? 1;
+  body.scale.setScalar(S);
 
   // torso: a rounded block of black fleece, the zip, the collar
   P.torso = pivot([0, 0, 0]);
-  root.add(P.torso);
+  body.add(P.torso);
   // a jacket's shape turned on a lathe: hips, a little waist, a broad chest, square shoulders, the collar
   const prof = [[0.0, -0.02], [0.15, 0.0], [0.16, 0.1], [0.175, 0.24], [0.2, 0.36], [0.215, 0.43], [0.19, 0.48], [0.12, 0.53], [0.075, 0.56], [0.0, 0.565]].map(([x, y]) => new THREE.Vector2(x, y));
-  P.torso.add(part(new THREE.LatheGeometry(prof, 40), suit, [0, 0, 0], [0, 0, 0], [1.05, 1, 0.68]));
-  P.torso.add(part(new THREE.BoxGeometry(0.008, 0.42, 0.012), new THREE.MeshStandardMaterial({ color: '#1a1a1c', roughness: 0.8 }), [0, 0.27, 0.142]));
-  const rib = felt(C.suit, { nap: 0.3, repeat: 10 });
-  const collar = part(new THREE.CylinderGeometry(0.074, 0.086, 0.055, 32, 1, true, 0.12, Math.PI * 2 - 0.24), rib, [0, 0.555, 0.004]);
-  collar.material = rib.clone();
-  collar.material.side = THREE.DoubleSide;
-  P.torso.add(collar);
-  P.torso.add(part(new THREE.TorusGeometry(0.074, 0.0055, 8, 32, Math.PI * 2 - 0.24), rib, [0, 0.582, 0.004], [Math.PI / 2, 0, Math.PI / 2 + 0.12]));
+  const topM = C.top === 'tank' ? singlet() : suit;
+  P.torso.add(part(new THREE.LatheGeometry(prof, 40), topM, [0, 0, 0], [0, 0, 0], [1.05 * belly, 1, 0.68 * (0.6 + 0.4 * belly)]));
+  if (C.top === 'track') {
+    P.torso.add(part(new THREE.BoxGeometry(0.008, 0.42, 0.012), new THREE.MeshStandardMaterial({ color: '#1a1a1c', roughness: 0.8 }), [0, 0.27, 0.142]));
+    const rib = felt(C.suit, { nap: 0.3, repeat: 10 });
+    const collar = part(new THREE.CylinderGeometry(0.074, 0.086, 0.055, 32, 1, true, 0.12, Math.PI * 2 - 0.24), rib, [0, 0.555, 0.004]);
+    collar.material = rib.clone();
+    collar.material.side = THREE.DoubleSide;
+    P.torso.add(collar);
+    P.torso.add(part(new THREE.TorusGeometry(0.074, 0.0055, 8, 32, Math.PI * 2 - 0.24), rib, [0, 0.582, 0.004], [Math.PI / 2, 0, Math.PI / 2 + 0.12]));
+  } else if (C.top === 'cardigan') {
+    // buttons down the front, a little white collar of the blouse under it
+    for (let i = 0; i < 4; i++) P.torso.add(part(new THREE.SphereGeometry(0.011, 10, 8), glossy('#6a4a1a', 0.4), [0, 0.18 + i * 0.085, 0.15 * (0.92 + i * 0.02)], [0, 0, 0], [1, 1, 0.5]));
+    P.torso.add(part(new THREE.TorusGeometry(0.07, 0.012, 8, 28), felt('#efe8da'), [0, 0.552, 0.0], [Math.PI / 2, 0, 0]));
+  } else if (C.top === 'tank') {
+    // the singlet's straps leave the shoulders bare: skin over the top of the chest
+    P.torso.add(part(new THREE.SphereGeometry(0.2, 24, 12, 0, Math.PI * 2, 0, 0.5), skin, [0, 0.4, 0], [0, 0, 0], [1.05 * belly, 0.9, 0.68 * (0.6 + 0.4 * belly)]));
+    // a tuft of chest hair at the neckline
+    P.torso.add(part(new THREE.SphereGeometry(0.035, 12, 8), felt(C.hair, { nap: 1 }), [0, 0.5, 0.11], [0.5, 0, 0], [1.4, 0.8, 0.5]));
+  }
   // neck and head
   P.neck = pivot([0, 0.55, 0]);
   P.torso.add(P.neck);
@@ -226,7 +308,7 @@ export function puppet(C = SAYF, opts = {}) {
   P.neck.add(P.head);
   // a big oval head, as a puppet's is. The face sits low on it, as on the puppet: the eyes on the middle line,
   // the mouth well below, a broad chin; the forehead is under the fringe and the crown under the twists.
-  const r = 0.19, sy = 1.1, sx = 0.9, sz = 0.88, cut = 0.69 * Math.PI;
+  const r = 0.19, sy = C.hsy ?? 1.1, sx = C.hsx ?? 0.9, sz = 0.88, cut = 0.69 * Math.PI;
   const hc = new THREE.Vector3(0, 0.2, 0);
   const surf = (x, y, off = 0) => {
     // the point on the front of the head at (x, y) from its centre, pushed out along the normal by off
@@ -291,18 +373,27 @@ export function puppet(C = SAYF, opts = {}) {
   });
   const lipM = felt(C.lips, { nap: 0.4 });
   P.upperLip = along(arc(my + 0.005, 0.084, 0.003, 11, -0.006), 0.0058, felt(new THREE.Color(C.skin).lerp(new THREE.Color(C.lips), 0.4).multiplyScalar(0.85)), P.head, 30);
-  along(arc(my + 0.021, 0.074, 0.006, 11, -0.009), 0.0042, felt(C.brows), P.head, 30);
+  if (C.moustache === 'thin') along(arc(my + 0.021, 0.074, 0.006, 11, -0.009), 0.0042, felt(C.brows), P.head, 30);
+  if (C.moustache === 'handlebar') {
+    // two thick sweeps from under the nose, curling up at the ends
+    for (const k of [-1, 1]) {
+      const pts = [surf(k * 0.006, my + 0.03, 0.012), surf(k * 0.045, my + 0.022, 0.014), surf(k * 0.085, my + 0.018, 0.01), surf(k * 0.112, my + 0.04, 0.008), surf(k * 0.11, my + 0.062, 0.006)];
+      taper(pts, [0.016, 0.017, 0.012, 0.007, 0.004], felt(C.hair, { nap: 1.1 }), P.head, 24);
+    }
+  }
   P.lowerLip = along(arc(my - 0.01, 0.08, 0.01, 11, 0.004).map(toJaw), 0.0118, lipM, P.jaw, 30);
-  P.jaw.add(part(new THREE.SphereGeometry(0.03, 16, 10), felt(new THREE.Color(C.skin).lerp(new THREE.Color(C.brows), 0.45)), toJaw(surf(0, my - 0.05, -0.006)).toArray(), [0, 0, 0], [1.5, 0.75, 0.35]));
+  if (C.beard) P.jaw.add(part(new THREE.SphereGeometry(0.03, 16, 10), felt(new THREE.Color(C.skin).lerp(new THREE.Color(C.brows), 0.45)), toJaw(surf(0, my - 0.05, -0.006)).toArray(), [0, 0, 0], [1.5, 0.75, 0.35]));
+  if (C.stubble) P.jaw.add(part(new THREE.SphereGeometry(r * 1.004, 40, 10, Math.PI / 2 - 1.2, 2.4, cut + 0.05, Math.PI - cut - 0.25), felt(new THREE.Color(C.skin).lerp(new THREE.Color('#3a3030'), 0.35)), toJaw(hc).toArray(), [0, 0, 0], [sx, sy, sz]));
+  if (C.cheeks) for (const k of [-1, 1]) P.head.add(part(new THREE.SphereGeometry(0.03, 14, 10), felt(C.cheeks, { nap: 0.4 }), surf(k * 0.085, -0.05, -0.012).toArray(), [0, 0, 0], [1, 0.8, 0.5]));
   // the nose: a long bridge from between the eyes to a big round tip, the nostrils either side of it
   const nt = surf(0, -0.068, 0.034);
   taper([surf(0, 0.022, -0.004), surf(0, -0.01, 0.012), surf(0, -0.042, 0.026), nt], [0.012, 0.016, 0.022, 0.026], skin, P.head, 20);
-  P.head.add(part(new THREE.SphereGeometry(0.029, 20, 16), skin, nt.toArray(), [0.25, 0, 0], [1.2, 0.95, 1.0]));
+  P.head.add(part(new THREE.SphereGeometry(0.029 * (C.nose ? 1.2 : 1), 20, 16), C.nose ? felt(C.nose) : skin, nt.toArray(), [0.25, 0, 0], [1.2, 0.95, 1.0]));
   for (const sx_ of [-1, 1]) P.head.add(part(new THREE.SphereGeometry(0.017, 12, 10), skin, surf(sx_ * 0.028, -0.078, 0.015).toArray(), [0, 0, 0], [1.1, 0.85, 0.9]));
   // eyes: glossy whites, brown irises, black pupils, a highlight; heavy lids that roll down, a soft rim under them
   P.eyes = [];
   P.lids = [];
-  const er = 0.035;
+  const er = C.er ?? 0.035;
   for (const sx_ of [-1, 1]) {
     const at = surf(sx_ * 0.06, -0.006, -0.011);
     const eye = pivot(at.toArray());
@@ -328,14 +419,24 @@ export function puppet(C = SAYF, opts = {}) {
     });
     P[sx_ < 0 ? 'browR' : 'browL'] = along(bw, 0.0095, felt(C.brows), P.head, 16);
     // the ear: a round shell standing off the side of the head, turned a little forward
+    if (C.hairStyle === 'foulard') continue;
     const ear = pivot([sx_ * r * sx * 0.96, hc.y - 0.012, -0.02]);
     ear.rotation.set(0, sx_ * 0.45, sx_ * -0.08);
     P.head.add(ear);
     ear.add(part(new THREE.SphereGeometry(0.046, 18, 14), skin, [sx_ * 0.012, 0, 0], [0, 0, 0], [0.38, 1.0, 0.72]));
     ear.add(part(new THREE.SphereGeometry(0.03, 14, 10), felt(new THREE.Color(C.skin).multiplyScalar(0.72)), [sx_ * 0.026, -0.002, 0.004], [0, 0, 0], [0.22, 1.0, 0.68]));
   }
+  if (C.glasses) {
+    // round gold frames on the nose
+    const gold = new THREE.MeshStandardMaterial({ color: '#d4a640', metalness: 0.9, roughness: 0.3 });
+    for (const k of [-1, 1]) P.head.add(part(new THREE.TorusGeometry(0.043, 0.0035, 8, 32), gold, surf(k * 0.06, -0.006, 0.03).toArray(), [0, k * 0.25, 0]));
+    along([surf(-0.018, 0.0, 0.03), surf(0, 0.006, 0.036), surf(0.018, 0.0, 0.03)], 0.003, gold, P.head, 8);
+  }
   // hair: a felt fringe cut straight across the forehead, the shaved sides, rows of twists on top, long locks behind
   const hairF = felt(C.hair, { nap: 0.75 });
+  P.twists = [];
+  P.locks = [];
+  if (C.hairStyle === 'sayf') {
   const fringe = (() => {
     const nu = 48, y0 = 0.084, hh = 0.078, a0 = Math.PI * 0.44;
     const pos = [], uv = [], idx = [];
@@ -437,8 +538,29 @@ export function puppet(C = SAYF, opts = {}) {
       p.clone().addScaledVector(out, 0.062).add(new THREE.Vector3(sw * 2, -len, -0.03))];
     P.locks.push(rope(pts, { R: 0.008, ply: 0.0098, pitch: 0.055, mat: ply, parent: P.head }));
   }
+  } else if (C.hairStyle === 'foulard') {
+    // a little grey hair at the forehead, then the foulard over all of it, knotted under the chin
+    const fm = foulardMat(C.scarf, C.scarf2);
+    P.scarf = new THREE.Group();
+    P.head.add(P.scarf);
+    P.scarf.add(part(new THREE.SphereGeometry(r * 1.07, 48, 24, 0, Math.PI * 2, 0, Math.PI * 0.35), fm, hc.toArray(), [0, 0, 0], [sx * 1.02, sy, sz * 1.03]));
+    P.scarf.add(part(new THREE.TorusGeometry(r * 1.07 * Math.sin(Math.PI * 0.35), 0.012, 8, 40, Math.PI * 1.1), fm, [0, hc.y + r * sy * 1.07 * Math.cos(Math.PI * 0.35), 0], [Math.PI / 2, 0, -Math.PI * 0.05], [sx * 1.02, sz * 1.03, 1]));
+    // the sides fall past the ears to the jaw, open at the face
+    P.scarf.add(part(new THREE.SphereGeometry(r * 1.075, 48, 20, Math.PI / 2 + 0.95, Math.PI * 2 - 1.9, Math.PI * 0.2, Math.PI * 0.58), fm, hc.toArray(), [0, 0, 0], [sx * 1.02, sy, sz * 1.02]));
+    P.scarf.add(part(new THREE.SphereGeometry(0.035, 14, 10), fm, [0, hc.y - sy * r * 1.02, 0.02], [0, 0, 0], [1.3, 0.8, 0.9]));
+    for (const k of [-1, 1]) P.scarf.add(part(new THREE.ConeGeometry(0.03, 0.09, 10), fm, [k * 0.025, hc.y - sy * r * 1.02 - 0.05, 0.03], [0.2, 0, k * 0.4]));
+  } else if (C.hairStyle === 'cap') {
+    // a wool docker's cap, rolled at the brim, and the hair showing under it at the back and sides
+    P.head.add(part(new THREE.SphereGeometry(r * 1.01, 40, 12, Math.PI / 2 + 1.3, Math.PI * 2 - 2.6, Math.PI * 0.32, Math.PI * 0.16), hairF, hc.toArray(), [0, 0, 0], [sx, sy, sz]));
+    const capM = felt(C.cap, { nap: 1.0, repeat: 8 });
+    P.cap = new THREE.Group();
+    P.head.add(P.cap);
+    P.cap.add(part(new THREE.SphereGeometry(r * 1.06, 40, 20, 0, Math.PI * 2, 0, Math.PI * 0.36), capM, hc.toArray(), [-0.1, 0, 0], [sx * 1.02, sy * 1.12, sz * 1.02]));
+    P.cap.add(part(new THREE.TorusGeometry(r * 1.06 * Math.sin(Math.PI * 0.36), 0.02, 10, 40), capM, [0, hc.y + r * sy * Math.cos(Math.PI * 0.36) * 1.04 + 0.01, 0.02], [Math.PI / 2 - 0.1, 0, 0], [sx * 1.02, sz * 1.02, 1]));
+    P.cap.add(part(new THREE.SphereGeometry(0.025, 12, 8), capM, [0, hc.y + r * sy * 1.18, -0.03]));
+  }
   // the three stripes of the jacket, from the collar over the top of each shoulder
-  {
+  if (C.top === 'track') {
     const lathe = (y) => {
       for (let i = 0; i < prof.length - 1; i++) if (y >= prof[i].y && y <= prof[i + 1].y) return prof[i].x + (prof[i + 1].x - prof[i].x) * (y - prof[i].y) / (prof[i + 1].y - prof[i].y);
       return 0.0;
@@ -466,12 +588,15 @@ export function puppet(C = SAYF, opts = {}) {
   for (const [side, sx_] of [['L', 1], ['R', -1]]) {
     const sh = pivot([sx_ * 0.205, 0.43, 0]);
     P.torso.add(sh);
-    sh.add(part(new THREE.SphereGeometry(0.063, 16, 12), suit, [0, 0, 0]));
-    sh.add(part(new THREE.CylinderGeometry(0.062, 0.058, 0.27, 18), striped(C.suit, '#f2f0ea', sx_), [0, -0.135, 0]));
+    const sleeve = C.top === 'track' ? striped(C.suit, '#f2f0ea', sx_) : C.top === 'tank' ? skin : suit;
+    sh.add(part(new THREE.SphereGeometry(0.063, 16, 12), C.top === 'tank' ? skin : suit, [0, 0, 0]));
+    sh.add(part(new THREE.CylinderGeometry(0.062, 0.058, 0.27, 18), sleeve, [0, -0.135, 0]));
     const el = pivot([0, -0.27, 0]);
     sh.add(el);
-    el.add(part(new THREE.CylinderGeometry(0.057, 0.05, 0.24, 18), striped(C.suit, '#f2f0ea', sx_), [0, -0.12, 0]));
-    el.add(part(new THREE.TorusGeometry(0.048, 0.012, 8, 20), suit, [0, -0.235, 0], [Math.PI / 2, 0, 0]));
+    // the forearm: a camallo's swells like a ham toward the wrist
+    el.add(part(new THREE.CylinderGeometry(0.057 * fa, 0.05 * (1 + (fa - 1) * 0.6), 0.24, 18), sleeve, [0, -0.12, 0]));
+    if (C.top !== 'tank') el.add(part(new THREE.TorusGeometry(0.048, 0.012, 8, 20), suit, [0, -0.235, 0], [Math.PI / 2, 0, 0]));
+    else el.add(part(new THREE.SphereGeometry(0.057 * fa, 16, 10), skin, [0, -0.04, 0], [0, 0, 0], [1, 1.3, 1]));
     const wr = pivot([0, -0.25, 0]);
     el.add(wr);
     wr.add(part(new THREE.SphereGeometry(0.05, 18, 12), skin, [0, -0.05, 0.005], [0, 0, 0], [1.05, 1.15, 0.55]));
@@ -487,12 +612,13 @@ export function puppet(C = SAYF, opts = {}) {
   // legs: trousers with the stripes, white trainers
   for (const [side, sx_] of [['L', 1], ['R', -1]]) {
     const hip = pivot([sx_ * 0.1, 0.04, 0]);
-    root.add(hip);
-    hip.add(part(new THREE.CylinderGeometry(0.085, 0.078, 0.42, 18), striped(C.suit, '#f2f0ea', sx_), [0, -0.21, 0]));
+    body.add(hip);
+    const legM = C.bottom === 'track' ? striped(C.suit, '#f2f0ea', sx_) : C.bottom === 'skirt' ? felt('#3a2a26', { nap: 0.3 }) : felt(C.trousers ?? '#3a4a6a');
+    hip.add(part(new THREE.CylinderGeometry(0.085, 0.078, 0.42, 18), legM, [0, -0.21, 0]));
     const kn = pivot([0, -0.42, 0]);
     hip.add(kn);
-    kn.add(part(new THREE.SphereGeometry(0.08, 14, 10), suit));
-    kn.add(part(new THREE.CylinderGeometry(0.076, 0.07, 0.42, 18), striped(C.suit, '#f2f0ea', sx_), [0, -0.21, 0]));
+    kn.add(part(new THREE.SphereGeometry(0.08, 14, 10), C.bottom === 'track' ? suit : legM));
+    kn.add(part(new THREE.CylinderGeometry(0.076, 0.07, 0.42, 18), legM, [0, -0.21, 0]));
     const ft = pivot([0, -0.43, 0]);
     kn.add(ft);
     ft.add(part(new THREE.CapsuleGeometry(0.055, 0.15, 6, 14), felt(C.shoes, { nap: 0.3 }), [0, -0.03, 0.06], [Math.PI / 2, 0, 0], [1.15, 1, 0.8]));
@@ -500,6 +626,12 @@ export function puppet(C = SAYF, opts = {}) {
     P['hip' + side] = hip;
     P['knee' + side] = kn;
     P['ankle' + side] = ft;
+  }
+  if (C.bottom === 'skirt') {
+    // a long skirt from the waist to the shins, hanging from the torso so it follows the hips
+    P.skirt = part(new THREE.CylinderGeometry(0.19, 0.3, 0.7, 32, 1, true), felt(C.skirt, { nap: 0.5 }), [0, -0.3, 0], [0, 0, 0], [1, 1, 0.8]);
+    P.skirt.material.side = THREE.DoubleSide;
+    body.add(P.skirt);
   }
   root.traverse((o) => {
     if (o.isMesh) o.castShadow = o.receiveShadow = true;

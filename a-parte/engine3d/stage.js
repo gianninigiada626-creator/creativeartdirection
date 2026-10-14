@@ -590,7 +590,7 @@ function facesOf(scene, camera) {
   return out;
 }
 
-export function renderPasses(scene, camera, { far = 200 } = {}) {
+export function renderPasses(scene, camera, { far = 200, only = null } = {}) {
   const meshes = [];
   scene.traverse((o) => o.isMesh && meshes.push(o));
   const orig = meshes.map((o) => o.material);
@@ -609,12 +609,15 @@ export function renderPasses(scene, camera, { far = 200 } = {}) {
   scene.fog = null;
   const ghosts = meshes.filter((o) => o.userData.colorOnly && o.visible);
   ghosts.forEach((o) => (o.visible = false));
+  const want = (k) => !only || only.includes(k);
   // normals (keeping any normal map, so waves and fabric still draw)
   const nm = new THREE.MeshNormalMaterial();
-  meshes.forEach((o, i) => (o.material = orig[i].normalMap ? new THREE.MeshNormalMaterial({ normalMap: orig[i].normalMap, normalScale: orig[i].normalScale }) : nm));
-  scene.background = new THREE.Color(0.5, 0.5, 1.0);
-  renderer.render(scene, camera);
-  out.normal = renderer.domElement.toDataURL('image/png');
+  if (want('normal')) {
+    meshes.forEach((o, i) => (o.material = orig[i].normalMap ? new THREE.MeshNormalMaterial({ normalMap: orig[i].normalMap, normalScale: orig[i].normalScale }) : nm));
+    scene.background = new THREE.Color(0.5, 0.5, 1.0);
+    renderer.render(scene, camera);
+    out.normal = renderer.domElement.toDataURL('image/png');
+  }
   // depth
   const dm = depthMaterial(far);
   meshes.forEach((o) => (o.material = dm));
@@ -622,15 +625,17 @@ export function renderPasses(scene, camera, { far = 200 } = {}) {
   renderer.render(scene, camera);
   out.depth = renderer.domElement.toDataURL('image/png');
   // ids
-  const mats = new Map();
-  meshes.forEach((o) => {
-    const id = idOf(o);
-    if (!mats.has(id)) mats.set(id, new THREE.MeshBasicMaterial({ color: idColor(id) }));
-    o.material = mats.get(id);
-  });
-  scene.background = new THREE.Color(0, 0, 0);
-  renderer.render(scene, camera);
-  out.id = renderer.domElement.toDataURL('image/png');
+  if (want('id')) {
+    const mats = new Map();
+    meshes.forEach((o) => {
+      const id = idOf(o);
+      if (!mats.has(id)) mats.set(id, new THREE.MeshBasicMaterial({ color: idColor(id) }));
+      o.material = mats.get(id);
+    });
+    scene.background = new THREE.Color(0, 0, 0);
+    renderer.render(scene, camera);
+    out.id = renderer.domElement.toDataURL('image/png');
+  }
   meshes.forEach((o, i) => (o.material = orig[i]));
   ghosts.forEach((o) => (o.visible = true));
   scene.background = bg;

@@ -1,5 +1,9 @@
 <!doctype html><meta charset="utf-8"><style>body{margin:0;background:#000}</style>
-<script>window.STAGE_SIZE = [1920, 1080]; // 16:9</script>
+<script>
+// 16:9; the animatic renders smaller: ?w=1280&h=720
+const q = new URLSearchParams(location.search);
+window.STAGE_SIZE = [+(q.get('w') ?? 1920), +(q.get('h') ?? 1080)];
+</script>
 <script type="importmap">{"imports":{"three":"/muerto/node_modules/three/build/three.module.js","three/addons/":"/muerto/node_modules/three/examples/jsm/"}}</script>
 <script type="module">
 import { SCENES } from './scenes.js';
@@ -29,12 +33,18 @@ window.buildAnim = async (id, opts = {}) => {
   cur = await SCENES[id]({ ...opts, anim: true });
   const people = [];
   cur.scene.traverse((o) => o.bones && o.userData.id !== undefined && people.push(o.userData.id));
-  return { far: cur.far ?? 60, dur: cur.dur ?? null, animated: !!cur.update, people };
+  return { far: cur.far ?? 60, dur: cur.dur ?? null, t0: cur.t0 ?? 0, stop: cur.stop ?? 1.5, animated: !!cur.update, people };
 };
-window.renderFrame = (k, t) => {
+window.renderFrame = (k, t, only = null) => {
   cur.scene.traverse((o) => o.tick?.(t));
   cur.update?.(k, t);
-  return renderPasses(cur.scene, cur.camera, { far: cur.far ?? 60 });
+  const out = renderPasses(cur.scene, cur.camera, { far: cur.far ?? 60, only });
+  // where the lens is focused this frame: the distance to the shot's subject
+  if (cur.focus) {
+    cur.scene.updateMatrixWorld(true);
+    out.focus = String(cur.camera.position.distanceTo(cur.focus()));
+  }
+  return out;
 };
 window.__ready = true;
 </script>

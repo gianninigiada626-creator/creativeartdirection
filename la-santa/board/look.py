@@ -19,15 +19,18 @@ import numpy as np
 cv2.setNumThreads(1)
 
 
-def load(dirp, tag):
-    rd = lambda k: cv2.imread(os.path.join(dirp, f'{tag}-{k}.png'), cv2.IMREAD_COLOR)
-    color = cv2.cvtColor(rd('color'), cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
-    d = cv2.cvtColor(rd('depth'), cv2.COLOR_BGR2RGB).astype(np.float64) / 255.0
-    meta = json.load(open(os.path.join(dirp, f'{tag}-meta.json')))
-    far = meta.get('far', 60)
+def load_pair(color_path, depth_path, far):
+    color = cv2.cvtColor(cv2.imread(color_path, cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+    d = cv2.cvtColor(cv2.imread(depth_path, cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB).astype(np.float64) / 255.0
     depth = (d[..., 0] + d[..., 1] / 255.0 + d[..., 2] / 65025.0) * far
     depth[(d > 0.999).all(axis=2)] = far
-    return color, depth.astype(np.float32), meta
+    return color, depth.astype(np.float32)
+
+
+def load(dirp, tag):
+    meta = json.load(open(os.path.join(dirp, f'{tag}-meta.json')))
+    color, depth = load_pair(os.path.join(dirp, f'{tag}-color.png'), os.path.join(dirp, f'{tag}-depth.png'), meta.get('far', 60))
+    return color, depth, meta
 
 
 def to_linear(c):
@@ -42,8 +45,9 @@ def to_srgb(c):
 def contact(depth, strength=1.0):
     """Darken where the surface sits behind what is around it: corners, creases, under the chin."""
     ao = np.ones_like(depth)
+    sc = depth.shape[0] / 1080
     for sigma, k in ((4, 0.9), (16, 0.6), (48, 0.35)):
-        blur = cv2.GaussianBlur(depth, (0, 0), sigma)
+        blur = cv2.GaussianBlur(depth, (0, 0), sigma * sc)
         diff = (blur - depth) / np.maximum(depth, 0.1)  # negative: the neighbours are nearer, a crevice
         ao *= 1.0 + np.clip(diff, -0.08, 0.0) * (k * strength / 0.08) * 0.5
     return np.clip(ao, 0.45, 1.0)
@@ -53,11 +57,13 @@ def dof(img, depth, focus, stop=1.0, max_r=16):
     """A lens: the blur grows with the distance from the plane of focus (in dioptres, as a lens does)."""
     h = img.shape[0]
     coc = np.abs(1.0 / np.maximum(depth, 0.05) - 1.0 / focus) * stop * h * 0.0105
+    max_r = max_r * h / 1080
     coc = np.clip(coc, 0, max_r)
+    coc = coc * 1080 / h  # in the radii's own units below, which are sized for 1080
     radii = [0, 1.5, 3, 5, 8, 12, 16]
     layers = [img]
     for r in radii[1:]:
-        layers.append(cv2.GaussianBlur(img, (0, 0), r * 0.55))
+        layers.append(cv2.GaussianBlur(img, (0, 0), r * 0.55 * h / 1080))
     # blur the CoC map itself a little, so the edges of what is sharp do not cut hard
     coc = cv2.GaussianBlur(coc, (0, 0), 2.0)
     out = np.zeros_like(img)
@@ -75,8 +81,9 @@ def bloom(lin, thresh=0.7, amount=0.5, tint=(1.0, 0.82, 0.6)):
     lum = lin @ np.array([0.2126, 0.7152, 0.0722], np.float32)
     bright = lin * np.clip((lum - thresh) / (1 - thresh + 1e-6), 0, 4)[..., None]
     acc = np.zeros_like(lin)
+    sc = lin.shape[0] / 1080
     for s, w in ((6, 0.45), (18, 0.3), (50, 0.18), (120, 0.1)):
-        acc += cv2.GaussianBlur(bright, (0, 0), s) * w
+        acc += cv2.GaussianBlur(bright, (0, 0), s * sc) * w
     return lin + acc * amount * np.array(tint, np.float32)
 
 
@@ -113,6 +120,10 @@ def grain(srgb, seed=0, amount=0.028):
 
 def look(dirp, tag, out, at=None, focus=None, stop=1.0, seed=0, ao=1.0):
     color, depth, meta = load(dirp, tag)
+    return finish(color, depth, out, at, focus, stop, seed, ao)
+
+
+def finish(color, depth, out, at=None, focus=None, stop=1.0, seed=0, ao=1.0, quality=None):
     h, w = depth.shape
     if focus is None:
         x, y = at if at else (w // 2, h // 2)
@@ -128,9 +139,13 @@ def look(dirp, tag, out, at=None, focus=None, stop=1.0, seed=0, ao=1.0):
     srgb = np.clip(srgb, 0, 1)
     srgb = srgb * 0.7 + (srgb * srgb * (3 - 2 * srgb)) * 0.3
     # the lens is never quite as sharp as the renderer
-    srgb = cv2.GaussianBlur(srgb, (0, 0), 0.6)
+    srgb = cv2.GaussianBlur(srgb, (0, 0), 0.6 * max(0.7, h / 1080))
     srgb = grain(srgb, seed)
-    cv2.imwrite(out, cv2.cvtColor((np.clip(srgb, 0, 1) * 255 + 0.5).astype(np.uint8), cv2.COLOR_RGB2BGR))
+    img = cv2.cvtColor((np.clip(srgb, 0, 1) * 255 + 0.5).astype(np.uint8), cv2.COLOR_RGB2BGR)
+    if out.endswith('.jpg'):
+        cv2.imwrite(out, img, [cv2.IMWRITE_JPEG_QUALITY, quality or 93])
+    else:
+        cv2.imwrite(out, img)
     return focus
 
 
