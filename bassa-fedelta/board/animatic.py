@@ -177,28 +177,52 @@ def _font(name, size):
     return ImageFont.truetype(os.path.join(INTER, name), size)
 
 
+def _wrap(d, text, font, width):
+    """Words into lines no wider than width, the lines as even as they can be."""
+    words = text.split()
+    if d.textlength(text, font=font) <= width:
+        return [text]
+    best = None
+    for k in range(1, len(words)):
+        a, b = ' '.join(words[:k]), ' '.join(words[k:])
+        wa, wb = d.textlength(a, font=font), d.textlength(b, font=font)
+        if max(wa, wb) <= width and (best is None or max(wa, wb) < best[0]):
+            best = (max(wa, wb), [a, b])
+    return best[1] if best else [text]
+
+
 @lru_cache(maxsize=64)
 def subtitle_image(who, it, en):
-    """One subtitle on the picture: Italian above in white, English beneath, a soft dark band behind them."""
-    bh = 190
-    im = Image.new('RGBA', (W, bh), (0, 0, 0, 0))
-    band = np.zeros((bh, W, 4), np.uint8)
-    band[..., 3] = (np.linspace(0, 1, bh) ** 1.4 * 170).astype(np.uint8)[:, None]
-    im = Image.fromarray(band, 'RGBA')
-    d = ImageDraw.Draw(im)
+    """One subtitle on the picture: Italian above in white, English beneath, a soft dark band behind them.
+    A line too long for the frame goes onto two."""
+    probe = ImageDraw.Draw(Image.new('RGBA', (8, 8)))
     f_it = _font('Inter-SemiBold.otf' if who != 'VO' else 'Inter-MediumItalic.otf', 38)
     f_en = _font('Inter-Italic.otf', 25)
     f_who = _font('Inter-Bold.otf', 19)
     label = '' if who == 'VO' else who.upper()
-    wi = d.textlength(it, font=f_it)
-    x = (W - wi) / 2
-    for dx, dy in ((2, 2), (-1, 1), (1, -1)):
-        d.text((x + dx, 118 + dy), it, font=f_it, fill=(0, 0, 0, 200), anchor='ls')
-    if label:
-        d.text((x - 14, 118), label, font=f_who, fill=(232, 196, 64, 255), anchor='rs')
-    d.text((x, 118), it, font=f_it, fill=(246, 242, 234, 255), anchor='ls')
-    d.text((W / 2 + 1, 160 + 1), en, font=f_en, fill=(0, 0, 0, 200), anchor='ms')
-    d.text((W / 2, 160), en, font=f_en, fill=(200, 196, 188, 255), anchor='ms')
+    room = W - 220 - (d_label := (probe.textlength(label, font=f_who) + 14 if label else 0))
+    lines_it = _wrap(probe, it, f_it, room)
+    lines_en = _wrap(probe, en, f_en, W - 220)
+    bh = 72 + 46 * len(lines_it) + 32 * len(lines_en)
+    band = np.zeros((bh, W, 4), np.uint8)
+    band[..., 3] = (np.linspace(0, 1, bh) ** 1.4 * 175).astype(np.uint8)[:, None]
+    im = Image.fromarray(band, 'RGBA')
+    d = ImageDraw.Draw(im)
+    y = 64
+    for k, line in enumerate(lines_it):
+        y += 46 if k else 38
+        wi = d.textlength(line, font=f_it)
+        x = (W - wi) / 2
+        for dx, dy in ((2, 2), (-1, 1), (1, -1)):
+            d.text((x + dx, y + dy), line, font=f_it, fill=(0, 0, 0, 200), anchor='ls')
+        if label and k == 0:
+            d.text((x - 14, y), label, font=f_who, fill=(232, 196, 64, 255), anchor='rs')
+        d.text((x, y), line, font=f_it, fill=(246, 242, 234, 255), anchor='ls')
+    y += 10
+    for line in lines_en:
+        y += 32
+        d.text((W / 2 + 1, y + 1), line, font=f_en, fill=(0, 0, 0, 200), anchor='ms')
+        d.text((W / 2, y), line, font=f_en, fill=(200, 196, 188, 255), anchor='ms')
     return np.asarray(im)
 
 

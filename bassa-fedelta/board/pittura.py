@@ -271,7 +271,8 @@ def faces(canvas, height, faces_, z, seed, shift):
     st = Strokes()
     sx, sy = shift
     for f in faces_:
-        if f['facing'] < 0.1 or f['px'] < 10:
+        # a face too far or too turned to measure comes back empty: nothing to paint there
+        if f.get('facing') is None or f.get('px') is None or f['facing'] < 0.1 or f['px'] < 10:
             continue
         P = {}
         for k, v in f['pts'].items():
