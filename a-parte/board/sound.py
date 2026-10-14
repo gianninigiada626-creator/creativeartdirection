@@ -302,7 +302,7 @@ PIANO = [('04', 0.8, 1.0), ('07', 12.5, 0.6), ('16', 6.0, 0.7), ('23', 10.0, 0.6
         [('27', 1.0 + 4.0 * k, 0.85 - 0.08 * k) for k in range(5)] + [('28', 1.0, 0.4)]
 
 
-def build(path, starts):
+def build(path, starts, voices=None):
     from shots import RUNTIME, SHOTS
     total = int(RUNTIME * SR)
     mix = np.zeros(total, np.float32)
@@ -318,7 +318,15 @@ def build(path, starts):
     # the very beginning and the very end come out of and go into silence
     t = np.arange(total) / SR
     mix *= np.clip(t / 2.0, 0, 1) * np.clip((RUNTIME - t) / 1.5, 0, 1)
-    mix /= np.abs(mix).max() / 0.89
+    if voices:
+        # the voices in front; the place and the music sink under them
+        import voices as V
+        mix /= np.abs(mix).max() / 0.6
+        v, gain = V.track(voices, RUNTIME, bed=mix)
+        mix = mix * gain[:len(mix)] + v[:len(mix)]
+    mix /= max(1.0, np.abs(mix).max() / 0.95)
+    if not voices:
+        mix /= np.abs(mix).max() / 0.89
     st = np.stack([mix, np.roll(mix, int(0.0007 * SR))], 1)
     with wave.open(path, 'wb') as w:
         w.setnchannels(2)

@@ -127,41 +127,92 @@ def _split(it, en, limit=64):
     return out
 
 
-def subtitle_events():
-    """[(start, end, who, it, en)] in film seconds."""
-    ev, t0 = [], 0.0
+def line_plan():
+    """Every spoken line in film seconds: where it starts and ends (the recorded take's own length when there
+    is one), its clip name as in VOCI.md, and its subtitle parts."""
+    import voices
+    durs = voices.durations()
+    plan, t0 = [], 0.0
     for s in SHOTS:
-        items = []
+        items, n = [], {}
         for line in s['lines']:
             who, it, en = line[:3]
             at = line[3] if len(line) > 3 else None
             it = re.sub(r'\([^)]*\)\s*', '', it).strip()
             en = re.sub(r'\([^)]*\)\s*', '', en).strip()
-            for j, (a, b) in enumerate(_split(it, en)):
-                items.append((who, a, b, max(1.7, len(a) / 13.0 + 0.6), at if j == 0 else None))
-        if items and any(x[4] is not None for x in items):
-            # lines tied to the action: each starts at its moment, or right after the one before
+            n[who] = n.get(who, 0) + 1
+            name = f"{s['id']}_{who.lower()}_{n[who]:02d}"
+            parts = _split(it, en)
+            est = sum(max(1.7, len(x) / 13.0 + 0.6) for x, _ in parts) + 0.35 * (len(parts) - 1)
+            items.append(dict(who=who, name=name, parts=parts, d=durs.get(name, est), at=at, real=name in durs))
+        gap = 0.45
+        if any(i['at'] is not None for i in items):
             t = 0.0
-            for who, a, b, d, at in items:
-                t = max(t, at if at is not None else t)
-                ev.append((t0 + t, t0 + min(t + d, s['dur'] - 0.2), who, a, b))
-                t += d + 0.35
+            for i in items:
+                t = max(t, i['at'] if i['at'] is not None else t)
+                i['start'] = t
+                t += i['d'] + gap
         elif items:
-            items = [x[:4] for x in items]
             start = FIRST_LINE.get(s['id'], 0.7)
-            gap = 0.35
-            need = sum(d for *_, d in items) + gap * (len(items) - 1)
-            room = s['dur'] - start - 0.4
-            if need > room:
-                start = max(0.4, s['dur'] - 0.4 - need)
-                room = s['dur'] - start - 0.4
-            k = min(1.0, room / need)
+            need = sum(i['d'] for i in items) + gap * (len(items) - 1)
+            if start + need > s['dur'] - 0.3:
+                start = max(0.3, s['dur'] - 0.3 - need)
             t = start
-            for who, a, b, d in items:
-                ev.append((t0 + t, t0 + t + d * k, who, a, b))
-                t += (d + gap) * k
+            for i in items:
+                i['start'] = t
+                t += i['d'] + gap
+        for i in items:
+            i['start'] += t0
+            i['end'] = i['start'] + i['d']
+            plan.append(i)
         t0 += s['dur']
-    return ev
+    return plan
+
+
+def _pauses(name):
+    """Where the take breathes: [(start, end)] of its silences longer than a short beat, in seconds."""
+    import wave
+    import voices
+    path = os.path.join(voices.CLIPS, f'{name}.wav')
+    if not os.path.exists(path):
+        return []
+    with wave.open(path) as w:
+        x = np.frombuffer(w.readframes(w.getnframes()), '<i2').astype(np.float32) / 32767
+    e, hop = voices.envelope(x)
+    quiet = e < e.max() * 0.04
+    out, i = [], 0
+    while i < len(quiet):
+        j = i
+        while j < len(quiet) and quiet[j] == quiet[i]:
+            j += 1
+        if quiet[i] and i > 0 and j < len(quiet) and (j - i) * hop >= 0.15 * voices.SR:
+            out.append((i * hop / voices.SR, j * hop / voices.SR))
+        i = j
+    return out
+
+
+def subtitle_events():
+    """[(start, end, who, it, en)] in film seconds: each line's parts spread over its spoken time, every change
+    of subtitle moved onto the breath nearest to where it falls by length."""
+    ev = []
+    for p in line_plan():
+        total = sum(len(x) for x, _ in p['parts'])
+        pauses = _pauses(p['name']) if len(p['parts']) > 1 else []
+        cuts, acc = [], 0
+        for x, _ in p['parts'][:-1]:
+            acc += len(x)
+            at = p['d'] * acc / total
+            near = min(pauses, key=lambda q: abs((q[0] + q[1]) / 2 - at), default=None)
+            if near and abs((near[0] + near[1]) / 2 - at) < 1.2:
+                at = max(near[0], near[1] - 0.12)
+            cuts.append(at)
+        bounds = [0] + cuts + [p['d']]
+        for (x, y), a, b in zip(p['parts'], bounds, bounds[1:]):
+            ev.append([p['start'] + a, p['start'] + a + max(b - a, 1.2) + 0.4, p['who'], x, y])
+    ev.sort(key=lambda e: e[0])
+    for a, b in zip(ev, ev[1:]):
+        a[1] = min(a[1], b[0] - 0.05)
+    return [tuple(e) for e in ev]
 
 
 def _font(name, size, weight=None):
@@ -300,7 +351,7 @@ def cut(out_name='a-parte-animatic', audio=True, span=None):
     wav = os.path.join(OUT, 'temp-sound.wav')
     if audio:
         import sound
-        sound.build(wav, starts)
+        sound.build(wav, starts, voices=line_plan())
     video = os.path.join(OUT, f'{out_name}.mp4')
     cmd = ['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-']
     if audio:
