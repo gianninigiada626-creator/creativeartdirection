@@ -330,11 +330,11 @@ footer { margin-top: 72px; padding-top: 22px; border-top: 1px solid var(--rule);
 
 PLAYER = r'''<section class="animatic" aria-label="Animatic">
     <div>
-      <h4>Animatic · 8 dipinti al secondo · suono provvisorio</h4>
+      <h4>Animatic · 8 dipinti al secondo · voci registrate, ambienti provvisori</h4>
       <div class="screen"><video id="anim" controls playsinline preload="metadata" poster="img/s-04.jpg"></video></div>
     </div>
     <div class="chapters"><h4>Capitoli</h4>%BTNS%</div>
-    <p class="hint">I capitoli si susseguono da soli. La voce narrante non è ancora registrata: le sue parole sono nei sottotitoli, nella banda nera sotto l'immagine.</p>
+    <p class="hint">I capitoli si susseguono da soli. Voce narrante e dialoghi sono quelli registrati; i sottotitoli, nella banda nera sotto l'immagine, seguono le registrazioni. Ambienti e musica sono ancora provvisori.</p>
   </section>
   <script>
   (() => {
