@@ -11,8 +11,9 @@ import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
 export { THREE };
-export const W = 1920;
-export const H = 804;
+// a film can set its own frame before the stage loads (window.STAGE_SIZE = [w, h]); A PARTE is 2.39:1
+export const W = globalThis.STAGE_SIZE?.[0] ?? 1920;
+export const H = globalThis.STAGE_SIZE?.[1] ?? 804;
 
 export const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(1);
@@ -61,11 +62,12 @@ export function wardrobe(seed) {
   const pick = (a) => a[(r = (r * 9301 + 49297) % 233280) % a.length];
   return { skin: pick(SKINS), hair: pick(HAIRS), top: pick(CLOTH), bottom: pick(CLOTH), shoes: pick(['#1c1a19', '#3a2a20', '#2a2f38', '#d9d4c8']) };
 }
-const PART = (bn) => (/Head|Neck|Eye/.test(bn) ? 'skin' : /Hand/.test(bn) ? 'hands' : /Foot|Toe/.test(bn) ? 'shoes' : /Hips|UpLeg|Leg/.test(bn) ? 'bottom' : 'top');
+const PART = (bn) => (/Head|Neck|Eye/.test(bn) ? 'skin' : /Hand/.test(bn) ? 'hands' : /Foot|Toe/.test(bn) ? 'shoes' : /ForeArm/.test(bn) ? 'forearm' : /^(Left|Right)Leg$/.test(bn) ? 'shin' : /Hips|UpLeg|Leg/.test(bn) ? 'bottom' : 'top');
 const RPM = { Wolf3D_Head: 'skin', Wolf3D_Body: 'skin', Wolf3D_Outfit_Top: 'top', Wolf3D_Outfit_Bottom: 'bottom', Wolf3D_Outfit_Footwear: 'shoes', Wolf3D_Beard: 'hair', Wolf3D_Headwear: 'hat', EyeLeft: 'eyes', EyeRight: 'eyes', Wolf3D_Teeth: 'teeth' };
 const HVMAT = { hair: 'hair', skin: 'skin', 'T-shirt': 'top', short: 'bottom', brown: 'shoes', belt: 'dark', black: 'dark', white: 'teeth', pupil: 'eyes', iris: 'eyes', 'iris dark': 'eyes' };
 function dress(obj, c) {
-  const col = { ...c, hands: c.sleeves === 'long' ? c.top : c.skin, eyes: '#15100e', teeth: '#e8e2d6', dark: '#1d1a19', hat: c.hat ?? c.top };
+  // short sleeves and shorts show the skin of forearms and shins (set on the single-mesh bodies)
+  const col = { ...c, hands: c.sleeves === 'long' ? c.top : c.skin, forearm: c.sleeves === 'short' ? c.skin : c.top, shin: c.shorts ? c.skin : c.bottom, eyes: '#15100e', teeth: '#e8e2d6', dark: '#1d1a19', hat: c.hat ?? c.top };
   const mat = (k) => new THREE.MeshStandardMaterial({ color: new THREE.Color(col[k] ?? col.top), roughness: 0.85 });
   obj.traverse((o) => {
     if (!o.isMesh) return;
