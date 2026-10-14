@@ -417,6 +417,24 @@ def share(master=None):
     print(out, f'{os.path.getsize(out) / 1e6:.1f} MB')
 
 
+def film(chunk=14_500_000):
+    """The whole film for the storyboard page: the 720p copy cut into pieces under the page's per-file limit,
+    put back together byte for byte in the browser when someone downloads it."""
+    src = os.path.join(OUT, 'a-parte-animatic-720p.mp4')
+    fdir = os.path.join(ROOT, 'out', 'web', 'film')
+    os.makedirs(fdir, exist_ok=True)
+    for f in os.listdir(fdir):
+        os.remove(os.path.join(fdir, f))
+    with open(src, 'rb') as fh:
+        k = 0
+        while piece := fh.read(chunk):
+            k += 1
+            # served as .mp4 (the page only serves media types); only the first piece plays on its own
+            with open(os.path.join(fdir, f'pezzo-{k}.mp4'), 'wb') as out:
+                out.write(piece)
+    print(fdir, k, 'pezzi')
+
+
 if __name__ == '__main__':
     if sys.argv[1] == 'render':
         render(sys.argv[2:])
@@ -435,3 +453,6 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'export':
         chapters()
         share()
+        film()
+    elif sys.argv[1] == 'film':
+        film()

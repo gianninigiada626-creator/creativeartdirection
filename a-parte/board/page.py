@@ -69,6 +69,25 @@ def esc(t):
     return html.escape(t, quote=True)
 
 
+def mb(path):
+    return f'{os.path.getsize(path) / 1e6:.1f} MB'.replace('.', ',')
+
+
+def downloads_html(chapters):
+    """The film to take away: whole, or act by act."""
+    fdir = os.path.join(WEB, 'film')
+    pieces = sorted((f for f in os.listdir(fdir) if f.startswith('pezzo-')), key=lambda f: int(f[6:-4])) if os.path.isdir(fdir) else []
+    if not pieces or not chapters:
+        return ''
+    size = sum(os.path.getsize(os.path.join(fdir, f)) for f in pieces)
+    ch_links = ''.join(
+        f'<a class="dl" href="{c["src"]}" download="{c["file"]}"><b>{esc(c["num"])} · {esc(c["name"])}</b>'
+        f'<small>{c["start"]} · {c["dur"]} · {mb(os.path.join(WEB, c["src"]))}</small></a>' for c in chapters)
+    whole = dict(file='a-parte-animatic.mp4', pieces=[f'film/{f}' for f in pieces])
+    return DOWNLOADS.replace('%CH%', ch_links).replace('%WHOLE%', json.dumps(whole)).replace('%RUNTIME%', tc(RUNTIME)) \
+        .replace('%SIZE%', f'{size / 1e6:.0f} MB')
+
+
 def panel_html(s, start):
     meta_p = os.path.join(PASSES, f'{s["id"]}-meta.json')
     meta = json.load(open(meta_p)) if os.path.exists(meta_p) else {}
@@ -140,13 +159,13 @@ def build():
     for i, (key, num, name, _, _) in enumerate(ACTS):
         d = sum(s['dur'] for s in SHOTS if s['act'] == key)
         if os.path.exists(os.path.join(vdir, f'animatic-{i + 1}.mp4')):
-            chapters.append(dict(src=f'video/animatic-{i + 1}.mp4', num=num, name=name, start=tc(t), dur=tc(d)))
+            chapters.append(dict(src=f'video/animatic-{i + 1}.mp4', file=f'a-parte-{i + 1}-{key}.mp4', num=num, name=name, start=tc(t), dur=tc(d)))
         t += d
     player = ''
     if len(chapters) == len(ACTS):
         btns = ''.join(f'<button type="button" class="ch" data-i="{i}" id="ch{i}"><span class="ch-num">{esc(c["num"])}</span><span class="ch-name">{esc(c["name"])}</span><span class="ch-t">{c["start"]} · {c["dur"]}</span></button>' for i, c in enumerate(chapters))
         player = PLAYER.replace('%BTNS%', btns).replace('%SRCS%', json.dumps([c['src'] for c in chapters]))
-    page = TEMPLATE.replace('%PLAYER%', player).replace('%COLORSCRIPT_LINKS%', ''.join(links)).replace('%ACT_MARKS%', ''.join(act_marks)) \
+    page = TEMPLATE.replace('%PLAYER%', player).replace('%DOWNLOADS%', downloads_html(chapters) if player else '').replace('%COLORSCRIPT_LINKS%', ''.join(links)).replace('%ACT_MARKS%', ''.join(act_marks)) \
         .replace('%SECTIONS%', ''.join(sections)).replace('%RUNTIME%', tc(RUNTIME)).replace('%N%', str(len(SHOTS))) \
         .replace('%ROLL%', ' · '.join(f'<a href="#t{r}">{r}</a>' for r in roll))
     with open(os.path.join(WEB, 'index.html'), 'w') as fh:
@@ -260,11 +279,28 @@ a:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 .ch[aria-current="true"] .ch-name { color: var(--red); }
 .ch[aria-current="true"] { border-top-color: var(--red); }
 .animatic .hint { grid-column: 1 / -1; margin: 0; font-size: 13.5px; color: var(--pencil); max-width: 80ch; }
+/* ── downloads ── */
+html:not([data-dl]) .dl-only { display: none !important; }
+.downloads { margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--rule); display: grid; grid-template-columns: 15.5rem minmax(0, 1fr); gap: 18px 28px; }
+.downloads h4 { margin: 0 0 8px; font: 500 11.5px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--pencil); }
+.dl-intro p { margin: 0; font-size: 13.5px; color: var(--pencil); max-width: 34ch; text-wrap: pretty; }
+.dl-groups { display: grid; gap: 18px; min-width: 0; }
+.dl-label { margin: 0 0 8px; font: 500 10.5px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--pencil); }
+.dl-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.dl { display: inline-grid; gap: 3px; align-content: start; padding: 9px 12px 8px; border: 1px solid var(--rule); border-radius: 2px; background: transparent; color: var(--graphite); text-decoration: none; text-align: left; font: inherit; cursor: pointer; }
+.dl b { font: 500 19px/1.1 var(--display); }
+.dl small { font: 400 10.5px/1.3 var(--mono); color: var(--pencil); font-variant-numeric: tabular-nums; }
+.dl:hover { background: var(--sheet); border-color: var(--pencil); }
+.dl.whole { border-color: var(--graphite); }
+.dl:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.dl[data-state="busy"] { border-color: var(--red); cursor: progress; }
+.dl[data-state="busy"] small { color: var(--red); }
+.dl-note { margin: 0; min-height: 1.4em; font: 400 12px/1.4 var(--mono); color: var(--pencil); }
 footer { margin-top: 72px; padding-top: 22px; border-top: 1px solid var(--rule); font: 400 12px/1.6 var(--mono); color: var(--pencil); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
 @media (max-width: 1040px) {
   .grid { grid-template-columns: minmax(0, 1fr); }
-  .title, .notes, .animatic { grid-template-columns: minmax(0, 1fr); }
+  .title, .notes, .animatic, .downloads { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 560px) {
   .cap { grid-template-columns: minmax(0, 1fr); gap: 8px; }
@@ -275,6 +311,7 @@ footer { margin-top: 72px; padding-top: 22px; border-top: 1px solid var(--rule);
   .strip { aspect-ratio: 8 / 1; }
   .acts span { font-size: 9px; }
   .line .it { font-size: 19px; }
+  .dl { flex: 1 1 100%; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .strip a { transition: box-shadow 120ms ease; }
@@ -305,6 +342,8 @@ footer { margin-top: 72px; padding-top: 22px; border-top: 1px solid var(--rule);
   </section>
 
   %PLAYER%
+
+  %DOWNLOADS%
 
   <section class="notes">
     <div>
@@ -351,6 +390,105 @@ PLAYER = r'''<section class="animatic" aria-label="Animatic">
     btns.forEach((b, i) => b.addEventListener('click', () => go(i, true)));
     v.addEventListener('ended', () => { if (cur + 1 < srcs.length) go(cur + 1, true); });
     go(0, false);
+  })();
+  </script>'''
+
+DOWNLOADS = r'''<section class="downloads dl-only" id="scarica" aria-labelledby="dl-h">
+    <div class="dl-intro">
+      <h4 id="dl-h">Scarica</h4>
+      <p>720p, con voci e sottotitoli. Il film intero è un unico file mp4.</p>
+    </div>
+    <div class="dl-groups">
+      <div>
+        <p class="dl-label">Tutto intero</p>
+        <div class="dl-row">
+          <button type="button" class="dl whole" id="dl-whole"><b>A PARTE · il film intero</b><small>%RUNTIME% · mp4 · %SIZE%</small></button>
+        </div>
+      </div>
+      <div>
+        <p class="dl-label">Un capitolo alla volta</p>
+        <div class="dl-row">%CH%</div>
+      </div>
+      <p class="dl-note" id="dl-note" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+  <script>
+  (() => {
+    const WHOLE = %WHOLE%;
+    const note = document.getElementById('dl-note');
+    const say = t => { note.textContent = t; };
+    const framed = window.top !== window;
+    let cap = null;
+    // Inside the viewer a file goes through its downloads capability; a copy opened on its own uses plain links.
+    const ready = c => {
+      cap = c;
+      if (c) document.documentElement.dataset.dl = 'cap';
+      else if (!framed) document.documentElement.dataset.dl = 'link';
+    };
+    if (window.claude && typeof window.claude.use === 'function') window.claude.use('downloads').then(ready, () => ready(null));
+    else ready(null);
+
+    const MSG = {
+      declined: 'Download annullato.',
+      rate_limited: 'C\'è già una richiesta di download aperta: confermala o chiudila, poi riprova.',
+      too_large: 'File troppo grande per questo dispositivo: scarica i capitoli uno per uno.',
+    };
+    async function give(name, blob) {
+      if (!cap) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = name;
+        document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+        return true;
+      }
+      try { await cap.save({ filename: name, data: blob }); return true; }
+      catch (e) {
+        const code = e && e.code;
+        say(MSG[code] || 'Il download non è disponibile qui.');
+        if (!MSG[code]) document.documentElement.removeAttribute('data-dl');
+        return false;
+      }
+    }
+
+    const busy = (el, on, text) => {
+      const sm = el.querySelector('small');
+      if (on) { el.dataset.state = 'busy'; if (sm) { sm.dataset.was = sm.dataset.was || sm.textContent; sm.textContent = text; } }
+      else { delete el.dataset.state; if (sm && sm.dataset.was) sm.textContent = sm.dataset.was; }
+    };
+    const get = async src => { const r = await fetch(src); if (!r.ok) throw new Error(r.status); return r.blob(); };
+
+    document.addEventListener('click', async ev => {
+      const el = ev.target.closest('.dl');
+      if (!el) return;
+      const whole = el.id === 'dl-whole';
+      if (!whole && !cap) return;            // a plain link downloads by itself
+      ev.preventDefault();
+      if (el.dataset.state === 'busy') return;
+      say('');
+      try {
+        let name, blob;
+        if (whole) {
+          // the film travels in pieces; joined back in order they are the original file, byte for byte
+          const parts = [];
+          for (const src of WHOLE.pieces) {
+            busy(el, true, `scarico ${Math.round(parts.length / WHOLE.pieces.length * 100)}%…`);
+            parts.push(await get(src));
+          }
+          name = WHOLE.file;
+          blob = new Blob(parts, { type: 'video/mp4' });
+        } else {
+          busy(el, true, 'preparo…');
+          name = el.getAttribute('download');
+          blob = await get(el.getAttribute('href'));
+        }
+        busy(el, true, 'pronto');
+        if (await give(name, blob)) say(`${name}: fatto.`);
+      } catch (e) {
+        say('Non sono riuscito a preparare il file: riprova.');
+      } finally {
+        busy(el, false);
+      }
+    });
   })();
   </script>'''
 
