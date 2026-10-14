@@ -15,8 +15,10 @@ import sys
 import cv2
 import numpy as np
 
+cv2.setNumThreads(1)  # one painter per core: several of them work side by side
+
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, '..', '..', 'a-parte', 'board'))
+sys.path.append(os.path.join(HERE, '..', '..', 'a-parte', 'board'))  # after our own modules: shots.py is ours
 from paint import Strokes, _profiles, _trace, canvas_weave, impasto, load, noise, save, smooth  # noqa: E402
 
 INK = np.float32([0.05, 0.04, 0.06])
@@ -49,6 +51,8 @@ def passes(passdir, tag, far):
     fp = os.path.join(passdir, f'{tag}-faces.json')
     faces = json.load(open(fp)) if os.path.exists(fp) else []
     mp = os.path.join(passdir, f'{tag}-meta.json')
+    if not os.path.exists(mp):
+        mp = os.path.join(passdir, 'meta.json')  # a frame of an animated shot: the shot's meta
     people = np.zeros(ids.shape, bool)
     for i in (json.load(open(mp)).get('people', []) if os.path.exists(mp) else []):
         r, g, b = id_colour(i)
@@ -64,8 +68,21 @@ def wobble(h, w, seed, amp=3.5):
     return xx + dx, yy + dy, dx, dy
 
 
-def colour(col, ids, people):
+# the colour of each place: saturation, how far the dark turns violet (and into what), contrast, how much the
+# paint is scratched and dragged
+LOOKS = {
+    'viola': dict(sat=1.4, val=1.12, violet=0.6, deep=(0.3, 0.13, 0.48), contrast=1.12, scratch=1.0, drag=1.0),
+    'giorno': dict(sat=1.35, val=1.08, violet=0.35, deep=(0.32, 0.22, 0.5), contrast=1.1, scratch=0.8, drag=0.9),
+    'notte': dict(sat=1.35, val=1.2, violet=0.65, deep=(0.16, 0.12, 0.42), contrast=1.1, scratch=0.9, drag=1.0),
+    'tramonto': dict(sat=1.35, val=1.08, violet=0.45, deep=(0.4, 0.14, 0.42), contrast=1.1, scratch=0.9, drag=1.0),
+    'inverno': dict(sat=0.9, val=1.05, violet=0.4, deep=(0.22, 0.24, 0.36), contrast=1.05, scratch=0.6, drag=0.7),
+    'bianco': dict(sat=0.75, val=1.05, violet=0.2, deep=(0.45, 0.44, 0.48), contrast=1.0, scratch=0.35, drag=0.4),
+}
+
+
+def colour(col, ids, people, look='viola'):
     """Colour in patches, louder: light and shade kept but pressed together, saturation up, shadows violet."""
+    L = LOOKS[look]
     c8 = (np.clip(col, 0, 1) * 255).astype(np.uint8)
     flat = cv2.pyrMeanShiftFiltering(c8, 7, 22, maxLevel=2).astype(np.float32) / 255
     out = flat.copy()
@@ -78,14 +95,14 @@ def colour(col, ids, people):
         k = (ym + (Y[m] - ym) * 0.7) / np.maximum(Y[m], 1e-3)
         out[m] = flat[m] * np.clip(k, 0.5, 1.8)[:, None]
     hsv = cv2.cvtColor(np.clip(out, 0, 1), cv2.COLOR_RGB2HSV)
-    hsv[..., 1] = np.clip(hsv[..., 1] * 1.4, 0, 1)
-    hsv[..., 2] = np.clip(hsv[..., 2] * 1.12, 0, 1)
+    hsv[..., 1] = np.clip(hsv[..., 1] * L['sat'], 0, 1)
+    hsv[..., 2] = np.clip(hsv[..., 2] * L['val'], 0, 1)
     out = cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
     # a little more contrast, and the dark turns violet instead of grey
-    out = np.clip((out - 0.5) * 1.12 + 0.5, 0, 1)
+    out = np.clip((out - 0.5) * L['contrast'] + 0.5, 0, 1)
     Yo = lum(out)[..., None]
-    t = np.clip(1 - Yo / 0.32, 0, 1) * 0.6
-    out = out * (1 - t) + DEEP * (0.55 + Yo) * t
+    t = np.clip(1 - Yo / 0.32, 0, 1) * L['violet']
+    out = out * (1 - t) + np.float32(L['deep']) * (0.55 + Yo) * t
     # small things with drawing on them (posters, the stereo, a magazine) keep it, so their words still read
     detail = np.zeros(ids.shape, bool)
     Yc = lum(col)
@@ -171,8 +188,8 @@ def drags(canvas, height, base, ids, fx, fy, detail, seed, n=340):
             c = np.clip(b * r.uniform(0.5, 0.75), 0, 1)
         else:
             c = SCRATCH[r.integers(0, 4)] * r.uniform(0.85, 1.0)
-        a = np.arctan2(fy[int(y), int(x)], fx[int(y), int(x)]) + r.normal(0, 0.12)
-        L = r.uniform(30, 110)
+        a = np.arctan2(fy[int(y), int(x)], fx[int(y), int(x)]) + r.normal(0, 0.55)
+        L = r.uniform(18, 70)
         pts = np.float32([[x + np.cos(a) * L * t, y + np.sin(a) * L * t] for t in np.linspace(-0.5, 0.5, 8)])
         st.add(pts, c, r.uniform(2.0, 5.0), r.uniform(0.45, 0.75), prof[i], r.uniform(0.25, 0.6))
     st.render(canvas, height)
@@ -197,7 +214,7 @@ def scratches(out, base, dark, detail, fx, fy, seed, n=1150):
             c = SCRATCH[0] if Y[y, x] < 0.5 else SCRATCH[4]
         else:
             c = SCRATCH[r.choice([1, 2, 3])]
-        a = np.arctan2(fy[y, x], fx[y, x]) + (r.normal(0, 0.2) if r.random() < 0.75 else r.uniform(0, np.pi))
+        a = np.arctan2(fy[y, x], fx[y, x]) + (r.normal(0, 0.35) if r.random() < 0.55 else r.uniform(0, np.pi))
         L = r.uniform(6, 30) if r.random() < 0.85 else r.uniform(35, 80)
         bend = r.normal(0, 0.15)
         pts = [(x + np.cos(a + bend * t) * L * t, y + np.sin(a + bend * t) * L * t) for t in np.linspace(-0.5, 0.5, 5)]
@@ -305,7 +322,7 @@ def faces(canvas, height, faces_, z, seed, shift):
     st.render(canvas, height)
 
 
-def paint(passdir, tag, seed=1, far=30.0):
+def paint(passdir, tag, seed=1, far=30.0, look='viola'):
     col, z, ids, faces_, people = passes(passdir, tag, far)
     h, w = ids.shape
     mx, my, dx, dy = wobble(h, w, seed)
@@ -313,7 +330,8 @@ def paint(passdir, tag, seed=1, far=30.0):
     ids = cv2.remap(ids.astype(np.float32), mx, my, cv2.INTER_NEAREST, borderMode=cv2.BORDER_REFLECT).astype(np.int64)
     people = cv2.remap(people.astype(np.uint8), mx, my, cv2.INTER_NEAREST, borderMode=cv2.BORDER_REFLECT).astype(bool)
     z = cv2.remap(z, mx, my, cv2.INTER_NEAREST, borderMode=cv2.BORDER_REFLECT)
-    base, dark, detail = colour(col, ids, people)
+    base, dark, detail = colour(col, ids, people, look)
+    L = LOOKS[look]
     fx, fy = region_flow(ids, seed)
     canvas = base * 0.85 + VIOLET * 0.15
     height = np.zeros((h, w), np.float32)
@@ -322,12 +340,12 @@ def paint(passdir, tag, seed=1, far=30.0):
         ids_l = ids if R < 10 else np.where(detail, -2 - ids, ids)
         knife(canvas, height, ref, fx, fy, ids_l, R, steps, thresh, seed * 31 + i, jit, err_min=err)
     canvas[detail] = canvas[detail] * 0.35 + base[detail] * 0.65
-    drags(canvas, height, base, ids, fx, fy, detail, seed + 9)
+    drags(canvas, height, base, ids, fx, fy, detail, seed + 9, n=int(200 * L['drag']))
     faces(canvas, height, faces_, z, seed, (dx, dy))
     out = impasto(canvas, height, strength=3.0)
     out = contours(out, base, ids, z, dark, seed)
-    out = scratches(out, base, dark, detail, fx, fy, seed + 21)
-    out = splashes(out, seed + 23)
+    out = scratches(out, base, dark, detail, fx, fy, seed + 21, n=int(1150 * L['scratch']))
+    out = splashes(out, seed + 23, n=int(110 * L['scratch']))
     out *= canvas_weave(h, w, seed + 77)
     out += np.random.default_rng(seed + 2).normal(0, 0.008, (h, w, 1)).astype(np.float32)
     return np.clip(out, 0, 1)
@@ -336,7 +354,8 @@ def paint(passdir, tag, seed=1, far=30.0):
 if __name__ == '__main__':
     passdir, tag, out = sys.argv[1:4]
     seed = int(sys.argv[sys.argv.index('--seed') + 1]) if '--seed' in sys.argv else 1
+    look = sys.argv[sys.argv.index('--look') + 1] if '--look' in sys.argv else 'viola'
     meta = os.path.join(passdir, f'{tag}-meta.json')
     far = json.load(open(meta))['far'] if os.path.exists(meta) else 30.0
-    save(paint(passdir, tag, seed, far), out)
+    save(paint(passdir, tag, seed, far, look), out)
     print('ok', out)
