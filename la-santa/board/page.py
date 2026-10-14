@@ -56,7 +56,7 @@ def still(n):
     fr = sorted(f for f in os.listdir(os.path.join(LOOK, shot))) if os.path.isdir(os.path.join(LOOK, shot)) else []
     if not fr:
         return None
-    pick = {'s16': 0.55, 's24': 0.1, 's01': 0.85, 's11': 0.95, 's12': 0.75, 's15': 0.8, 's18': 0.9, 's22': 0.2}.get(shot, 0.55)
+    pick = {'s16': 0.55, 's24': 0.1, 's01': 0.85, 's02': 0.15, 's11': 0.95, 's12': 0.75, 's15': 0.8, 's18': 0.9, 's22': 0.85}.get(shot, 0.55)
     im = cv2.imread(os.path.join(LOOK, shot, fr[min(len(fr) - 1, int(len(fr) * pick))]))
     im = cv2.resize(im, (640, 360), interpolation=cv2.INTER_AREA)
     cv2.imwrite(out, im, [cv2.IMWRITE_JPEG_QUALITY, 84, cv2.IMWRITE_JPEG_PROGRESSIVE, 1])
@@ -75,13 +75,13 @@ def media():
     for i, (name, sub, a, b) in enumerate(CHAPTERS):
         b = total if b is None else b
         out = os.path.join(vdir, f'capitolo-{i + 1}.mp4')
-        crf = 22
+        crf = 28
         while True:
-            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{a:.3f}', '-to', f'{b:.3f}', '-i', FILM, '-c:v', 'libx264', '-preset', 'slow', '-crf', str(crf),
+            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{a:.3f}', '-to', f'{b:.3f}', '-i', FILM, '-c:v', 'libx264', '-preset', 'slow', '-crf', str(crf), '-tune', 'grain',
                             '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', out], check=True)
-            if os.path.getsize(out) < 14.5e6 or crf > 34:
+            if os.path.getsize(out) < 14.5e6 or crf > 36:
                 break
-            crf += 2
+            crf += 1
         chapters.append(dict(src=f'video/capitolo-{i + 1}.mp4', file=f'sex-on-la-santa-{i + 1}.mp4', name=name, sub=sub, start=tc(a), dur=tc(b - a), size=os.path.getsize(out)))
     for f in os.listdir(fdir):
         os.remove(os.path.join(fdir, f))
@@ -124,7 +124,8 @@ def build():
     if chapters:
         btns = ''.join(f'<button type="button" class="ch" data-i="{i}"><b>{esc(c["name"])}</b><span>{esc(c["sub"])}</span><small>{c["start"]} · {c["dur"]}</small></button>' for i, c in enumerate(chapters))
         player = PLAYER.replace('%BTNS%', btns).replace('%SRCS%', json.dumps([c['src'] for c in chapters]))
-        ch = ''.join(f'<a class="dl" href="{c["src"]}" download="{c["file"]}"><b>{esc(c["name"])}</b><small>{c["start"]} · {c["dur"]} · {c["size"] / 1e6:.1f} MB</small></a>'.replace('.', ',', 0) for c in chapters)
+        mb = lambda n: f'{n / 1e6:.1f}'.replace('.', ',')
+        ch = ''.join(f'<a class="dl" href="{c["src"]}" download="{c["file"]}"><b>{esc(c["name"])}</b><small>{c["start"]} · {c["dur"]} · {mb(c["size"])} MB</small></a>' for c in chapters)
         whole = dict(file='sayf-sex-on-la-santa-animatic.mp4', pieces=pieces)
         downloads = DOWNLOADS.replace('%CH%', ch).replace('%WHOLE%', json.dumps(whole)).replace('%SIZE%', f'{size / 1e6:.0f} MB')
     page = TEMPLATE.replace('%PLAYER%', player).replace('%DOWNLOADS%', downloads).replace('%MENU%', ''.join(menu))

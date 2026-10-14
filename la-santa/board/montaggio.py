@@ -134,7 +134,7 @@ def cut():
         cv2.imwrite(os.path.join(CUTD, f'c{j:05d}.jpg'), img, [cv2.IMWRITE_JPEG_QUALITY, 94])
     out = os.path.join(OUT, 'sex-on-la-santa.mp4')
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', str(FPS), '-i', os.path.join(CUTD, 'c%05d.jpg'), '-i', SONG,
-                    '-r', '24', '-c:v', 'libx264', '-preset', 'slow', '-crf', '19', '-pix_fmt', 'yuv420p',
+                    '-r', '24', '-c:v', 'libx264', '-preset', 'slow', '-crf', '27', '-tune', 'grain', '-pix_fmt', 'yuv420p',
                     '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out], check=True)
     print(out)
 
