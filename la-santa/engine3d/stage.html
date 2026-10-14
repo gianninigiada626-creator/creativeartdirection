@@ -1,0 +1,40 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#000}</style>
+<script>window.STAGE_SIZE = [1920, 1080]; // 16:9</script>
+<script type="importmap">{"imports":{"three":"/muerto/node_modules/three/build/three.module.js","three/addons/":"/muerto/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import { SCENES } from './scenes.js';
+// the bar's script (Lobster) and a poster face (Anton)
+for (const [fam, file] of [['Lobster', 'Lobster.ttf'], ['Anton', 'Anton.ttf']]) {
+  const f = new FontFace(fam, `url(/la-santa/build/fonts/${file})`);
+  await f.load().then(() => document.fonts.add(f)).catch(() => {});
+}
+import { renderPasses, renderer, THREE } from '/a-parte/engine3d/stage.js';
+// a filmic curve on the colour, so the bulbs and the neon roll off instead of clipping
+renderer.toneMapping = THREE.AgXToneMapping;
+renderer.toneMappingExposure = 1.0;
+window.renderPanel = async (id, opts = {}) => {
+  const { scene, camera, far = 60, update } = await SCENES[id](opts);
+  if (opts.t !== undefined) {
+    scene.traverse((o) => o.tick?.(opts.t));
+    update?.(opts.k ?? 0.5, opts.t);
+  }
+  const cam = { fov: camera.fov, aspect: camera.aspect, pos: camera.position.toArray() };
+  // who is a person: the painter fills their skin with one flat black
+  const people = [];
+  scene.traverse((o) => o.bones && o.userData.id !== undefined && people.push(o.userData.id));
+  return { ...renderPasses(scene, camera, { far }), meta: JSON.stringify({ far, cam, people }) };
+};
+let cur = null;
+window.buildAnim = async (id, opts = {}) => {
+  cur = await SCENES[id]({ ...opts, anim: true });
+  const people = [];
+  cur.scene.traverse((o) => o.bones && o.userData.id !== undefined && people.push(o.userData.id));
+  return { far: cur.far ?? 60, dur: cur.dur ?? null, animated: !!cur.update, people };
+};
+window.renderFrame = (k, t) => {
+  cur.scene.traverse((o) => o.tick?.(t));
+  cur.update?.(k, t);
+  return renderPasses(cur.scene, cur.camera, { far: cur.far ?? 60 });
+};
+window.__ready = true;
+</script>

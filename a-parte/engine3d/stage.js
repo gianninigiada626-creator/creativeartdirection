@@ -602,6 +602,9 @@ export function renderPasses(scene, camera, { far = 200 } = {}) {
   renderer.shadowMap.needsUpdate = true;
   renderer.render(scene, camera);
   out.color = renderer.domElement.toDataURL('image/png');
+  // a scene may tone-map its colour (renderer.toneMapping); the data passes never are
+  const toneMapping = renderer.toneMapping;
+  renderer.toneMapping = THREE.NoToneMapping;
   renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
   scene.fog = null;
   const ghosts = meshes.filter((o) => o.userData.colorOnly && o.visible);
@@ -632,6 +635,7 @@ export function renderPasses(scene, camera, { far = 200 } = {}) {
   ghosts.forEach((o) => (o.visible = true));
   scene.background = bg;
   scene.fog = fog;
+  renderer.toneMapping = toneMapping;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   return out;
 }
