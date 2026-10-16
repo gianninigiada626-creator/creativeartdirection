@@ -360,7 +360,7 @@ footer {{ border-top: 1px solid var(--line); padding-block: 2rem 3rem; font: 400
 
 /* the film: the player on the dark screen, the chapters under it like reels */
 .player video {{ display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; }}
-.chapters {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: .5rem; margin-top: .9rem; }}
+.chapters {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(9.6rem, 1fr)); gap: .5rem; margin-top: .9rem; }}
 .ch {{ display: grid; gap: .15rem; text-align: left; padding: .65rem .75rem; background: transparent; color: var(--screen-ink); border: 1px solid #3a2f36; cursor: pointer; font: 400 .8rem/1.3 var(--label); }}
 .ch b {{ font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: .72rem; }}
 .ch small {{ color: #8f8389; font-variant-numeric: tabular-nums; }}
