@@ -84,7 +84,8 @@ attraversa il secolo del colore nell'ordine in cui il colore muore e rinasce.
 ## La figura magenta
 
 Ada parte dipinta come tutti. A ogni visita una parte di lei diventa una forma piatta color magenta, che
-mangia la figura dai bordi verso dentro, come una macchia su un vecchio fotogramma.
+la consuma dalle estremità verso il volto, come una macchia su un vecchio fotogramma: prima le dita e i
+piedi, poi il bordo della figura, il volto per ultimo.
 
 | Scena | Ada magenta |
 |---|---|
