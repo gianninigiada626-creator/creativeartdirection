@@ -1,0 +1,6 @@
+node_modules
+dist
+out
+# unreleased audio stays out of the repository
+public/assets/*.mp3
+public/assets/*.wav

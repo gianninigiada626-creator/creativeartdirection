@@ -1,0 +1,6 @@
+# third-party models (fetch with engine3d/fetch_models.sh), the client's reference, renders
+engine3d/models/
+ref/
+build/
+out/
+__pycache__/

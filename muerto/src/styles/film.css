@@ -1,0 +1,621 @@
+/* MUERTO — the film runs in a 16:9 frame. Every overlay size is in --u (1% of the frame width),
+   so the web player and the 1920×1080 export lay out identically. */
+
+:root {
+  --ink: #000;
+  --bone: #e8e6dc;
+  --silver: #b9b9b9;
+  --red: #c8141b;
+  --hud-red: #d4161f;
+  --display: 'Rammetto One', 'Arial Black', sans-serif;
+  --script: 'Mea Culpa', 'Brush Script MT', cursive;
+  --smallcaps: 'Almendra SC', 'Times New Roman', serif;
+  --serif: 'IM Fell English', Georgia, serif;
+  --sans: 'Oswald', 'Arial Narrow', sans-serif;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+[hidden] {
+  display: none !important;
+}
+html,
+body {
+  height: 100%;
+  background: var(--ink);
+  color: var(--bone);
+  overflow: hidden;
+}
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+:focus-visible {
+  outline: 2px solid var(--hud-red);
+  outline-offset: 3px;
+}
+
+.screen {
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+.frame {
+  position: relative;
+  overflow: hidden;
+  background: #000;
+}
+.film-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.overlay {
+  --u: 19.2px;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--sans);
+}
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.overlay.is-crt-off .layer {
+  opacity: 0;
+}
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+.veil--white {
+  background: #fff;
+  opacity: 0;
+}
+.veil--black {
+  background: #000;
+  opacity: 1;
+}
+
+/* text outline used by the game typography */
+.overlay .stroke,
+.hud__clock,
+.hud__money,
+.hud__title-main,
+.hud__zone,
+.game-logo__album,
+.hud__radio-name {
+  paint-order: stroke fill;
+  -webkit-text-stroke: calc(var(--u) * 0.32) #000;
+}
+
+/* ───────── ACT I ───────── */
+.presents {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 12%;
+  text-align: center;
+  font: 300 calc(var(--u) * 1.05) var(--sans);
+  letter-spacing: 0.9em;
+  text-transform: uppercase;
+  color: #cfcac0;
+}
+.loading {
+  position: absolute;
+  inset: 0;
+}
+.game-logo {
+  position: absolute;
+  left: calc(var(--u) * 6);
+  bottom: calc(var(--u) * 7.5);
+  display: grid;
+  justify-items: start;
+  transform-origin: left bottom;
+}
+.game-logo__artist {
+  font: calc(var(--u) * 2.1) var(--display);
+  background: #0b0b0b;
+  color: var(--bone);
+  border: calc(var(--u) * 0.22) solid var(--bone);
+  padding: calc(var(--u) * 0.2) calc(var(--u) * 1.1) calc(var(--u) * 0.35);
+  letter-spacing: 0.04em;
+}
+.game-logo__album {
+  font: calc(var(--u) * 7.6) / 1 var(--display);
+  color: var(--bone);
+  -webkit-text-stroke-width: calc(var(--u) * 0.55);
+  text-shadow: calc(var(--u) * 0.55) calc(var(--u) * 0.55) 0 var(--red);
+  margin-top: calc(var(--u) * -0.4);
+}
+.loading__bar {
+  position: absolute;
+  left: calc(var(--u) * 6);
+  right: calc(var(--u) * 6);
+  bottom: calc(var(--u) * 4);
+  height: calc(var(--u) * 0.9);
+  border: calc(var(--u) * 0.18) solid var(--bone);
+  background: rgba(0, 0, 0, 0.5);
+}
+.loading__bar i {
+  display: block;
+  height: 100%;
+  background: var(--bone);
+  transform-origin: left;
+}
+
+/* ───────── ACT III — HUD ───────── */
+.hud {
+  position: absolute;
+  inset: 0;
+  color: var(--bone);
+}
+.hud__tr {
+  position: absolute;
+  top: calc(var(--u) * 2);
+  right: calc(var(--u) * 2.6);
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--u) * 1);
+  opacity: 0;
+}
+.hud__weapon {
+  width: calc(var(--u) * 6.4);
+  height: calc(var(--u) * 6.4);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #6d6d6a, #2b2b2a 70%);
+  border: calc(var(--u) * 0.25) solid #000;
+  display: grid;
+  place-items: center;
+  color: var(--bone);
+}
+.hud__weapon svg {
+  width: 62%;
+  height: 62%;
+}
+.hud__stats {
+  display: grid;
+  justify-items: end;
+  gap: calc(var(--u) * 0.25);
+}
+.hud__clock {
+  font: calc(var(--u) * 2.5) / 1 var(--display);
+  letter-spacing: 0.04em;
+}
+.hud__bar {
+  width: calc(var(--u) * 10);
+  height: calc(var(--u) * 0.95);
+  border: calc(var(--u) * 0.22) solid #000;
+  background: #4a1114;
+}
+.hud__bar i {
+  display: block;
+  height: 100%;
+  background: var(--hud-red);
+  transform-origin: left;
+}
+.hud__money {
+  font: calc(var(--u) * 2.4) / 1 var(--display);
+  color: #dfe3d4;
+  letter-spacing: 0.03em;
+}
+.hud__stars {
+  display: flex;
+  gap: calc(var(--u) * 0.15);
+  font: calc(var(--u) * 1.7) / 1 var(--display);
+}
+.hud__stars span {
+  color: rgba(0, 0, 0, 0.45);
+  -webkit-text-stroke: calc(var(--u) * 0.12) #000;
+}
+.hud__stars span.is-on {
+  color: var(--bone);
+}
+.hud__stars.is-flash span.is-on {
+  color: var(--hud-red);
+}
+.hud__radar {
+  position: absolute;
+  left: calc(var(--u) * 2.6);
+  bottom: calc(var(--u) * 2.6);
+  width: calc(var(--u) * 12.5);
+  height: calc(var(--u) * 12.5);
+  opacity: 0;
+}
+.hud__radar canvas {
+  width: 100%;
+  height: 100%;
+}
+.hud__radar b {
+  position: absolute;
+  top: calc(var(--u) * -0.6);
+  left: 50%;
+  transform: translateX(-50%);
+  font: calc(var(--u) * 1.2) var(--display);
+  color: var(--bone);
+  -webkit-text-stroke: calc(var(--u) * 0.18) #000;
+  paint-order: stroke fill;
+}
+.hud__radio {
+  position: absolute;
+  top: calc(var(--u) * 3);
+  left: 0;
+  right: 0;
+  display: grid;
+  justify-items: center;
+  gap: calc(var(--u) * 0.3);
+  opacity: 0;
+}
+.hud__radio-name {
+  font: calc(var(--u) * 2.2) var(--display);
+  color: #d8d2c4;
+  -webkit-text-stroke-width: calc(var(--u) * 0.26);
+}
+.hud__radio-song {
+  font: 500 calc(var(--u) * 1.15) var(--sans);
+  letter-spacing: 0.3em;
+  color: var(--bone);
+  text-shadow: 0 0 calc(var(--u) * 0.3) #000, 0 0 calc(var(--u) * 0.3) #000;
+}
+.hud__zone {
+  position: absolute;
+  right: calc(var(--u) * 3.2);
+  bottom: calc(var(--u) * 4.5);
+  font: calc(var(--u) * 4.4) / 1 var(--script);
+  color: var(--bone);
+  -webkit-text-stroke-width: calc(var(--u) * 0.28);
+  opacity: 0;
+}
+.hud__title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38%;
+  display: grid;
+  justify-items: center;
+  gap: calc(var(--u) * 0.6);
+  opacity: 0;
+}
+.hud__title-main {
+  font: calc(var(--u) * 7) / 1 var(--display);
+  color: var(--red);
+  -webkit-text-stroke-width: calc(var(--u) * 0.45);
+  text-shadow: calc(var(--u) * 0.35) calc(var(--u) * 0.35) 0 #000;
+  order: 2;
+}
+.hud__title-sub {
+  font: 500 calc(var(--u) * 1.3) var(--sans);
+  letter-spacing: 0.5em;
+  color: var(--bone);
+  text-shadow: 0 0 calc(var(--u) * 0.25) #000, 0 0 calc(var(--u) * 0.25) #000;
+  order: 1;
+}
+.hud__title[data-kind='passed'] .hud__title-main {
+  color: var(--bone);
+  font-size: calc(var(--u) * 5.4);
+}
+.hud__title[data-kind='passed'] .hud__title-sub {
+  order: 3;
+  font: calc(var(--u) * 2.4) var(--display);
+  letter-spacing: 0.06em;
+  color: var(--hud-red);
+  -webkit-text-stroke: calc(var(--u) * 0.24) #000;
+  paint-order: stroke fill;
+}
+.hud__objective {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 17%;
+  text-align: center;
+  font: 600 calc(var(--u) * 1.75) var(--sans);
+  letter-spacing: 0.03em;
+  color: var(--bone);
+  text-shadow: 0 0 calc(var(--u) * 0.2) #000, 0 0 calc(var(--u) * 0.2) #000, calc(var(--u) * 0.12) calc(var(--u) * 0.12) 0 #000;
+  opacity: 0;
+}
+.hud__objective b {
+  color: var(--hud-red);
+  font-weight: 700;
+}
+.hud__sub {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: calc(var(--u) * 8.6);
+  text-align: center;
+  font: 500 calc(var(--u) * 1.65) / 1.3 var(--sans);
+  color: var(--bone);
+  text-shadow: 0 0 calc(var(--u) * 0.22) #000, 0 0 calc(var(--u) * 0.22) #000, calc(var(--u) * 0.1) calc(var(--u) * 0.1) 0 #000;
+  opacity: 0;
+}
+.hud__sub b {
+  color: #9c9c96;
+  font-weight: 600;
+  margin-right: 0.4em;
+}
+
+/* ───────── ACT IV — the back insert ───────── */
+.insert {
+  position: absolute;
+  width: calc(var(--u) * 62);
+  height: calc(var(--u) * 48.4);
+  left: calc(50% - var(--u) * 31);
+  top: calc(50% - var(--u) * 24.2);
+  background: radial-gradient(ellipse at 50% 40%, #0e0d0d, #050505 75%);
+  box-shadow: 0 calc(var(--u) * 1) calc(var(--u) * 4) rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  color: var(--silver);
+}
+.insert__title {
+  position: absolute;
+  top: 4.5%;
+  left: 0;
+  right: 0;
+  display: grid;
+  justify-items: center;
+  color: var(--red);
+  line-height: 0.82;
+}
+.t-artist {
+  font: calc(var(--u) * 3.1) var(--script);
+  margin-left: calc(var(--u) * -9);
+}
+.t-artist i {
+  font-style: normal;
+}
+.t-album {
+  font: calc(var(--u) * 9.2) var(--script);
+  margin-top: calc(var(--u) * -1.2);
+}
+.insert__frame {
+  position: absolute;
+  top: 29%;
+  left: 6%;
+  width: 88%;
+  aspect-ratio: 1000 / 400;
+}
+.frame-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.orn {
+  fill: none;
+  stroke: var(--silver);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.orn.rail {
+  stroke-width: 2.2;
+}
+.orn.thin {
+  stroke-width: 1;
+}
+.orn.crest,
+.orn.car {
+  stroke-width: 1.7;
+}
+.bead {
+  fill: none;
+  stroke: var(--silver);
+  stroke-width: 1.1;
+}
+.tracklist {
+  position: absolute;
+  inset: 25% 11% 25% 11%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(var(--u) * 0.55);
+  text-align: center;
+  font: calc(var(--u) * 1.32) / 1.2 var(--smallcaps);
+  letter-spacing: 0.06em;
+  color: #c4c4c4;
+}
+.tracklist b {
+  color: var(--red);
+  font-weight: 400;
+  margin-right: 0.25em;
+}
+.trk {
+  display: inline-block;
+  margin: 0 0.45em;
+}
+.insert__producers-title {
+  position: absolute;
+  top: 74.5%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font: calc(var(--u) * 1.25) var(--smallcaps);
+  letter-spacing: 0.4em;
+  color: #c4c4c4;
+}
+.insert__producers,
+.insert__credits {
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  text-align: center;
+  font: italic calc(var(--u) * 0.98) / 1.4 var(--serif);
+  color: #a6a6a6;
+}
+.insert__producers {
+  top: 79%;
+}
+.insert__producers b {
+  font-style: normal;
+  font-weight: 400;
+  color: #cfcfcf;
+}
+.insert__credits {
+  top: 89.5%;
+}
+.insert__mark {
+  position: absolute;
+  left: 50%;
+  bottom: 2.2%;
+  transform: translateX(-50%);
+  font: calc(var(--u) * 0.85) var(--serif);
+  letter-spacing: 0.12em;
+  color: var(--red);
+  border: calc(var(--u) * 0.1) solid var(--red);
+  padding: 0 calc(var(--u) * 0.35);
+}
+.spark {
+  position: absolute;
+  font: calc(var(--u) * 1.1) var(--serif);
+  font-style: normal;
+  color: #7d7d7d;
+}
+.s1 { top: 3%; left: 3%; }
+.s2 { top: 3%; right: 3%; }
+.s3 { bottom: 3%; left: 3%; }
+.s4 { bottom: 3%; right: 3%; }
+.insert__sheen {
+  position: absolute;
+  inset: -20% -40%;
+  background: linear-gradient(100deg, transparent 42%, rgba(255, 255, 255, 0.06) 49%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 51%, transparent 58%);
+  pointer-events: none;
+}
+
+/* ───────── player chrome (never in the export) ───────── */
+.start {
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: calc(var(--u, 19.2px) * 1.2);
+  background: #000;
+  text-align: center;
+  transition: opacity 0.7s;
+}
+.start.is-gone {
+  opacity: 0;
+  pointer-events: none;
+}
+.start__kicker {
+  font: 300 clamp(11px, 1vw, 16px) var(--sans);
+  letter-spacing: 0.8em;
+  text-transform: uppercase;
+  color: #a9a59c;
+}
+.start__title {
+  font: clamp(48px, 9vw, 150px) / 1 var(--display);
+  color: var(--bone);
+  -webkit-text-stroke: clamp(3px, 0.4vw, 7px) #000;
+  paint-order: stroke fill;
+  text-shadow: clamp(3px, 0.45vw, 8px) clamp(3px, 0.45vw, 8px) 0 var(--red);
+}
+.start__btn {
+  margin-top: 8px;
+  padding: 14px 26px;
+  font: clamp(14px, 1.3vw, 20px) var(--display);
+  letter-spacing: 0.05em;
+  color: #000;
+  background: var(--bone);
+  border: 3px solid #000;
+  box-shadow: 5px 5px 0 var(--red);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.start__btn:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 var(--red);
+}
+.start__btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.start__note {
+  font: 400 clamp(11px, 0.9vw, 14px) var(--sans);
+  letter-spacing: 0.2em;
+  color: #8b8780;
+  max-width: 60ch;
+}
+
+.controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px 14px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+  font: 500 13px var(--sans);
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+.frame.is-active .controls,
+.frame.is-paused .controls,
+.controls:focus-within {
+  opacity: 1;
+}
+.controls button {
+  padding: 6px 8px;
+  color: var(--bone);
+}
+.controls button:hover {
+  color: #fff;
+}
+.c-play {
+  font-size: 16px;
+  min-width: 34px;
+}
+.c-time {
+  font-variant-numeric: tabular-nums;
+  color: #bdb9b0;
+  white-space: nowrap;
+}
+.c-scrub {
+  flex: 1;
+  min-width: 80px;
+  accent-color: var(--hud-red);
+}
+.c-chapters {
+  display: flex;
+  gap: 2px;
+}
+.c-chapters button {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #a9a59c;
+}
+.c-mute.is-off {
+  text-decoration: line-through;
+  color: #8b8780;
+}
+@media (max-width: 720px) {
+  .c-chapters {
+    display: none;
+  }
+}
+.is-export .controls,
+.is-export .start {
+  display: none;
+}
