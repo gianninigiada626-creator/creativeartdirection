@@ -17,7 +17,7 @@ function toward(from, rotY, to) {
 
 const ELIO = { skin: '#d6ac8c', hair: '#8f8a86', top: '#33373f', bottom: '#2a2a2e', shoes: '#1c1a19', sleeves: 'long' };
 const ADA_OLD = { skin: '#e3bc9c', top: '#7e8ba0', bottom: '#5f5a50', shoes: '#3a3530', sleeves: 'long' };
-const ADA_GIRL = { skin: '#dcae86', top: '#1f7d55', bottom: '#1f7d55', shoes: '#2a2018', sleeves: 'short' };
+const ADA_GIRL = { skin: '#dcae86', top: '#1f7d55', bottom: '#6a5448', shoes: '#2a2018', sleeves: 'short' };
 
 async function elio(pose, opts = {}) {
   const o = await grey('beard', pose, { seed: 3, hide: ['Wolf3D_Headwear', 'Wolf3D_Hair'], ...opts, wear: { ...ELIO, ...(opts.wear ?? {}) } });
@@ -26,13 +26,13 @@ async function elio(pose, opts = {}) {
 }
 /** Ada at eighty-two: white hair in a soft bob, a cardigan, a little bent. */
 async function adaOld(pose, opts = {}) {
-  return grey('woman', pose, { bob: '#d6d0c6', bobShape: [0.56, 0.46, -0.12, 1.08], seed: 5, ...opts, wear: { ...ADA_OLD, hair: '#d8d2c8', ...(opts.wear ?? {}) },
+  return grey('woman', pose, { bob: '#d6d0c6', bobShape: [0.5, 0.46, -0.12, 1.05], seed: 5, ...opts, wear: { ...ADA_OLD, hair: '#d8d2c8', ...(opts.wear ?? {}) },
     aim: { Spine2: [0, 1, 0.1], Neck: [0, 1, 0.16], ...(opts.aim ?? {}) } });
 }
 /** Ada at nineteen, in the pale dress that was green. */
 async function adaGirl(pose, opts = {}) {
   const o = await grey('woman', pose, { bob: '#231812', bobShape: [0.49, 0.47, -0.1, 1.1], scale: 0.97, seed: 8, ...opts, wear: { ...ADA_GIRL, hair: '#231812', ...(opts.wear ?? {}) } });
-  skirt(o, (opts.wear ?? {}).bottom ?? ADA_GIRL.bottom);
+  skirt(o, (opts.wear ?? {}).top ?? ADA_GIRL.top);
   return o;
 }
 /** A skirt hung from the hips, full, to below the knee. */
@@ -43,7 +43,7 @@ function skirt(o, color) {
   if (!hips || !knee) return;
   const top = hips.getWorldPosition(new THREE.Vector3());
   const bot = knee.getWorldPosition(new THREE.Vector3());
-  const len = (top.y - bot.y) * 1.25;
+  const len = (top.y - bot.y) * 1.6;
   const ws = hips.getWorldScale(new THREE.Vector3()).x;
   const m = new THREE.Mesh(new THREE.CylinderGeometry(0.15 / ws, 0.245 / ws, len / ws, 28, 1, true), clay(color));
   m.material.side = THREE.DoubleSide;
@@ -213,7 +213,7 @@ function banner() {
 }
 
 /** The flat ground of Pietralata in 1962, from where the camera stood: the extras watching the procession go by. */
-export async function pianoPietralata(s, { girlLook = 'lens', camPos = [0.2, 1.3, 1.5] } = {}) {
+export async function pianoPietralata(s, { girlLook = 'lens', camPos = [0.2, 1.3, 1.5], sun: sunAt = [-30, 60, 25], sunI = 2.2, hemiI = 1.25 } = {}) {
   s.background = new THREE.Color('#dfe2e2');
   s.fog = new THREE.Fog('#dcdad2', 30, 220);
   s.add(sky([[-0.1, '#c9c3b6'], [0.0, '#e2e0d6'], [0.12, '#e3e7e8'], [1.0, '#c4d2de']]));
@@ -265,12 +265,12 @@ export async function pianoPietralata(s, { girlLook = 'lens', camPos = [0.2, 1.3
   const look = girlLook === 'lens' ? camPos : [-2.4, 0, 0.5]; // the lens, or the boy with the clapperboard just beside it
   const ada = await adaGirl('stand', { pos: ap, rotY: facing(ap, look), expr: 'neutral', aim: { Spine: [0.1, 1, 0], Head: [0.08, 1, 0.08] } });
   s.add(ada);
-  s.add(new THREE.HemisphereLight('#f4f2ea', '#6a5a48', 1.25));
-  const sun = shadowed(new THREE.DirectionalLight('#fff2dc', 2.2), 2048, 30);
-  sun.position.set(-30, 60, 25);
+  s.add(new THREE.HemisphereLight('#f4f2ea', '#6a5a48', hemiI));
+  const sun = shadowed(new THREE.DirectionalLight('#fff2dc', sunI), 2048, 30);
+  sun.position.set(...sunAt);
   sun.target.position.set(0, 0, -8);
   s.add(sun, sun.target);
-  return { ada };
+  return { ada, banner: bn, sun };
 }
 
 /** 03 · the four seconds, as they came out of the can: the girl turns and looks into the lens. */
@@ -289,6 +289,7 @@ async function paneCu(opts = {}) {
 
 // ── THE CARE HOME AT OSTIA: a pale green room, a window on the winter sea ─────────────────────────
 async function room(s, { night = false, rain = false, curtains = false } = {}) {
+  let rainTex = null;
   const W2 = 2.2, Bk = -4.6, Fr = 1.4, Ht = 2.9;
   const wall = '#a9b6a4';
   s.add(plane(W2 * 2, Fr - Bk, '#b9b5ab', [0, 0, (Bk + Fr) / 2]));
@@ -330,6 +331,8 @@ async function room(s, { night = false, rain = false, curtains = false } = {}) {
         c.stroke();
       }
     });
+    streaks.wrapS = streaks.wrapT = THREE.RepeatWrapping;
+    rainTex = streaks;
     const g = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, y1 - y0), new THREE.MeshBasicMaterial({ map: streaks, transparent: true }));
     g.position.set((x0 + x1) / 2, (y0 + y1) / 2, Bk - 0.02);
     g.userData.id = wid;
@@ -345,7 +348,7 @@ async function room(s, { night = false, rain = false, curtains = false } = {}) {
       s.add(c);
     }
   }
-  return { W2, Bk, Fr, Ht, x0, x1, y0, y1 };
+  return { W2, Bk, Fr, Ht, x0, x1, y0, y1, rainTex };
 }
 
 function armchair(x, z, rot) {
@@ -424,14 +427,14 @@ async function stanza(opts = {}) {
   const el = await elio('sitChair', { pos: [-1.18, 0.14, -2.5], rotY: facing([-1.18, 0, -2.5], [1.1, 0, -3.6]), expr: 'neutral' });
   s.add(el);
   daylight(s);
-  return { scene: s, camera: cam(30, [0.35, 0.9, 0.9], [-0.15, 0.98, -4.6]), far: 3000, figure: { obj: ada, fade: opts.fade ?? 0 } };
+  return { scene: s, camera: cam(30, [0.35, 0.9, 0.9], [-0.15, 0.98, -4.6]), far: 3000, figure: { obj: ada, fade: opts.fade ?? 0 }, cast: { ada, el } };
 }
 
 /** 18 · rain on the window; Ada in bed, half of her already gone; Elio in his wet coat, on the chair. */
 async function visita(opts = {}) {
   const s = new THREE.Scene();
   s.background = new THREE.Color('#9aa2a6');
-  await room(s, { rain: true });
+  const rm = await room(s, { rain: true });
   s.add(bed(0.6, -3.0, -90, '#c4bba6'));
   s.add(nightstand(1.85, -4.2));
   const ada = await adaOld('sitFloor', { pos: [1.35, 0.58, -2.95], rotY: -70, expr: 'tired', aim: { LeftArm: [0.3, -1, 0.3], RightArm: [-0.3, -1, 0.3] } });
@@ -440,7 +443,7 @@ async function visita(opts = {}) {
   const el = await elio('sitChair', { pos: [-0.75, 0.12, -1.95], rotY: facing([-0.75, 0, -1.95], [1.35, 0, -2.95]), wear: { top: '#2e3238', bottom: '#26262a' }, expr: 'sad' });
   s.add(el);
   daylight(s, { rain: true });
-  return { scene: s, camera: cam(32, [-1.75, 1.0, 1.0], [0.6, 1.05, -3.6]), far: 3000, figure: { obj: ada, fade: opts.fade ?? 0.6 } };
+  return { scene: s, camera: cam(32, [-1.75, 1.0, 1.0], [0.6, 1.05, -3.6]), far: 3000, figure: { obj: ada, fade: opts.fade ?? 0.6 }, cast: { ada, el, rain: rm.rainTex } };
 }
 
 // ── THE LAB, the night of the green ─────────────────────────────────────────────────────────────
@@ -472,7 +475,8 @@ async function laboratorio(opts = {}) {
     s.add(reel);
   }
   s.add(boxMesh(0.3, 0.012, 0.012, '#7a3a5a', [-0.95, 1.18, -1.4]));
-  s.add(boxMesh(1.04, 0.62, 0.05, '#101214', [0.1, 0.92, -1.82]));
+  const mon = boxMesh(1.04, 0.62, 0.05, '#101214', [0.1, 0.92, -1.82]);
+  s.add(mon);
   s.add(boxMesh(0.06, 0.18, 0.06, '#101214', [0.1, 0.76, -1.82]));
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.96, 0.54), new THREE.MeshBasicMaterial({ color: new THREE.Color('#1c3a2a') }));
   screen.position.set(0.1, 1.23, -1.79);
@@ -496,7 +500,7 @@ async function laboratorio(opts = {}) {
   rim.position.set(-2, 2.6, 1);
   rim.target.position.set(0, 1, -1);
   s.add(rim, rim.target);
-  return { scene: s, camera: cam(30, [0.85, 1.52, 0.75], [-0.02, 1.12, -1.8]), far: 30, screens: [{ name: opts.screen ?? 'verde', mode: 'monitor', mesh: screen }] };
+  return { scene: s, camera: cam(30, [0.85, 1.52, 0.75], [-0.02, 1.12, -1.8]), far: 30, screens: [{ name: opts.screen ?? 'verde', mode: 'monitor', mesh: screen }], cast: { el, glow, screen, mon } };
 }
 
 // ── THE PROJECTION: the room in the dark, the beam, the girl on the wall between mother and son ──
@@ -556,7 +560,7 @@ async function proiezione(opts = {}) {
   bounce.position.set(0, 1.7, -3.3);
   s.add(bounce);
   s.add(new THREE.HemisphereLight('#1a3a4a', '#08060a', 0.7));
-  return { scene: s, camera: cam(30, [-0.55, 1.0, 2.3], [0.85, 1.35, -3.9]), far: 30, screens: [{ name: 'restaurato', mode: 'projection', mesh: pic }], figure: { obj: ada, fade: opts.fade ?? 0 } };
+  return { scene: s, camera: cam(30, [-0.55, 1.0, 2.3], [0.85, 1.35, -3.9]), far: 30, screens: [{ name: 'restaurato', mode: 'projection', mesh: pic }], figure: { obj: ada, fade: opts.fade ?? 0 }, cast: { ada, el, beamL, pic, proj, lens } };
 }
 
 // ── OSTIA AT DAWN: the sea to the west, the pink band of the Earth's shadow over it ──────────────
@@ -610,7 +614,10 @@ async function alba(opts = {}) {
   low.position.set(10, 8, 40);
   low.target.position.set(0, 0, -14);
   s.add(low, low.target);
-  return { scene: s, camera: cam(30, [1.4, 1.0, 2.0], [0.3, 10, -120]), far: 3000 };
+  return { scene: s, camera: cam(30, [1.4, 1.0, 2.0], [0.3, 10, -120]), far: 3000, cast: { el } };
 }
 
 export const SCENES = { pane, paneCu, stanza, visita, laboratorio, proiezione, alba };
+// for the shots of the film (film.js)
+export { facing, toward, elio, adaOld, adaGirl, skirt, gloves, sea, room, armchair, bed, nightstand, daylight, banner, ELIO, ADA_OLD, ADA_GIRL };
+export { stanza, visita, laboratorio, proiezione, alba };

@@ -43,6 +43,17 @@ LOOKS = {
     # Eastmancolor, 1962, as it came out of the bath; and the same film sixty years on, faded to magenta
     'eastman': dict(pre=None, shadow=(0.08, 0.07, 0.07), keep=0.6, sat=1.3, warm=(1.0, 0.94, 0.82), gain=1.05, gamma=1.0, lo=0.04, hi=0.45),
     'sbiadito': dict(pre='faded', shadow=(0.2, 0.08, 0.14), keep=0.65, sat=1.05, warm=(1.0, 0.86, 0.92), gain=1.0, gamma=1.0, lo=0.05, hi=0.5),
+    # the restoration, one layer a night: the cyan back (the sky turns blue), then the yellow (the sun on the faces)
+    'restauro1': dict(pre='faded', dyes=(1.0, 0.42, 0.96, 0.04), shadow=(0.12, 0.08, 0.12), keep=0.62, sat=1.15, warm=(0.98, 0.9, 0.92), gain=1.02, gamma=1.0, lo=0.05, hi=0.48),
+    'restauro2': dict(pre='faded', dyes=(1.0, 0.85, 1.0, 0.02), shadow=(0.09, 0.07, 0.08), keep=0.6, sat=1.22, warm=(1.0, 0.92, 0.84), gain=1.04, gamma=1.0, lo=0.04, hi=0.46),
+    # the light table: white light through pink film
+    'tavolo': dict(pre=None, shadow=(0.08, 0.06, 0.08), keep=0.6, sat=1.1, warm=(1.0, 0.97, 0.96), gain=1.02, gamma=1.0, lo=0.05, hi=0.5),
+    # the lab in the dark, lit only by the monitor
+    'buio': dict(pre=None, shadow=(0.02, 0.02, 0.03), keep=0.5, sat=1.15, warm=(1.0, 0.9, 0.96), gain=1.25, gamma=0.9, lo=0.02, hi=0.34),
+    # the road to Ostia: sodium, Wong Kar-wai's orange
+    'sodio': dict(pre=None, shadow=(0.03, 0.02, 0.02), keep=0.5, sat=1.45, warm=(1.0, 0.72, 0.38), gain=1.35, gamma=0.88, lo=0.02, hi=0.32),
+    # the night room: blue, the corridor's sodium through the door
+    'notte': dict(pre=None, shadow=(0.02, 0.03, 0.06), keep=0.55, sat=1.2, warm=(1.0, 0.82, 0.6), gain=1.4, gamma=0.85, lo=0.02, hi=0.32),
     # dawn over the western sea: the band of magenta over the Earth's shadow
     'alba': dict(pre=None, shadow=(0.08, 0.06, 0.14), keep=0.6, sat=1.35, warm=(1.0, 0.8, 0.9), gain=1.15, gamma=0.95, lo=0.04, hi=0.42),
     # the morning after: milk white
@@ -74,7 +85,7 @@ def pre(img, L):
         y = img @ np.float32([0.299, 0.587, 0.114])
         return np.clip(y[..., None] * np.float32(L.get('tint', (1, 1, 1))), 0, 1).astype(np.float32)
     if p == 'faded':
-        return fade_dyes(img)
+        return fade_dyes(img, *L.get('dyes', (0.22, 0.42, 0.96, 0.06)))
     if p == 'deserto':
         return desert(img, 0.62, 0.08)
     return img
@@ -123,6 +134,11 @@ def lay_in(canvas, img, corners, mode):
     M = cv2.getPerspectiveTransform(src, np.float32(corners))
     warped = cv2.warpPerspective(img, M, (w, h), flags=cv2.INTER_AREA)
     mask = cv2.warpPerspective(np.ones((ih, iw), np.float32), M, (w, h))
+    if mode == 'ghost':
+        # a face in the black glass of the monitor: a reflection, faint, its edges lost
+        soft = cv2.GaussianBlur(mask, (0, 0), 40)[..., None]
+        y = warped.mean(axis=2, keepdims=True)
+        return np.clip(1 - (1 - canvas) * (1 - 0.42 * soft * (0.4 * warped + 0.6 * y)), 0, 1)
     if mode == 'projection':
         # a picture thrown on a rough wall: soft at the edges, the wall's grain through it, a little glow round it
         soft = cv2.GaussianBlur(mask, (0, 0), 2.2)[..., None]
@@ -172,6 +188,10 @@ def painting(passdir, tag, look, seed=1, fade=None, screens=None):
     if L.get('pre') == 'deserto':
         # the strokes bring their own colour with them: wash it out again, as the room is
         out = desert(out, 0.75, 0.0)
+    elif L.get('pre') in ('mono', 'tint'):
+        # black and white stays black and white, or one tint, whatever colour the strokes brought
+        y = out @ np.float32([0.299, 0.587, 0.114])
+        out = np.clip(y[..., None] * np.float32(L.get('tint', (1, 1, 1))), 0, 1).astype(np.float32)
     # the 1962 film where it is shown
     for sc in meta.get('screens', []):
         src = (screens or {}).get(sc['name']) or os.path.join(FILM, f"{sc['name']}.jpg")
