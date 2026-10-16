@@ -154,6 +154,19 @@ def lay_in(canvas, img, corners, mode):
         soft = cv2.GaussianBlur(mask, (0, 0), 2.2)[..., None]
         glow = cv2.GaussianBlur(warped * mask[..., None], (0, 0), 22) * 0.35
         res = roi * (1 - soft * 0.7) + warped * soft * (0.85 + 0.25 * roi.mean(axis=2, keepdims=True)) + glow
+    elif mode == 'paper':
+        # a paper label: crisp enough to read, in the light and the colour of the painting around it
+        soft = cv2.GaussianBlur(mask, (0, 0), 1.0)[..., None]
+        m = mask > 0.5
+        if m.any():
+            ratio = np.clip(roi[m].mean(axis=0) / (warped[m].mean(axis=0) + 1e-4), 0.2, 1.5)
+            warped = warped * ratio * 1.15
+        res = roi * (1 - soft) + warped * soft
+    elif mode == 'over':
+        # the picture laid over a painting that only had the white of the beam there
+        soft = cv2.GaussianBlur(mask, (0, 0), 2.6)[..., None]
+        glow = cv2.GaussianBlur(warped * mask[..., None], (0, 0), 22) * 0.3
+        res = roi * (1 - soft) + warped * 0.97 * soft + glow * (1 - soft)
     else:
         soft = cv2.GaussianBlur(mask, (0, 0), 0.8)[..., None]
         glow = cv2.GaussianBlur(warped * mask[..., None], (0, 0), 14) * 0.25
@@ -189,6 +202,8 @@ def painting(passdir, tag, look, seed=1, fade=None, screens=None):
     ids = (idp[..., 0] << 16) | (idp[..., 1] << 8) | idp[..., 2]
     fp = os.path.join(passdir, f'{tag}-faces.json')
     faces = json.load(open(fp)) if os.path.exists(fp) else []
+    # only faces in front of the camera: one behind it projects onto whatever is in the middle of the picture
+    faces = [f for f in faces if f['pts']['center'][2] > 0.05]
     L = LOOKS[look]
     col = pre(col, L)
     none = np.zeros(ids.shape, bool)
@@ -207,6 +222,8 @@ def painting(passdir, tag, look, seed=1, fade=None, screens=None):
         out = np.clip(y[..., None] * tint, 0, 1).astype(np.float32)
     # the 1962 film where it is shown
     for sc in meta.get('screens', []):
+        if not sc.get('corners'):
+            continue
         src = (screens or {}).get(sc['name']) or os.path.join(FILM, f"{sc['name']}.jpg")
         if os.path.exists(src):
             img = cv2.cvtColor(cv2.imread(src), cv2.COLOR_BGR2RGB).astype(np.float32) / 255

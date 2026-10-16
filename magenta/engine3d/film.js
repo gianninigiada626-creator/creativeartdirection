@@ -896,6 +896,7 @@ async function s32() {
   const gl = glove();
   gl.rotation.set(0, Math.PI, 0);
   s.add(gl);
+  const screens = [{ name: 'etichetta', mode: 'paper', mesh: label }];
   const update = (k, t) => {
     const x = lerp(-0.85, -1.03, ramp(t, 2, 6));
     can.position.set(x, 1.73, -6);
@@ -903,7 +904,7 @@ async function s32() {
     gl.visible = t < 8;
   };
   update(0, 0);
-  return { scene: s, camera: cam(22, [0.2, 1.75, -4.9], [-1.05, 1.68, -6.1]), far: 40, update };
+  return { scene: s, camera: cam(22, [0.2, 1.75, -4.9], [-1.05, 1.68, -6.1]), far: 40, update, screens };
 }
 /** 33 · Ostia at dawn: Elio small at the edge of the sea; the camera pulls slowly back. */
 async function s33() {

@@ -96,7 +96,7 @@ SHOTS = [
         L(7, 13.5, "Le scarpe buone le portavamo in mano fino alla fermata, e le mettevamo sull'autobus.", 'We carried our good shoes in our hands to the bus stop, and put them on in the bus.')]),
     dict(id='11', dur=7, kind='3d', fps=8, look='deserto', fade=0, amb='stanza', lines=[
         L(0.5, 5, 'Passami… quella cosa. Per il brodo.', 'Pass me… that thing. For the broth.')]),
-    dict(id='12', dur=20, kind='3d', fps=8, look='deserto', fade=0.08, amb='stanza', lines=[
+    dict(id='12', dur=20, kind='3d', fps=8, look='deserto', fade=0, amb='stanza', lines=[
         L(0.5, 4.5, "E papà? C'era anche lui, a Pietralata?", 'And Dad? Was he in Pietralata too?'),
         L(10.5, 15.5, 'Tuo padre aveva le mani bianche. Bianche di gesso.', 'Your father had white hands. White with chalk.'),
         L(16.5, 20, "È l'unica cosa che mi abbia mai detto di lui. In cinquantotto anni.", "It's the only thing she ever told me about him. In fifty-eight years.")]),
@@ -117,7 +117,7 @@ SHOTS = [
     dict(id='17', dur=8, kind='insert', seq='presa', look='restauro2', frames=loop(5), tint=(1.0, 0.95, 0.75), amb='laboratorio'),
     dict(id='18', dur=18, kind='3d', fps=8, look='deserto_pioggia', fade=0.6, amb='pioggia', lines=[
         L(4, 8.5, 'Lei è gentile. Viene tutti i giorni.', "You're very kind, sir. You come every day.")]),
-    dict(id='19', dur=20, kind='3d', fps=8, look='verde', amb='laboratorio', screens={'verde': ('presaCu', 'eastman', lambda t: 14 + int(t * 8) % 18)}, lines=[
+    dict(id='19', dur=20, kind='3d', fps=8, look='verde', amb='laboratorio', screens={'verde': ('presaCu', 'eastman', lambda t: 24 + int(t * 4) % 8)}, lines=[
         L(4, 7, 'Il vestito era verde.', 'The dress was green.'),
         L(9, 13, 'Il verde è proprio il colore che manca al magenta.', 'Green is exactly the colour that magenta is missing.'),
         L(13.2, 17, "Era lì sotto da sessant'anni.", 'It had been under there for sixty years.')]),
@@ -156,7 +156,7 @@ SHOTS = [
     dict(id='30', dur=25, kind='3d', fps=4, look='technicolor', fade=0, amb='proiettore'),
     # EPILOGO
     dict(id='31', dur=15, kind='3d', fps=4, look='mattino', amb='mattino'),
-    dict(id='32', dur=12, kind='3d', fps=8, look='imbibizione', amb='archivio'),
+    dict(id='32', dur=12, kind='3d', fps=8, look='imbibizione', amb='archivio', screens={'etichetta': 'etichetta'}),
     dict(id='33', dur=35, kind='3d', fps=8, look='alba', amb='mare', lines=[
         L(8, 12, 'Il magenta non esiste.', "Magenta doesn't exist."),
         L(16, 20.5, "Ma all'alba, quando la luce arriva da tutte e due le parti del giorno,", 'But at dawn, when the light comes from both sides of the day,'),
@@ -243,8 +243,8 @@ def render(ids):
 def screen_paths(s, t):
     out = {}
     for name, src in (s.get('screens') or {}).items():
-        if src == 'griglia':
-            out[name] = os.path.join(FILM, 'griglia.jpg')
+        if src in ('griglia', 'etichetta'):
+            out[name] = os.path.join(FILM, f'{src}.jpg')
         else:
             seq, look, f = src
             out[name] = take_frame(seq, look, f(t) % 32)
@@ -282,6 +282,25 @@ def paint(ids):
             if k % 40 == 0:
                 print('painted', k, '/', len(jobs), flush=True)
     print('paintings done', len(jobs), flush=True)
+
+
+def posa(ids):
+    """Lay the 1962 film onto paintings that were painted with only the white of the beam where it falls
+    (the picture's quad was hidden from the render): the corners come from a still of the same static camera."""
+    for sid in ids:
+        s = BY_ID[sid]
+        meta = json.load(open(os.path.join(ROOT, 'build', 'test', f's{sid}-meta.json')))
+        n = int(round(s['dur'] * DRAW_FPS))
+        for i in range(n):
+            path = os.path.join(DRAW, sid, f'a{i:04d}.jpg')
+            img = cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB).astype(np.float32) / 255
+            srcs = screen_paths(s, i / DRAW_FPS)
+            for sc in meta['screens']:
+                if sc.get('corners') and sc['name'] in srcs:
+                    pic = cv2.cvtColor(cv2.imread(srcs[sc['name']]), cv2.COLOR_BGR2RGB).astype(np.float32) / 255
+                    img = pittura.lay_in(img, pic, sc['corners'], 'over')
+            pittura.save(img, path)
+        print('laid in', sid, n, flush=True)
 
 
 # ── the cut ─────────────────────────────────────────────────────────────────────────────────────
@@ -503,6 +522,8 @@ if __name__ == '__main__':
         paint(args)
     elif cmd == 'cut':
         cut(*(float(a) for a in args[:2])) if args else cut()
+    elif cmd == 'posa':
+        posa(args)
     elif cmd == 'list':
         listing()
     else:
