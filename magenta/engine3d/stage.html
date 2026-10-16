@@ -1,0 +1,39 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#000}</style>
+<script>window.STAGE_SIZE = [1920, 804]; // 2.39:1, as A PARTE</script>
+<script type="importmap">{"imports":{"three":"/muerto/node_modules/three/build/three.module.js","three/addons/":"/muerto/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import { SCENES } from './scenes.js';
+import { renderPasses, THREE, W, H } from '/a-parte/engine3d/stage.js';
+/** Where a plane lands on the picture: its four corners in pixels, top-left first, clockwise. */
+function corners(mesh, camera) {
+  mesh.updateWorldMatrix(true, false);
+  const b = new THREE.Box3().setFromBufferAttribute(mesh.geometry.attributes.position);
+  return [[b.min.x, b.max.y], [b.max.x, b.max.y], [b.max.x, b.min.y], [b.min.x, b.min.y]].map(([x, y]) => {
+    const v = new THREE.Vector3(x, y, 0).applyMatrix4(mesh.matrixWorld).project(camera);
+    return [((v.x + 1) / 2) * W, ((1 - v.y) / 2) * H];
+  });
+}
+/** Where her head is on the picture: the colour leaves from the far ends of her toward it. */
+function head(obj, camera) {
+  const b = obj.bones?.Head;
+  if (!b) return null;
+  const v = b.getWorldPosition(new THREE.Vector3()).project(camera);
+  return [((v.x + 1) / 2) * W, ((1 - v.y) / 2) * H];
+}
+window.renderPanel = async (id, opts = {}) => {
+  const { scene, camera, far = 200, update, screens = [], figure = null } = await SCENES[id](opts);
+  if (opts.t !== undefined) {
+    scene.traverse((o) => o.tick?.(opts.t));
+    update?.(opts.k ?? 0.5, opts.t);
+  }
+  scene.updateMatrixWorld(true);
+  camera.updateMatrixWorld(true);
+  const meta = {
+    far, cam: { fov: camera.fov, aspect: camera.aspect, pos: camera.position.toArray() },
+    screens: screens.map((s) => ({ name: s.name, mode: s.mode, corners: corners(s.mesh, camera) })),
+    figure: figure ? { id: figure.obj.userData.id, fade: figure.fade, head: head(figure.obj, camera) } : null,
+  };
+  return { ...renderPasses(scene, camera, { far }), meta: JSON.stringify(meta) };
+};
+window.__ready = true;
+</script>
