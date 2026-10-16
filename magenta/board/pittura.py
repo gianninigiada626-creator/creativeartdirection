@@ -126,7 +126,7 @@ def figure_mask(idp, fig, seed):
     return m & ((score + 0.3 * wob) > 1 - f * 1.05)
 
 
-def lay_in(canvas, img, corners, mode):
+def lay_in(canvas, img, corners, mode, ids=None):
     """The 1962 film laid into a monitor or onto a wall, from its four corners on the picture."""
     h, w = canvas.shape[:2]
     ih, iw = img.shape[:2]
@@ -142,6 +142,16 @@ def lay_in(canvas, img, corners, mode):
     M = cv2.getPerspectiveTransform(src, cs - np.float32([x0, y0]))
     warped = cv2.warpPerspective(img, M, (bw, bh), flags=cv2.INTER_AREA)
     mask = cv2.warpPerspective(np.ones((ih, iw), np.float32), M, (bw, bh))
+    if ids is not None and mode != 'ghost':
+        # whatever stands in front of the screen stays in front: lay the picture only on the surface it falls on,
+        # the object that fills most of its quad (the monitor's glass, the wall, the strip of film)
+        ir = ids[y0:y1, x0:x1]
+        inside = ir[mask > 0.5]
+        if inside.size:
+            vals, counts = np.unique(inside, return_counts=True)
+            surf = vals[np.argmax(counts)]
+            vis = cv2.GaussianBlur((ir == surf).astype(np.float32), (0, 0), 1.0)
+            mask = mask * vis
     out = canvas.copy()
     roi = canvas[y0:y1, x0:x1]
     if mode == 'ghost':
@@ -227,7 +237,7 @@ def painting(passdir, tag, look, seed=1, fade=None, screens=None):
         src = (screens or {}).get(sc['name']) or os.path.join(FILM, f"{sc['name']}.jpg")
         if os.path.exists(src):
             img = cv2.cvtColor(cv2.imread(src), cv2.COLOR_BGR2RGB).astype(np.float32) / 255
-            out = lay_in(out, img, sc['corners'], sc['mode'])
+            out = lay_in(out, img, sc['corners'], sc['mode'], ids)
     # Ada, as much of her as has gone: one flat magenta shape with a hand-cut edge, as the red of A PARTE
     if fm is not None:
         h, w = fm.shape

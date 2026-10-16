@@ -249,6 +249,23 @@ function faceOn(o, dist, fov, { dy = 0, side = 0, aimDy = 0, bone = 'Head', up =
   p.y += dy;
   return cam(fov, p.toArray(), [h.x, h.y + aimDy, h.z]);
 }
+/** Turn someone from the waist up by `a` radians (the spine, the neck, the head share it); the legs stay where they are. */
+function twist(o, a) {
+  o.updateMatrixWorld(true);
+  for (const [b, w] of [['Spine1', 0.2], ['Spine2', 0.25], ['Neck', 0.2], ['Head', 0.35]]) o.bones[b]?.rotateY(a * w);
+}
+/** A spoon held as a hand holds it: the handle across the palm, the bowl out past the thumb. */
+function grip(o, sp) {
+  o.updateMatrixWorld(true);
+  const p = (n) => o.bones[n].getWorldPosition(new THREE.Vector3());
+  const hand = p('RightHand'), mid = p('RightHandMiddle1'), idx = p('RightHandIndex1'), pinky = p('RightHandPinky1');
+  const fingers = mid.clone().sub(hand).normalize();
+  const across = idx.clone().sub(pinky).normalize();
+  const palmN = new THREE.Vector3().crossVectors(fingers, across).normalize();
+  const axis = across.clone().multiplyScalar(0.85).addScaledVector(fingers, 0.35).normalize();
+  sp.position.copy(hand.clone().lerp(mid, 0.75)).addScaledVector(palmN, -0.012).addScaledVector(axis, 0.03);
+  sp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), axis);
+}
 /** Seated, hands in the lap (both arms), so a gesture can come out of the pose and go back to it. */
 const LAP = { LeftArm: [0.15, -1, 0.35], LeftForeArm: [-0.1, -0.15, 1], RightArm: [-0.15, -1, 0.35], RightForeArm: [0.1, -0.15, 1] };
 /** Two fingers take the hair behind the ear (the right hand). */
@@ -455,7 +472,8 @@ async function s09() {
   const update = (k, t) => {
     // he turns his hands over; she looks at him, then at the sea
     set(el, mixAims(el.baseAims, { RightForeArm: [0.25, 0.1, 1], Head: [0, 1, 0.15] }, bell(t, 2, 9)));
-    ada.rotation.y = D(-35 - 55 * bell(t, 18, 32));
+    // she turns to the sea from the waist up; her legs stay in the chair
+    twist(ada, D(-55) * bell(t, 18, 32));
   };
   return { ...sc, update };
 }
@@ -485,8 +503,7 @@ async function s11() {
   const LOOK = { RightArm: [-0.1, -0.8, 0.6], RightForeArm: [0.35, 0.55, 1], RightHand: [0.2, 0.4, 1], Head: [0, 0.85, 0.5] };
   const update = (k, t) => {
     set(ada, mixAims({ ...ada.baseAims, ...LAP }, LOOK, ramp(t, 0.5, 2.5)));
-    hold(ada, sp, 'Right', [0, 0.06, 0.02]);
-    sp.rotation.set(-1.15, 0.35, 0);
+    grip(ada, sp);
   };
   update(0, 3);
   const hp = boneAt(ada, 'RightHand');
@@ -863,8 +880,12 @@ async function s31() {
   const FOLD = { LeftArm: [0.2, -0.6, 0.8], LeftForeArm: [-0.25, 0.1, 1], RightArm: [-0.2, -0.6, 0.8], RightForeArm: [0.25, 0.1, 1], Head: [0, 0.9, 0.4] };
   const update = (k, t) => {
     set(ok, mixAims(ok.baseAims, FOLD, 0.7 + 0.3 * Math.sin(t * 0.9)));
-    hold(ok, blanket, 'Both', [0, -0.02, 0]);
-    blanket.rotation.set(0, D(-60), 0);
+    // she holds the folded blanket by its two sides: her hands at its edges, not inside it
+    const L = boneAt(ok, 'LeftHand'), Rh = boneAt(ok, 'RightHand');
+    const v = L.clone().sub(Rh);
+    blanket.scale.x = Math.max(0.5, (v.length() - 0.03) / 0.42);
+    blanket.position.copy(L.clone().add(Rh).multiplyScalar(0.5)).add(new THREE.Vector3(0, -0.035, 0));
+    blanket.rotation.set(0, -Math.atan2(v.z, v.x), 0);
   };
   update(0, 0);
   return { scene: s, camera: cam(30, [0.5, 1.02, -1.25], [0.62, 0.68, -4.6]), far: 3000, update };
