@@ -181,11 +181,24 @@ def frames():
 
 
 FILM_MP4 = os.path.join(ROOT, 'out', 'magenta.mp4')
-# the chapters the page plays, by shot (each file under 15 MB)
+# the chapters the page plays, by shot: each under 65 seconds, so at 1.6 Mbit/s each file stays under 15 MB
 CHAPTERS = [('Prologo', 'Il proiettore', '01', '04'), ('I · Le bobine', "L'archivio, il tavolo luminoso", '05', '07'),
-            ('II · Ada', 'La stanza sul mare', '08', '13'), ('III · Novantasei fotogrammi', 'Il ciano, il giallo', '14', '17'),
-            ('III · Novantasei fotogrammi', 'Il verde, la strada, la notte', '18', '22'), ('IV · Il ciak', 'Le mani bianche', '23', '25'),
-            ("V · L'anello", 'La proiezione', '26', '28'), ("V · L'anello", 'Nino', '29', '30'), ('Epilogo', "L'alba", '31', '35')]
+            ('II · Ada', 'Hai mai fatto del cinema?', '08', '10'), ('II · Ada', 'Le mani bianche', '11', '13'),
+            ('III · Novantasei fotogrammi', 'Il ciano', '14', '16'), ('III · Novantasei fotogrammi', 'Il giallo, il verde', '17', '19'),
+            ('III · Novantasei fotogrammi', 'La strada, la notte', '20', '22'), ('IV · Il ciak', 'Fotogramma per fotogramma', '23', '25'),
+            ("V · L'anello", 'Il proiettore si accende', '26', '27'), ("V · L'anello", 'Chi sta guardando?', '28', '28'),
+            ("V · L'anello", 'Nino', '29', '30'), ('Epilogo', 'Il letto vuoto, la scatola', '31', '32'), ('Epilogo', "L'alba", '33', '35')]
+VBIT = 1600   # kbit/s, the chapters
+WBIT = 1300   # kbit/s, the whole film
+
+
+def enc(src, out, t0=None, t1=None, kbit=1600):
+    """1280×720, two passes at a set bitrate: the size is known before the file exists."""
+    cut = ['-ss', f'{t0:.3f}', '-to', f'{t1:.3f}'] if t0 is not None else []
+    log = os.path.join(ROOT, 'build', 'x264-pass')
+    common = ['-vf', 'scale=1280:720:flags=lanczos', '-c:v', 'libx264', '-preset', 'medium', '-b:v', f'{kbit}k', '-pix_fmt', 'yuv420p', '-passlogfile', log]
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', *cut, '-i', src, *common, '-pass', '1', '-an', '-f', 'mp4', '/dev/null'], check=True)
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', *cut, '-i', src, *common, '-pass', '2', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', out], check=True)
 
 
 def tc(sec):
@@ -206,18 +219,13 @@ def media():
     for i, (name, sub, a, b) in enumerate(CHAPTERS):
         t0, t1 = start[a], min(end[b], total)
         out = os.path.join(vdir, f'capitolo-{i + 1}.mp4')
-        crf = 27
-        while True:
-            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{t0:.3f}', '-to', f'{t1:.3f}', '-i', FILM_MP4, '-vf', 'scale=1280:720:flags=lanczos',
-                            '-c:v', 'libx264', '-preset', 'slow', '-crf', str(crf), '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', out], check=True)
-            if os.path.getsize(out) < 14.5e6 or crf > 38:
-                break
-            crf += 1
+        if not os.path.exists(out):
+            enc(FILM_MP4, out, t0, t1, VBIT)
         chapters.append(dict(src=f'video/capitolo-{i + 1}.mp4', file=f'magenta-{i + 1}.mp4', name=name, sub=sub, start=tc(t0), dur=tc(t1 - t0), size=os.path.getsize(out)))
-        print('chapter', i + 1, crf, os.path.getsize(out), flush=True)
+        print('chapter', i + 1, os.path.getsize(out), flush=True)
     whole = os.path.join(ROOT, 'build', 'magenta-720p.mp4')
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', FILM_MP4, '-vf', 'scale=1280:720:flags=lanczos', '-c:v', 'libx264', '-preset', 'slow', '-crf', '28',
-                    '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', whole], check=True)
+    if not os.path.exists(whole):
+        enc(FILM_MP4, whole, kbit=WBIT)
     for f in os.listdir(fdir):
         os.remove(os.path.join(fdir, f))
     data = open(whole, 'rb').read()
