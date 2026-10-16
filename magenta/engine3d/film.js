@@ -440,11 +440,13 @@ async function s06() {
 }
 
 // ── II · ADA ──────────────────────────────────────────────────────────────────────────────────────
-/** 08 · the match cut: her two old fingers, the same gesture; over her shoulder, the winter sea. */
+/** 08 · the match cut: her two old fingers, the same gesture; her profile against the winter sea. */
 async function s08() {
-  const { s, ada } = await casa({ chair: [1.1, -3.55, 200], ada: { pose: 'sitChair', pos: [1.06, 0.1, -3.66], rot: 200 } });
-  const update = (k, t) => set(ada, mixAims(ada.baseAims, EAR_SIT, bell(t + 1.1, 0, 3.6)));
-  return { scene: s, camera: cam(26, [1.62, 1.18, -2.95], [0.55, 1.05, -4.6]), far: 3000, update, figure: { obj: ada, fade: 0 } };
+  const { s, ada } = await casa({ chair: [0.95, -3.95, 90], ada: { pose: 'sitChair', pos: [0.92, 0.1, -3.98], rot: 90, aim: LAP } });
+  const update = (k, t) => set(ada, mixAims({ ...ada.baseAims, ...LAP }, EAR_SIT, bell(t + 1.1, 0, 3.6)));
+  update(0, 0);
+  const h = boneAt(ada, 'Head');
+  return { scene: s, camera: cam(20, [h.x + 0.3, h.y + 0.08, h.z + 1.3], [h.x + 0.12, h.y + 0.02, h.z]), far: 3000, update, figure: { obj: ada, fade: 0 } };
 }
 /** 09 · the room from the door, at the height of someone sitting. */
 async function s09() {
@@ -811,32 +813,43 @@ async function s29() {
   sc.scene.add(key, key.target);
   return { ...sc, camera: faceOn(ada, 1.25, 16, { up: 0.02 }), update: (k, t) => set(ada, mixAims(ada.baseAims, { Head: [-0.05, 1, 0.1] }, bell(t, 1, 8))) };
 }
-/** 30 · the Pietà: Elio on the floor against the bed, his head on the blanket, her hand in his hair; the beam paints them. */
+/** 30 · the Pietà: she sits on the edge of the bed, he on the floor with his head against her knees, her hand in his hair; the beam paints them. */
 async function s30() {
   const s = new THREE.Scene();
   s.background = new THREE.Color('#04060a');
-  s.add(plane(6, 6, '#3a3c38', [0, 0, -1.5]));
-  s.add(plane(6, 3, '#a9b6a4', [0, 1.5, -3.2], 0));
-  s.add(bed(0, -2.2, 90, '#2f6a4a'));
-  const ada = await adaOld('sitFloor', { pos: [0.55, 0.58, -2.2], rotY: -90, expr: 'smile', aim: { LeftArm: [-0.35, -0.2, 0.8], LeftForeArm: [-0.2, -0.5, 1], Head: [0, 0.9, 0.45] } });
+  s.add(plane(7, 7, '#3a3c38', [0, 0, -1.0]));
+  s.add(plane(7, 3, '#a9b6a4', [0, 1.5, -3.2], 0));
+  const lw = plane(7, 3, '#a9b6a4', [-2.6, 1.5, -0.5], 0);
+  lw.rotation.y = Math.PI / 2;
+  s.add(lw);
+  s.add(bed(0, -2.25, 90, '#2f6a4a'));
+  const ada = await adaOld('sitChair', { pos: [0.02, 0.26, -1.78], rotY: 0, expr: 'smile', aim: { LeftArm: [0.25, -0.55, 0.8], LeftForeArm: [0.25, -0.75, 0.6], LeftHand: [0.1, -0.8, 0.5], RightArm: [-0.15, -1, 0.35], RightForeArm: [0.1, -0.15, 1], Head: [0.1, 0.85, 0.5], Neck: [0, 1, 0.3] } });
   s.add(ada);
-  const el = await elio('sitFloor', { pos: [-0.25, 0.0, -1.35], rotY: 175, gloves: true, expr: 'sad', aim: { Spine: [0, 1, 0.7], Spine1: [0, 1, 0.6], Spine2: [0, 1, 0.5], Neck: [0.3, 0.6, 1], Head: [0.4, 0.3, 1] } });
+  const el = await elio('sitFloor', { pos: [0.28, 0.0, -1.05], rotY: 8, gloves: true, expr: 'sad', aim: { Spine: [-0.15, 1, -0.45], Spine1: [-0.2, 1, -0.35], Neck: [-0.4, 0.9, -0.1], Head: [-0.55, 0.75, 0.05], LeftArm: [0.25, -1, 0.1], RightArm: [-0.25, -1, 0.05] } });
   s.add(el);
-  // the beam from the nightstand on the right, across them to the wall: the 1962 picture on their bodies
+  // the projector on the nightstand at the right: across them, to the wall at the left; the 1962 picture on their bodies
+  s.add(nightstand(1.35, 0.1, false));
   const tex = await new THREE.TextureLoader().loadAsync('/magenta/build/film/presa-eastman/f0028.jpg');
   tex.colorSpace = THREE.SRGBColorSpace;
-  const lensP = [2.4, 1.15, -1.7];
-  const sp = new THREE.SpotLight('#ffffff', 70, 10, 0.32, 0.05, 1.0);
+  const lensP = [1.25, 1.0, 0.15];
+  const aim = [-0.15, 0.78, -1.75];
+  const sp = new THREE.SpotLight('#ffffff', 40, 10, 0.36, 0.05, 1.0);
   sp.position.set(...lensP);
-  sp.target.position.set(-2.6, 1.0, -2.6);
+  sp.target.position.set(...aim);
   sp.map = tex;
   sp.castShadow = true;
   sp.shadow.mapSize.set(1024, 1024);
   s.add(sp, sp.target);
-  s.add(shaft(lensP, [-2.6, 1.0, -2.6], 0.02, 0.9, '#f4f0e6', 0.22));
-  s.add(dust(lensP, [-2.6, 1.0, -2.6], 0.8, 120, 13));
-  s.add(new THREE.HemisphereLight('#1a3a4a', '#08060a', 0.45));
-  return { scene: s, camera: cam(30, [0.05, 1.05, 1.6], [0.05, 0.85, -2.2]), far: 30, figure: { obj: ada, fade: 0 } };
+  s.add(shaft(lensP, aim, 0.02, 0.8, '#f4f0e6', 0.07));
+  s.add(dust(lensP, aim, 0.7, 90, 13));
+  const pr = projector();
+  pr.rotation.y = Math.atan2(lensP[0] - aim[0], lensP[2] - aim[2]);
+  pr.position.set(1.35, 0.62 + 0.3, 0.3);
+  pr.scale.setScalar(0.8);
+  s.add(pr);
+  s.add(new THREE.HemisphereLight('#1a3a4a', '#08060a', 0.4));
+  const update = (k, t) => pr.userData.reels.forEach((r, i) => (r.rotation.x = -t * (i ? 2.6 : 1.9)));
+  return { scene: s, camera: cam(30, [0.05, 0.98, 0.55], [0.12, 0.8, -1.7]), far: 30, update, figure: { obj: ada, fade: 0 } };
 }
 
 // ── EPILOGO ───────────────────────────────────────────────────────────────────────────────────────

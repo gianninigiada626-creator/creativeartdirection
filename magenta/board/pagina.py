@@ -4,10 +4,14 @@ screenplay set as a screenplay (Courier, the English subtitles under each line),
     python3 pagina.py   → out/web/index.html, out/web/img/*.jpg
 """
 import html
+import json
 import os
 import re
+import subprocess
 
 import cv2
+
+import film
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -176,6 +180,56 @@ def frames():
     return '\n'.join(out)
 
 
+FILM_MP4 = os.path.join(ROOT, 'out', 'magenta.mp4')
+# the chapters the page plays, by shot (each file under 15 MB)
+CHAPTERS = [('Prologo', 'Il proiettore', '01', '04'), ('I · Le bobine', "L'archivio, il tavolo luminoso", '05', '07'),
+            ('II · Ada', 'La stanza sul mare', '08', '13'), ('III · Novantasei fotogrammi', 'Il ciano, il giallo', '14', '17'),
+            ('III · Novantasei fotogrammi', 'Il verde, la strada, la notte', '18', '22'), ('IV · Il ciak', 'Le mani bianche', '23', '25'),
+            ("V · L'anello", 'La proiezione', '26', '28'), ("V · L'anello", 'Nino', '29', '30'), ('Epilogo', "L'alba", '31', '35')]
+
+
+def tc(sec):
+    return f'{int(sec // 60)}:{int(round(sec % 60)):02d}'
+
+
+def media():
+    """The film for the page: chapters that play (1280×720, each under 15 MB), and the whole film in byte pieces for the download."""
+    if not os.path.exists(FILM_MP4):
+        return [], [], 0
+    tl, total = film.timeline()
+    start = {s['id']: st for st, s in tl}
+    end = {s['id']: st + s['dur'] for st, s in tl}
+    vdir, fdir = os.path.join(WEB, 'video'), os.path.join(WEB, 'film')
+    os.makedirs(vdir, exist_ok=True)
+    os.makedirs(fdir, exist_ok=True)
+    chapters = []
+    for i, (name, sub, a, b) in enumerate(CHAPTERS):
+        t0, t1 = start[a], min(end[b], total)
+        out = os.path.join(vdir, f'capitolo-{i + 1}.mp4')
+        crf = 27
+        while True:
+            subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', f'{t0:.3f}', '-to', f'{t1:.3f}', '-i', FILM_MP4, '-vf', 'scale=1280:720:flags=lanczos',
+                            '-c:v', 'libx264', '-preset', 'slow', '-crf', str(crf), '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', out], check=True)
+            if os.path.getsize(out) < 14.5e6 or crf > 38:
+                break
+            crf += 1
+        chapters.append(dict(src=f'video/capitolo-{i + 1}.mp4', file=f'magenta-{i + 1}.mp4', name=name, sub=sub, start=tc(t0), dur=tc(t1 - t0), size=os.path.getsize(out)))
+        print('chapter', i + 1, crf, os.path.getsize(out), flush=True)
+    whole = os.path.join(ROOT, 'build', 'magenta-720p.mp4')
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', FILM_MP4, '-vf', 'scale=1280:720:flags=lanczos', '-c:v', 'libx264', '-preset', 'slow', '-crf', '28',
+                    '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', whole], check=True)
+    for f in os.listdir(fdir):
+        os.remove(os.path.join(fdir, f))
+    data = open(whole, 'rb').read()
+    step = 14_500_000
+    pieces = []
+    for k in range(0, len(data), step):
+        p = f'film/pezzo-{k // step + 1}.mp4'
+        open(os.path.join(WEB, p), 'wb').write(data[k:k + step])
+        pieces.append(p)
+    return chapters, pieces, len(data)
+
+
 def main():
     sc = open(os.path.join(ROOT, 'SCENEGGIATURA.md')).read().split('\n')
     k = next(i for i, x in enumerate(sc) if x.startswith('## Sceneggiatura'))
@@ -187,7 +241,18 @@ def main():
     script = screenplay(sc[k + 1:][sc[k + 1:].index(note) + 1:])
     rg = open(os.path.join(ROOT, 'REGIA.md')).read().split('\n')
     regia = prose(blocks(rg[1:]))
-    page = TEMPLATE.format(logline=inline(logline), intro=prose(intro), frames=frames(), note=inline(note), script=script, regia=regia)
+    chapters, pieces, size = media()
+    _, total = film.timeline()
+    if chapters:
+        btns = ''.join(f'<button type="button" class="ch" data-i="{i}"><b>{esc(c["name"])}</b><span>{esc(c["sub"])}</span><small>{c["start"]} · {c["dur"]}</small></button>' for i, c in enumerate(chapters))
+        player = PLAYER.replace('%BTNS%', btns).replace('%SRCS%', json.dumps([c['src'] for c in chapters]))
+        mb = lambda n: f'{n / 1e6:.0f}'
+        downloads = DOWNLOADS.replace('%WHOLE%', json.dumps(dict(file='MAGENTA.mp4', pieces=pieces))).replace('%SIZE%', f'{mb(size)} MB').replace('%DUR%', tc(total))
+    else:
+        player = '<img src="img/03-sbiadito.jpg" width="1920" height="804" alt="Pane duro, 1962: la spianata di Pietralata in un fotogramma sbiadito, tutto rosa.">'
+        downloads = ''
+    page = TEMPLATE.format(logline=inline(logline), intro=prose(intro), frames=frames(), note=inline(note), script=script, regia=regia,
+                           player=player, downloads=downloads, minutes=tc(total))
     os.makedirs(WEB, exist_ok=True)
     open(os.path.join(WEB, 'index.html'), 'w').write(page)
     print(os.path.join(WEB, 'index.html'))
@@ -285,6 +350,23 @@ table.many {{ min-width: 56rem; }}
 
 footer {{ border-top: 1px solid var(--line); padding-block: 2rem 3rem; font: 400 .8rem/1.6 var(--label); letter-spacing: .06em; color: var(--muted); text-align: center; }}
 
+/* the film: the player on the dark screen, the chapters under it like reels */
+.player video {{ display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; }}
+.chapters {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: .5rem; margin-top: .9rem; }}
+.ch {{ display: grid; gap: .15rem; text-align: left; padding: .65rem .75rem; background: transparent; color: var(--screen-ink); border: 1px solid #3a2f36; cursor: pointer; font: 400 .8rem/1.3 var(--label); }}
+.ch b {{ font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: .72rem; }}
+.ch small {{ color: #8f8389; font-variant-numeric: tabular-nums; }}
+.ch[aria-current="true"] {{ border-color: #ff4fa8; color: #fff; }}
+.ch:hover, .ch:focus-visible {{ border-color: #ff4fa8; outline: none; }}
+.player .hint {{ margin: .8rem 0 0; font: 400 .8rem/1.5 var(--label); color: #8f8389; letter-spacing: .03em; }}
+.downloads .dl {{ display: inline-grid; gap: .2rem; padding: .8rem 1rem; border: 1px solid var(--magenta); background: transparent; color: var(--ink); cursor: pointer; font: 400 .9rem/1.3 var(--label); text-align: left; }}
+.downloads .dl b {{ letter-spacing: .1em; text-transform: uppercase; font-size: .78rem; }}
+.downloads .dl small {{ color: var(--muted); font-variant-numeric: tabular-nums; }}
+.downloads .dl[data-state="busy"] {{ opacity: .7; cursor: progress; }}
+.dl-note {{ min-height: 1.4em; margin: .8rem 0 0; font: 400 .85rem/1.4 var(--label); color: var(--muted); }}
+.dl-only {{ display: none; }}
+:root[data-dl] .dl-only {{ display: block; }}
+
 @media (max-width: 34rem) {{
   .frame figcaption {{ grid-template-columns: 1fr; }}
   .frame .cap, .frame .ref {{ grid-column: 1; }}
@@ -296,10 +378,10 @@ html {{ scroll-behavior: smooth; }}
 
 <header class="hero">
   <div class="wide">
-    <img src="img/03-sbiadito.jpg" width="1920" height="804" alt="Pane duro, 1962: la spianata di Pietralata in un fotogramma sbiadito, tutto rosa. Una ragazza in un angolo guarda in macchina.">
+    {player}
     <div class="title">
       <h1>MAGENTA</h1>
-      <div class="meta">Cortometraggio d'animazione · circa 11 minuti · 2.39:1 e 1.37:1 · italiano, sottotitoli inglesi</div>
+      <div class="meta">Cortometraggio d'animazione · {minutes} · 2.39:1 e 1.37:1 · italiano, sottotitoli inglesi</div>
       <p class="logline">{logline}</p>
     </div>
   </div>
@@ -307,6 +389,7 @@ html {{ scroll-behavior: smooth; }}
 
 <nav aria-label="Sezioni"><div class="wrap"><ul>
   <li><a href="#film">Il film</a></li>
+  <li><a href="#scarica">Scarica</a></li>
   <li><a href="#immagini">Le immagini</a></li>
   <li><a href="#sceneggiatura">Sceneggiatura</a></li>
   <li><a href="#regia">Regia e fotografia</a></li>
@@ -317,6 +400,8 @@ html {{ scroll-behavior: smooth; }}
   <p class="eyebrow">Il film</p>
   {intro}
 </div></section>
+
+{downloads}
 
 <section id="immagini"><div class="wide">
   <div class="wrap" style="padding-left:0;padding-right:0;margin-left:0">
@@ -347,6 +432,81 @@ html {{ scroll-behavior: smooth; }}
 
 <footer><div class="wrap">MAGENTA · soggetto, sceneggiatura, regia e fotografia · stile pittorico di <i>A parte</i></div></footer>
 '''
+
+
+PLAYER = r'''<div class="player">
+      <video id="film" controls playsinline preload="metadata" poster="img/03-sbiadito.jpg"></video>
+      <div class="chapters" role="group" aria-label="Capitoli">%BTNS%</div>
+      <p class="hint">Primo montaggio. Le voci non sono ancora registrate: le battute sono nei sottotitoli, il suono è provvisorio. I capitoli si susseguono da soli.</p>
+    </div>
+    <script>
+    (() => {
+      const srcs = %SRCS%;
+      const v = document.getElementById('film');
+      const btns = [...document.querySelectorAll('.ch')];
+      let cur = 0;
+      const go = (i, play) => {
+        cur = i;
+        v.src = srcs[i];
+        btns.forEach((b, k) => b.setAttribute('aria-current', String(k === i)));
+        if (play) v.play().catch(() => {});
+      };
+      btns.forEach((b, i) => b.addEventListener('click', () => go(i, true)));
+      v.addEventListener('ended', () => { if (cur + 1 < srcs.length) go(cur + 1, true); });
+      go(0, false);
+    })();
+    </script>'''
+
+DOWNLOADS = r'''<section class="downloads dl-only" id="scarica" aria-labelledby="dl-h"><div class="wrap">
+  <p class="eyebrow" id="dl-h">Scarica</p>
+  <p>Il film intero, 1280×720, con i sottotitoli e il suono provvisorio. Un unico file mp4.</p>
+  <button type="button" class="dl" id="dl-whole"><b>MAGENTA</b><small>%DUR% · mp4 · %SIZE%</small></button>
+  <p class="dl-note" id="dl-note" role="status" aria-live="polite"></p>
+</div></section>
+<script>
+(() => {
+  const WHOLE = %WHOLE%;
+  const note = document.getElementById('dl-note');
+  const btn = document.getElementById('dl-whole');
+  const say = (t) => { note.textContent = t; };
+  let cap = null;
+  if (window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('downloads').then((c) => { cap = c; if (c) document.documentElement.dataset.dl = 'cap'; }, () => {});
+  }
+  const MSG = {
+    declined: 'Download annullato.',
+    rate_limited: "C'è già una richiesta di download aperta: confermala o chiudila, poi riprova.",
+    too_large: 'File troppo grande per questo dispositivo: guarda il film qui sopra, capitolo per capitolo.',
+  };
+  const small = btn.querySelector('small');
+  const was = small.textContent;
+  btn.addEventListener('click', async () => {
+    if (!cap || btn.dataset.state === 'busy') return;
+    btn.dataset.state = 'busy';
+    say('');
+    try {
+      // the film travels in pieces; joined back in order they are the original file, byte for byte
+      const parts = [];
+      for (const src of WHOLE.pieces) {
+        small.textContent = `scarico ${Math.round(parts.length / WHOLE.pieces.length * 100)}%…`;
+        const r = await fetch(src);
+        if (!r.ok) throw new Error(String(r.status));
+        parts.push(await r.blob());
+      }
+      small.textContent = 'pronto';
+      await cap.save({ filename: WHOLE.file, data: new Blob(parts, { type: 'video/mp4' }) });
+      say(`${WHOLE.file}: fatto.`);
+    } catch (e) {
+      const code = e && e.code;
+      say(MSG[code] || (code ? 'Il download non è disponibile qui.' : 'Non sono riuscito a preparare il file: riprova.'));
+    } finally {
+      delete btn.dataset.state;
+      small.textContent = was;
+    }
+  });
+})();
+</script>'''
+
 
 if __name__ == '__main__':
     main()

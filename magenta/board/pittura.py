@@ -30,7 +30,7 @@ LOOKS = {
     # the nitrate print: black and white, silver, the light of the arc that trembles
     'nitrato': dict(pre='mono', tint=(0.98, 0.96, 0.92), shadow=(0.03, 0.03, 0.035), keep=0.5, sat=1.0, warm=(1, 0.97, 0.92), gain=1.1, gamma=0.95, lo=0.03, hi=0.4),
     # the blue tinting of the silent films: night and cold dyed into the film
-    'imbibizione': dict(pre='tint', tint=(0.42, 0.62, 1.0), shadow=(0.02, 0.04, 0.1), keep=0.55, sat=1.1, warm=(0.85, 0.92, 1.0), gain=1.25, gamma=0.95, lo=0.03, hi=0.4),
+    'imbibizione': dict(pre='tint', tint=(0.42, 0.62, 1.0), shadow=(0.02, 0.04, 0.1), keep=0.55, sat=1.1, warm=(0.85, 0.92, 1.0), gain=1.8, gamma=0.82, lo=0.02, hi=0.36),
     # Antonioni's first colour: washed greens and greys, the sea bleached; the false flowers keep their colour
     'deserto': dict(pre='deserto', shadow=(0.12, 0.14, 0.13), keep=0.6, sat=0.95, warm=(0.96, 1.0, 0.96), gain=1.12, gamma=1.0, lo=0.05, hi=0.5),
     'deserto_pioggia': dict(pre='deserto', shadow=(0.1, 0.12, 0.13), keep=0.6, sat=0.85, warm=(0.92, 0.96, 1.0), gain=1.1, gamma=1.0, lo=0.05, hi=0.5),
@@ -130,24 +130,36 @@ def lay_in(canvas, img, corners, mode):
     """The 1962 film laid into a monitor or onto a wall, from its four corners on the picture."""
     h, w = canvas.shape[:2]
     ih, iw = img.shape[:2]
+    cs = np.float32(corners)
+    # work only on the part of the picture the frame (and its glow) can reach
+    pad = {'ghost': 130, 'projection': 70}.get(mode, 45)
+    x0, y0 = int(max(0, np.floor(cs[:, 0].min()) - pad)), int(max(0, np.floor(cs[:, 1].min()) - pad))
+    x1, y1 = int(min(w, np.ceil(cs[:, 0].max()) + pad)), int(min(h, np.ceil(cs[:, 1].max()) + pad))
+    if x1 - x0 < 2 or y1 - y0 < 2:
+        return canvas
+    bw, bh = x1 - x0, y1 - y0
     src = np.float32([[0, 0], [iw, 0], [iw, ih], [0, ih]])
-    M = cv2.getPerspectiveTransform(src, np.float32(corners))
-    warped = cv2.warpPerspective(img, M, (w, h), flags=cv2.INTER_AREA)
-    mask = cv2.warpPerspective(np.ones((ih, iw), np.float32), M, (w, h))
+    M = cv2.getPerspectiveTransform(src, cs - np.float32([x0, y0]))
+    warped = cv2.warpPerspective(img, M, (bw, bh), flags=cv2.INTER_AREA)
+    mask = cv2.warpPerspective(np.ones((ih, iw), np.float32), M, (bw, bh))
+    out = canvas.copy()
+    roi = canvas[y0:y1, x0:x1]
     if mode == 'ghost':
         # a face in the black glass of the monitor: a reflection, faint, its edges lost
         soft = cv2.GaussianBlur(mask, (0, 0), 40)[..., None]
         y = warped.mean(axis=2, keepdims=True)
-        return np.clip(1 - (1 - canvas) * (1 - 0.42 * soft * (0.4 * warped + 0.6 * y)), 0, 1)
-    if mode == 'projection':
+        res = 1 - (1 - roi) * (1 - 0.42 * soft * (0.4 * warped + 0.6 * y))
+    elif mode == 'projection':
         # a picture thrown on a rough wall: soft at the edges, the wall's grain through it, a little glow round it
         soft = cv2.GaussianBlur(mask, (0, 0), 2.2)[..., None]
         glow = cv2.GaussianBlur(warped * mask[..., None], (0, 0), 22) * 0.35
-        out = canvas * (1 - soft * 0.7) + warped * soft * (0.85 + 0.25 * canvas.mean(axis=2, keepdims=True))
-        return np.clip(out + glow, 0, 1)
-    soft = cv2.GaussianBlur(mask, (0, 0), 0.8)[..., None]
-    glow = cv2.GaussianBlur(warped * mask[..., None], (0, 0), 14) * 0.25
-    return np.clip(canvas * (1 - soft) + warped * 0.92 * soft + glow, 0, 1)
+        res = roi * (1 - soft * 0.7) + warped * soft * (0.85 + 0.25 * roi.mean(axis=2, keepdims=True)) + glow
+    else:
+        soft = cv2.GaussianBlur(mask, (0, 0), 0.8)[..., None]
+        glow = cv2.GaussianBlur(warped * mask[..., None], (0, 0), 14) * 0.25
+        res = roi * (1 - soft) + warped * 0.92 * soft + glow
+    out[y0:y1, x0:x1] = np.clip(res, 0, 1)
+    return out
 
 
 def academy(img):
@@ -190,8 +202,9 @@ def painting(passdir, tag, look, seed=1, fade=None, screens=None):
         out = desert(out, 0.75, 0.0)
     elif L.get('pre') in ('mono', 'tint'):
         # black and white stays black and white, or one tint, whatever colour the strokes brought
-        y = out @ np.float32([0.299, 0.587, 0.114])
-        out = np.clip(y[..., None] * np.float32(L.get('tint', (1, 1, 1))), 0, 1).astype(np.float32)
+        tint = np.float32(L.get('tint', (1, 1, 1)))
+        y = (out @ np.float32([0.299, 0.587, 0.114])) / float(tint @ np.float32([0.299, 0.587, 0.114]))
+        out = np.clip(y[..., None] * tint, 0, 1).astype(np.float32)
     # the 1962 film where it is shown
     for sc in meta.get('screens', []):
         src = (screens or {}).get(sc['name']) or os.path.join(FILM, f"{sc['name']}.jpg")

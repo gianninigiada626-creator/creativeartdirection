@@ -273,6 +273,9 @@ def paint(ids):
         os.makedirs(os.path.join(DRAW, s['id']), exist_ok=True)
         jobs += [(s['id'], i) for i in range(int(round(s['dur'] * DRAW_FPS)))]
     jobs = [j for j in jobs if not os.path.exists(os.path.join(DRAW, j[0], f'a{j[1]:04d}.jpg'))]
+    if os.environ.get('REVERSE'):
+        # a second painter, from the end of the film backwards, to meet the first one in the middle
+        jobs = jobs[::-1]
     print('to paint', len(jobs), flush=True)
     with Pool(WORKERS) as p:
         for k, _ in enumerate(p.imap_unordered(_paint, jobs, chunksize=2)):
@@ -356,20 +359,20 @@ def card(s, t, j):
         # the leader counting down in its 1.37 window; on 2, a white frame, and the cut
         x0 = (W - ACAD) // 2
         n = 8 - int(t)
-        if n <= 2:
-            d.rectangle([x0, 0, x0 + ACAD, PIC_H], fill=(240, 236, 228))
-        else:
-            d.rectangle([x0, 0, x0 + ACAD, PIC_H], fill=(118, 116, 112))
-            cx, cy, R = W // 2, PIC_H // 2, 330
+        win = Image.new('RGB', (ACAD, PIC_H), (240, 236, 228) if n <= 2 else (118, 116, 112))
+        if n > 2:
+            dw = ImageDraw.Draw(win)
+            cx, cy, R = ACAD // 2, PIC_H // 2, 330
             frac = t % 1
-            d.pieslice([cx - R * 2, cy - R * 2, cx + R * 2, cy + R * 2], -90, -90 + 360 * frac, fill=(70, 68, 66))
-            d.line([x0, cy, x0 + ACAD, cy], fill=(30, 30, 30), width=3)
-            d.line([cx, 0, cx, PIC_H], fill=(30, 30, 30), width=3)
+            dw.pieslice([cx - 900, cy - 900, cx + 900, cy + 900], -90, -90 + 360 * frac, fill=(70, 68, 66))
+            dw.line([0, cy, ACAD, cy], fill=(30, 30, 30), width=3)
+            dw.line([cx, 0, cx, PIC_H], fill=(30, 30, 30), width=3)
             for rr in (R, R - 30):
-                d.ellipse([cx - rr, cy - rr, cx + rr, cy + rr], outline=(235, 232, 225), width=6)
+                dw.ellipse([cx - rr, cy - rr, cx + rr, cy + rr], outline=(235, 232, 225), width=6)
             f = font(FONT_SANS, 330)
-            w = d.textlength(str(n), font=f)
-            d.text((cx - w / 2, cy - 200), str(n), font=f, fill=(20, 20, 20))
+            w = dw.textlength(str(n), font=f)
+            dw.text((cx - w / 2, cy - 200), str(n), font=f, fill=(20, 20, 20))
+        pil.paste(win, (x0, 0))
         return film_damage(np.asarray(pil), j)
     elif s['card'] == 'fine':
         if t < 7:
