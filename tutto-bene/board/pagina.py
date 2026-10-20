@@ -286,6 +286,10 @@ TEMPLATE = '''<title>Fin qui tutto bene</title>
   --red: #c4160e;          /* the one colour: him */
   --screen: #000;          /* the projection: black in both themes */
   --screen-ink: #d9d8d4;
+  --screen-hi: #f2f1ed;    /* the black screen keeps its own inks in both themes */
+  --screen-mute: #8e8d88;
+  --screen-line: #333331;
+  --screen-red: #ff4433;
   --body: "Spectral", Georgia, "Times New Roman", serif;
   --type: "Courier Prime", "Courier New", Courier, monospace;
   --label: "Archivo Narrow", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
@@ -305,11 +309,11 @@ h2, h3, h4 {{ text-wrap: balance; }}
 .hero {{ background: var(--screen); color: var(--screen-ink); padding-block: clamp(1.5rem, 5vw, 4rem) clamp(2rem, 5vw, 3.5rem); }}
 .hero img {{ display: block; width: 100%; height: auto; }}
 .hero .title {{ display: grid; gap: .9rem; justify-items: center; text-align: center; margin-top: clamp(1.5rem, 4vw, 2.75rem); }}
-.hero h1 {{ margin: 0; font: 400 clamp(1.4rem, 4vw, 2.4rem)/1.1 var(--type); letter-spacing: .08em; color: #f2f1ed; }}
-.hero .en {{ font: 400 .85rem/1 var(--type); letter-spacing: .14em; color: #8e8d88; }}
-.hero .meta {{ font: 400 .8rem/1.4 var(--label); letter-spacing: .12em; text-transform: uppercase; color: #8e8d88; }}
+.hero h1 {{ margin: 0; font: 400 clamp(1.4rem, 4vw, 2.4rem)/1.1 var(--type); letter-spacing: .08em; color: var(--screen-hi); }}
+.hero .en {{ font: 400 .85rem/1 var(--type); letter-spacing: .14em; color: var(--screen-mute); }}
+.hero .meta {{ font: 400 .8rem/1.4 var(--label); letter-spacing: .12em; text-transform: uppercase; color: var(--screen-mute); }}
 .hero .logline {{ max-width: 40rem; margin: .4rem auto 0; font: 400 clamp(1.1rem, 2.4vw, 1.4rem)/1.5 var(--body); }}
-.hero .logline::first-letter {{ color: #ff4433; }}
+.hero .logline::first-letter {{ color: var(--screen-red); }}
 
 nav {{ border-bottom: 1px solid var(--line); }}
 nav ul {{ list-style: none; margin: 0; padding: .9rem 0; display: flex; flex-wrap: wrap; gap: .4rem 1.6rem; justify-content: center; font: 600 .78rem/1 var(--label); letter-spacing: .14em; text-transform: uppercase; }}
@@ -365,14 +369,14 @@ table.many {{ min-width: 56rem; }}
 footer {{ border-top: 1px solid var(--line); padding-block: 2rem 3rem; font: 400 .8rem/1.6 var(--label); letter-spacing: .06em; color: var(--muted); text-align: center; }}
 
 /* the film: the player on black, the chapters under it, counted in seconds */
-.player video {{ display: block; width: 100%; height: auto; aspect-ratio: 1280 / 692; background: #000; }}
+.player video {{ display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1280 / 692; background: var(--screen); }}
 .chapters {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(9.2rem, 1fr)); gap: .5rem; margin-top: .9rem; }}
-.ch {{ display: grid; gap: .15rem; text-align: left; padding: .65rem .75rem; background: transparent; color: var(--screen-ink); border: 1px solid #333; cursor: pointer; font: 400 .8rem/1.3 var(--label); }}
+.ch {{ display: grid; gap: .15rem; text-align: left; padding: .65rem .75rem; background: transparent; color: var(--screen-ink); border: 1px solid var(--screen-line); cursor: pointer; font: 400 .8rem/1.3 var(--label); }}
 .ch b {{ font: 700 .82rem/1.2 var(--type); letter-spacing: .04em; }}
-.ch small {{ color: #85847f; font-variant-numeric: tabular-nums; }}
-.ch[aria-current="true"] {{ border-color: #ff4433; color: #fff; }}
-.ch:hover {{ border-color: #ff4433; }}
-.player .hint {{ margin: .8rem 0 0; font: 400 .8rem/1.5 var(--label); color: #85847f; letter-spacing: .03em; }}
+.ch small {{ color: var(--screen-mute); font-variant-numeric: tabular-nums; }}
+.ch[aria-current="true"] {{ border-color: var(--screen-red); color: var(--screen-hi); }}
+.ch:hover {{ border-color: var(--screen-red); }}
+.player .hint {{ margin: .8rem 0 0; font: 400 .8rem/1.5 var(--label); color: var(--screen-mute); letter-spacing: .03em; }}
 .downloads .dl {{ display: inline-grid; gap: .2rem; padding: .8rem 1rem; border: 1px solid var(--red); background: transparent; color: var(--ink); cursor: pointer; font: 400 .9rem/1.3 var(--label); text-align: left; }}
 .downloads .dl b {{ font: 700 .85rem/1.2 var(--type); letter-spacing: .06em; }}
 .downloads .dl small {{ color: var(--muted); font-variant-numeric: tabular-nums; }}

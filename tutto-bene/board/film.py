@@ -403,12 +403,12 @@ def subtitles(frame, s, t):
             y0 = H - 128
             w1 = bd.textlength(it, font=f1)
             w2 = bd.textlength(en, font=f2)
-            bd.rectangle([(W - max(w1, w2)) / 2 - 30, y0 - 14, (W + max(w1, w2)) / 2 + 30, y0 + 92], fill=int(110 * al))
+            bd.rectangle([(W - max(w1, w2)) / 2 - 30, y0 - 14, (W + max(w1, w2)) / 2 + 30, y0 + 92], fill=int(140 * al))
             bed = bed.filter(ImageFilter.GaussianBlur(22))
             pil = Image.composite(Image.new('RGB', (W, H), (0, 0, 0)), pil, bed)
             d = ImageDraw.Draw(pil)
             d.text(((W - w1) / 2, y0), it, font=f1, fill=tuple(int(c * al) for c in (244, 242, 236)), stroke_width=1, stroke_fill=(0, 0, 0))
-            d.text(((W - w2) / 2, y0 + 50), en, font=f2, fill=tuple(int(c * al) for c in (190, 188, 184)))
+            d.text(((W - w2) / 2, y0 + 50), en, font=f2, fill=tuple(int(c * al) for c in (214, 212, 207)), stroke_width=1, stroke_fill=(0, 0, 0))
             return np.asarray(pil)
     return frame
 
