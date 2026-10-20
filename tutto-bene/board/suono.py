@@ -262,6 +262,9 @@ def build():
         # each place its own sound, cut clean when we leave it (a few ms, no fade across the cut)
         if s.get('amb'):
             a = env_ends(AMB[s['amb']](sec, k + 1), 0.01, 0.01)
+            if sid == '31':
+                # the square goes quiet before the dedication, which is read in silence
+                a = env_ends(a[: int(26.0 * SR)], 0.01, 2.5)
             S.put(mix, a, st)
         if s.get('drop') is not None:
             S.put(mix, whoosh(), st + s['drop'] - 0.15, 0.8)

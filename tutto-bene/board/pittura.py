@@ -49,6 +49,31 @@ def reds(img):
     return np.clip((r - 0.22) / 0.2, 0, 1).astype(np.float32)[..., None]
 
 
+UNDER = {'cartellone'}
+
+
+def under(col, img, corners, ids):
+    """A picture put into the render before it is painted, on the surface that fills its quad (whatever stands in
+    front stays in front), in the light of that surface. Returns the new colour and the mask of its red."""
+    h, w = col.shape[:2]
+    ih, iw = img.shape[:2]
+    M = cv2.getPerspectiveTransform(np.float32([[0, 0], [iw, 0], [iw, ih], [0, ih]]), np.float32(corners))
+    warped = cv2.warpPerspective(img, M, (w, h), flags=cv2.INTER_AREA)
+    mask = cv2.warpPerspective(np.ones((ih, iw), np.float32), M, (w, h))
+    inside = ids[mask > 0.5]
+    if inside.size:
+        vals, counts = np.unique(inside, return_counts=True)
+        mask = mask * (ids == vals[np.argmax(counts)])
+    m = mask > 0.5
+    if not m.any():
+        return col, np.zeros((h, w), bool)
+    light = float((col[m] @ LUMA).mean() / max(float((mono(warped, (1, 1, 1))[m] @ LUMA).mean()), 1e-3))
+    red = (reds(warped)[..., 0] > 0.5) & m
+    pic = mono(warped, (1, 1, 1)) * min(light, 1.3)
+    mk = cv2.GaussianBlur(mask, (0, 0), 0.8)[..., None]
+    return (col * (1 - mk) + pic * mk).astype(np.float32), red
+
+
 def painting(passdir, tag, look, seed=1, screens=None, grain=0):
     meta = json.load(open(os.path.join(passdir, f'{tag}-meta.json')))
     far = meta.get('far', 200.0)
@@ -65,17 +90,24 @@ def painting(passdir, tag, look, seed=1, screens=None, grain=0):
     prop = him & (idp[..., 2] > 0)
     him = him & ~prop
     L = LOOKS[look]
-    out = AP.paint_arrays(mono(col, L['tint']), z, ids, him, prop, faces, L, seed)
+    col = mono(col, L['tint'])
+    # the billboard goes under the paint: its letters are painted with the rest, and its red letter is cut out
+    # flat, like him
+    for sc in meta.get('screens', []):
+        src = (screens or {}).get(sc['name'])
+        if sc['name'] in UNDER and sc.get('corners') and src and os.path.exists(src):
+            img = cv2.cvtColor(cv2.imread(src), cv2.COLOR_BGR2RGB).astype(np.float32) / 255
+            col, red = under(col, img, sc['corners'], ids)
+            prop = prop | red
+    out = AP.paint_arrays(col, z, ids, him, prop, faces, L, seed)
     # the strokes bring a little colour with them: back to silver, except the red
     keep = reds(out)
     out = mono(out, L['tint']) * (1 - keep) + out * keep
-    # paper in the world: the receipt, the letter, the billboard (its red letter stays red)
+    # paper in the world, small and to be read: the receipt, the letter
     for sc in meta.get('screens', []):
         src = (screens or {}).get(sc['name'])
-        if sc.get('corners') and src and os.path.exists(src):
-            img = cv2.cvtColor(cv2.imread(src), cv2.COLOR_BGR2RGB).astype(np.float32) / 255
-            k = reds(img)
-            img = mono(img, L['tint']) * (1 - k) + img * k
+        if sc['name'] not in UNDER and sc.get('corners') and src and os.path.exists(src):
+            img = mono(cv2.cvtColor(cv2.imread(src), cv2.COLOR_BGR2RGB).astype(np.float32) / 255, L['tint'])
             out = lay_in(out, img, sc['corners'], sc['mode'], ids)
     if grain:
         # the grain of the stock, a different one on every drawing
