@@ -37,20 +37,25 @@ def L(a, b, it, en):
     return (a, b, it, en)
 
 
-def so_far(a, b, n=1):
-    it = ' '.join(['Fin qui tutto bene.'] * n)
-    en = ' '.join(['So far so good.'] * n)
-    return L(a, b, it, en)
+VOCI = os.path.join(ROOT, 'build', 'voci')   # the recorded voices (not in git): odio, agente, operatore, ragazzo, poesia
+
+
+def V(name, at, src_from=0.0, src_to=None, tempo=1.0, fx=None, gain=0.82):
+    """A recorded voice: file `name` from src_from to src_to (seconds), at time `at` of the shot."""
+    return dict(name=name, at=at, src=(src_from, src_to), tempo=tempo, fx=fx, gain=gain)
 
 
 # ── the shots ───────────────────────────────────────────────────────────────────────────────────
 # kind: '3d' (rendered and painted) or 'card'. drop: when the red goes past the window (for the sound).
 SHOTS = [
     # PROLOGO
-    dict(id='01', dur=14, kind='card', card='nero', amb='vento_lontano', lines=[
-        L(1.5, 5.2, "C'è un uomo che cade da un palazzo di cinquanta piani.", "There's a man falling from a fifty-storey building."),
-        L(5.8, 9.4, 'Mentre cade, a ogni piano, per farsi coraggio, si ripete:', 'As he falls, at every floor, to keep his nerve, he tells himself:'),
-        L(9.8, 13.6, 'fin qui tutto bene. Fin qui tutto bene. Fin qui tutto bene.', 'so far so good. So far so good. So far so good.')]),
+    # the voice of La Haine (the Italian dub) tells the story in the black; it comes back in the fall, and at the end
+    dict(id='01', dur=22, kind='card', card='nero', amb='vento_lontano', voice=[V('odio', 1.2, 0.0, 19.6)], lines=[
+        L(1.8, 6.8, "Questa è la storia di un uomo che cade da un palazzo di cinquanta piani.", 'This is the story of a man who falls from a fifty-storey building.'),
+        L(7.2, 11.9, "Mano a mano che, cadendo, passa da un piano all'altro, il tizio, per farsi coraggio, si ripete:", 'As he falls past one floor after another, the guy keeps telling himself, to keep his nerve:'),
+        L(12.9, 14.4, 'Fino a qui tutto bene.', 'So far so good.'),
+        L(15.1, 16.7, 'Fino a qui tutto bene.', 'So far so good.'),
+        L(17.7, 20.6, 'Fino a qui tutto bene.', 'So far so good.')]),
     dict(id='02', dur=4, kind='card', card='titolo'),
     dict(id='03', dur=30, kind='card', card='archivio', label='LE PIAZZE DI QUESTI MESI', amb='piazza_vera'),
     # 06:11:58 · IL TETTO
@@ -62,48 +67,48 @@ SHOTS = [
     dict(id='08', dur=4, kind='3d', fps=8, look='argento', amb='tetto'),
     # 06:12:00 · LA CADUTA
     dict(id='c2', dur=1.6, kind='card', card='ora', text='06:12:00'),
-    dict(id='09', dur=4.4, kind='3d', fps=8, look='argento', amb='caduta', lines=[so_far(1.2, 3.8)]),
-    dict(id='10', dur=6, kind='3d', fps=8, look='interni', amb='attico', drop=3.4, lines=[
-        L(0.5, 3.3, 'Classe A. Vista libera fino alle montagne.', 'Energy class A. Clear view all the way to the mountains.')]),
+    dict(id='09', dur=4.4, kind='3d', fps=8, look='argento', amb='caduta', voice=[V('odio', 1.3, 11.55, 13.15)], lines=[L(1.5, 3.2, 'Fino a qui tutto bene.', 'So far so good.')]),
+    dict(id='10', dur=6, kind='3d', fps=8, look='interni', amb='attico', drop=3.4, voice=[V('agente', 0.3, fx='stanza')], lines=[
+        L(0.3, 3.6, 'Classe A. Vista libera fino alle montagne.', 'Energy class A. Clear view all the way to the mountains.')]),
     dict(id='11', dur=4, kind='3d', fps=8, look='interni', amb='aspirapolvere', drop=2.2),
-    dict(id='12', dur=4, kind='3d', fps=8, look='interni', amb='callcenter', drop=2.0, lines=[
-        L(0.2, 3.8, "Buongiorno, la chiamo per un'offerta che non può rifiutare.", "Good morning, I'm calling about an offer you can't refuse.")]),
-    dict(id='13', dur=2.5, kind='3d', fps=8, look='argento', amb='caduta', lines=[so_far(0.3, 2.4)]),
+    dict(id='12', dur=4, kind='3d', fps=8, look='interni', amb='callcenter', drop=2.0, voice=[V('operatore', 0.1, tempo=1.12)], lines=[
+        L(0.1, 3.9, "Buongiorno, la chiamo per un'offerta che non può rifiutare.", "Good morning, I'm calling about an offer you can't refuse.")]),
+    dict(id='13', dur=2.5, kind='3d', fps=8, look='argento', amb='caduta', voice=[V('odio', 0.3, 13.75, 15.45)], lines=[L(0.5, 2.3, 'Fino a qui tutto bene.', 'So far so good.')]),
     dict(id='14', dur=5, kind='3d', fps=8, look='interni', amb='stanza', drop=1.6),
-    dict(id='15', dur=8, kind='3d', fps=8, look='interni', amb='lavandino', drop=5.2, lines=[
-        L(0.4, 2.6, 'Mi servono cento euro in più. Al mese.', 'I need a hundred euros more. A month.'),
-        L(2.9, 5.1, 'Mi servono. Dici a me? Dici a me?', 'I need them. You talking to me? You talking to me?')]),
+    dict(id='15', dur=8, kind='3d', fps=8, look='interni', amb='lavandino', drop=5.2, voice=[V('ragazzo', 2.7, fx='bagno')], lines=[
+        L(0.3, 2.5, 'Mi servono cento euro in più. Al mese.', 'I need a hundred euros more. A month.'),
+        L(2.7, 5.9, 'Mi servono. Dici a me? Dici a me?', 'I need them. You talking to me? You talking to me?')]),
     dict(id='16', dur=3.5, kind='3d', fps=8, look='interni', amb='scale', drop=1.3, ping=0.4),
     dict(id='17', dur=3.5, kind='3d', fps=8, look='interni', amb='tv_muta', drop=1.4),
     dict(id='18', dur=5, kind='3d', fps=8, look='interni', amb='cucina', drop=3.3, coins=(0.2, 1.4)),
     # 06:12:02 · SOSPESO
     dict(id='c3', dur=1.6, kind='card', card='ora', text='06:12:02'),
-    dict(id='19', dur=34.5, kind='3d', fps=4, look='sospeso', amb='sospeso', lines=[
-        L(2.0, 5.6, 'Ho costruito i piani che non abiterò.', 'I built the floors I will never live on.'),
-        L(7.0, 10.2, 'Ho messo il vetro dove guarderanno gli altri,', 'I put in the glass the others will look through,'),
-        L(10.4, 13.6, 'il marmo dove cammineranno i figli degli altri.', "the marble the others' children will walk on."),
-        L(15.2, 19.6, "Il cemento, come il pane, ha l'odore di chi lo impasta e non lo mangia.", 'Cement, like bread, smells of the hands that knead it and never eat it.'),
-        L(21.0, 23.8, 'Città, ti conosco dal basso.', 'City, I know you from below.'),
-        L(24.0, 28.6, "Ti ho vista dai ponteggi all'alba, quando i ricchi dormono e i poveri sono già stanchi.", "I've seen you from the scaffolding at dawn, when the rich are asleep and the poor are already tired."),
-        L(29.8, 34.2, 'Non chiedo di non cadere. Chiedo che qualcuno, laggiù, alzi la testa.', "I'm not asking not to fall. I'm asking that someone, down there, lift their head.")]),
+    # the man speaks once, when time stops: close, dry, an Italian learnt elsewhere
+    dict(id='19', dur=34.5, kind='3d', fps=4, look='sospeso', amb='sospeso', voice=[V('poesia', 2.0, gain=1.0)], lines=[
+        L(2.0, 5.4, 'Ho costruito i piani che non abiterò.', 'I built the floors I will never live on.'),
+        L(5.7, 8.0, 'Ho messo il vetro dove guarderanno gli altri,', 'I put in the glass the others will look through,'),
+        L(8.3, 11.2, 'il marmo dove cammineranno i figli degli altri.', "the marble the others' children will walk on."),
+        L(12.3, 17.0, "Il cemento, come il pane, ha l'odore di chi lo impasta e non lo mangia.", 'Cement, like bread, smells of the hands that knead it and never eat it.'),
+        L(17.7, 21.7, 'Città, ti conosco dal basso.', 'City, I know you from below.'),
+        L(22.0, 26.9, "Ti ho vista dai ponteggi all'alba, quando i ricchi dormono e i poveri sono già stanchi.", "I've seen you from the scaffolding at dawn, when the rich are asleep and the poor are already tired."),
+        L(27.3, 32.4, 'Non chiedo di non cadere. Chiedo che qualcuno, laggiù, alzi la testa.', "I'm not asking not to fall. I'm asking that someone, down there, lift their head.")]),
     # 06:12:03 · CHI GUARDA
     dict(id='c4', dur=1.3, kind='card', card='ora', text='06:12:03'),
-    dict(id='20', dur=2.3, kind='3d', fps=8, look='argento', amb='caduta', lines=[so_far(0.2, 2.2)]),
+    dict(id='20', dur=2.3, kind='3d', fps=8, look='argento', amb='caduta', voice=[V('odio', 0.2, 11.55, 13.15)], lines=[L(0.4, 2.1, 'Fino a qui tutto bene.', 'So far so good.')]),
     dict(id='21', dur=3, kind='3d', fps=8, look='interni', amb='cucina', drop=0.9, run=1.5),
     dict(id='22', dur=3, kind='3d', fps=8, look='interni', amb='preghiera', drop=1.0),
     dict(id='23a', dur=3, kind='3d', fps=8, look='interni', amb='stanza', drop=1.1, cassa=0.8),
     dict(id='23b', dur=6, kind='3d', fps=8, look='argento', amb='cortile'),
     dict(id='24', dur=2, kind='3d', fps=8, look='interni', amb='cucina', drop=0.5, pen=1.0),
     dict(id='25', dur=3, kind='3d', fps=8, look='interni', amb='sfratto', drop=0.9),
-    dict(id='26', dur=3, kind='3d', fps=8, look='argento', amb='coro', lines=[so_far(0.1, 2.95, 3)]),
+    dict(id='26', dur=3, kind='3d', fps=8, look='argento', amb='coro', voice=[V('odio', 0.05, 16.35, 19.6)], lines=[L(0.3, 2.95, 'Fino a qui tutto bene.', 'So far so good.')]),
     # 06:12:05 · L'ATTERRAGGIO
     dict(id='c5', dur=1.1, kind='card', card='ora', text='06:12:05'),
     dict(id='27', dur=10.5, kind='3d', fps=8, look='argento', amb='piazza'),
     dict(id='28', dur=6, kind='3d', fps=8, look='argento', amb='piazza', spray=True, screens={'cartellone': 'cartellone'}),
     dict(id='29', dur=3, kind='3d', fps=8, look='argento', amb='piazza'),
-    dict(id='30', dur=12, kind='card', card='nero', lines=[
-        L(1.5, 4.6, "L'importante non è la caduta.", "What matters isn't the fall."),
-        L(5.4, 8.6, "È l'atterraggio.", "It's the landing.")]),
+    dict(id='30', dur=12, kind='card', card='nero', voice=[V('odio', 1.4, 20.0, 25.8)], lines=[
+        L(1.8, 7.0, "Il problema non è la caduta, ma l'atterraggio.", "The problem isn't the fall. It's the landing.")]),
     dict(id='31', dur=31, kind='card', card='titoli', amb='piazza_vera'),
 ]
 for _s in SHOTS:

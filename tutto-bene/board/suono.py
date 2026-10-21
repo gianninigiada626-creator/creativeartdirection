@@ -7,6 +7,7 @@ Not the film's sound: a guide for timing and mood. The voices are to be recorded
     python3 suono.py      → build/suono.wav
 """
 import os
+import subprocess
 import sys
 import wave
 
@@ -231,6 +232,23 @@ def typewriter(n, cps, seed=0):
     return y
 
 
+def voice(v):
+    """One recorded voice, cut, at the tempo asked, in its room: mono at the mix's rate, peak 1."""
+    path = os.path.join(film.VOCI, v['name'] + '.mp3')
+    a, b = v['src']
+    cut = ['-ss', f'{a:.3f}'] + (['-to', f'{b:.3f}'] if b else [])
+    af = ['highpass=f=70'] + ([f"atempo={v['tempo']}"] if v['tempo'] != 1.0 else [])
+    raw = subprocess.run(['ffmpeg', '-v', 'error', *cut, '-i', path, '-ac', '1', '-ar', str(SR), '-af', ','.join(af), '-f', 'f32le', '-'],
+                         capture_output=True, check=True).stdout
+    y = np.frombuffer(raw, np.float32).copy()
+    y /= np.abs(y).max() + 1e-9
+    if v['fx'] == 'stanza':
+        y = S.reverb(y, 0.7, 0.16)        # the empty penthouse
+    elif v['fx'] == 'bagno':
+        y = S.reverb(y, 0.45, 0.24)       # tiles
+    return env_ends(y, 0.06, 0.08)
+
+
 AMB = {
     'vento_lontano': lambda sec, s: S.wind(sec, 0.6, s) + city(sec, s) * 0.6,
     'tetto': lambda sec, s: S.wind(sec, 1.5, s) + city(sec, s),
@@ -295,8 +313,8 @@ def build():
             for t0, t1, _, _ in film.N_STROKES:
                 S.put(mix, spray(t1 - t0), st + t0, 0.8)
         if sid == '30':
-            # the cut to black: only his voice (to be recorded), then silence; one breath; then many; then the
-            # square, for real, rising into the end titles
+            # the cut to black: only the voice of La Haine, then silence; one breath; then many; then the square,
+            # for real, rising into the end titles
             S.put(mix, S.breath(2.2) * 1.6, st + 9.2)
             for j in range(10):
                 S.put(mix, S.breath(2.2) * 0.35, st + 10.2 + j * 0.11)
@@ -314,11 +332,28 @@ def build():
     sq = env_ends(sq, 0.01, 3.0)
     S.put(mix, sq, e)
     mix = mix[: int(total * SR)]
-    # the hard cut to black: nothing at all under the last two lines
+    # the hard cut to black: nothing at all under the last line
     c = int(at['30'] * SR)
     mix[c:c + int(9.2 * SR)] = 0
     mix /= np.abs(mix).max() + 1e-9
-    mix *= 0.72
+    mix *= 0.5
+    # the voices, over everything: the room ducks under them
+    vt = np.zeros_like(mix)
+    missing = set()
+    for st, s in tl:
+        for v in s.get('voice', []):
+            if not os.path.exists(os.path.join(film.VOCI, v['name'] + '.mp3')):
+                missing.add(v['name'])
+                continue
+            S.put(vt, voice(v), st + v['at'], v['gain'])
+    if missing:
+        print('voices not found, left to the subtitles:', ', '.join(sorted(missing)))
+    k = int(0.25 * SR)
+    env = np.convolve(np.abs(vt), np.ones(k, np.float32) / k, 'same')
+    duck = 1 - 0.55 * np.clip(env / 0.04, 0, 1)
+    duck = np.convolve(duck, np.ones(k, np.float32) / k, 'same').astype(np.float32)
+    mix = mix * duck + vt
+    mix /= max(1.0, np.abs(mix).max() / 0.95)
     st = np.stack([mix, np.roll(mix, int(0.0007 * SR))], axis=1)
     pcm = (np.clip(st, -1, 1) * 32767).astype(np.int16)
     with wave.open(OUT, 'wb') as w:

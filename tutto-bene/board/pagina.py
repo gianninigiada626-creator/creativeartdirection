@@ -456,7 +456,7 @@ html {{ scroll-behavior: smooth; }}
 PLAYER = r'''<div class="player">
       <video id="film" controls playsinline preload="metadata" poster="%POSTER%"></video>
       <div class="chapters" role="group" aria-label="Capitoli">%BTNS%</div>
-      <p class="hint">Primo montaggio. Le voci non sono ancora registrate: le battute sono nei sottotitoli, il suono è provvisorio. I due spazi d'archivio aspettano il materiale reale. I capitoli si susseguono da soli.</p>
+      <p class="hint">Secondo montaggio, con le voci. Il narratore è la voce di <i>L'odio</i> (doppiaggio italiano, citato); il coro e i respiri sono ancora provvisori, come la musica. I due spazi d'archivio aspettano il materiale reale. I capitoli si susseguono da soli.</p>
     </div>
     <script>
     (() => {
@@ -478,7 +478,7 @@ PLAYER = r'''<div class="player">
 
 DOWNLOADS = r'''<section class="downloads dl-only" id="scarica" aria-labelledby="dl-h"><div class="wrap">
   <p class="eyebrow" id="dl-h">Scarica</p>
-  <p>Il film intero, 1280×692, con i sottotitoli e il suono provvisorio. Un unico file mp4.</p>
+  <p>Il film intero, 1280×692, con le voci e i sottotitoli. Un unico file mp4.</p>
   <button type="button" class="dl" id="dl-whole"><b>FIN QUI TUTTO BENE</b><small>%DUR% · mp4 · %SIZE%</small></button>
   <p class="dl-note" id="dl-note" role="status" aria-live="polite"></p>
 </div></section>

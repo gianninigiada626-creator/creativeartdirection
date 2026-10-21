@@ -43,8 +43,11 @@ mentre si riempie di vetro dall'alto. L'uomo che cade è uno di quelli che il ve
 
 ## I personaggi
 
-- **L'uomo**, 28 anni. Operaio edile, ponteggio della facciata, cinquantesimo piano. Non ha nome. Di lui
-  sentiamo solo la voce, calma, come una preghiera detta per non pensare.
+- **L'uomo**, 28 anni. Operaio edile, ponteggio della facciata, cinquantesimo piano. Non ha nome. Parla una
+  volta sola, quando il tempo si ferma: calmo, come una preghiera detta per non pensare, in un italiano
+  imparato altrove, con l'accento francese. È venuto da fuori, come tanti di quelli che salgono sui ponteggi.
+- **Il narratore**: la voce di *L'odio*, dal doppiaggio italiano. Racconta la storia nel nero, la ripete
+  durante la caduta e chiude il film. Una citazione.
 - **Gli abitanti del palazzo**, un piano ciascuno: l'agente immobiliare e la coppia che guarda l'attico,
   la donna delle pulizie, le cuffie del call center, le studentesse in una stanza da quattro, il ragazzo
   davanti allo specchio, il rider, l'infermiera, il pensionato, la famiglia della lettera, i braccianti, il
@@ -55,7 +58,8 @@ mentre si riempie di vetro dall'alto. L'uomo che cade è uno di quelli che il ve
 
 ## Sceneggiatura
 
-**VO** = l'uomo, voce narrante, vicinissima. Sottotitoli inglesi in corsivo.
+**NARRATORE** = la voce di *L'odio*, citata dal doppiaggio italiano. **VO** = l'uomo, vicinissimo. Sottotitoli
+inglesi in corsivo.
 
 ### PROLOGO
 
@@ -63,13 +67,13 @@ mentre si riempie di vetro dall'alto. L'uomo che cade è uno di quelli che il ve
 
 Vento in quota. Un ponteggio che cigola. Lontano, la città che si sveglia.
 
-> VO: C'è un uomo che cade da un palazzo di cinquanta piani.
-> *There's a man falling from a fifty-storey building.*
+> NARRATORE: Questa è la storia di un uomo che cade da un palazzo di cinquanta piani.
+> *This is the story of a man who falls from a fifty-storey building.*
 
-> VO: Mentre cade, a ogni piano, per farsi coraggio, si ripete:
-> *As he falls, at every floor, to keep his nerve, he tells himself:*
+> NARRATORE: Mano a mano che, cadendo, passa da un piano all'altro, il tizio, per farsi coraggio, si ripete:
+> *As he falls past one floor after another, the guy keeps telling himself, to keep his nerve:*
 
-> VO: fin qui tutto bene. Fin qui tutto bene. Fin qui tutto bene.
+> NARRATORE: fino a qui tutto bene. Fino a qui tutto bene. Fino a qui tutto bene.
 > *so far so good. So far so good. So far so good.*
 
 **2. TITOLO**
@@ -107,12 +111,12 @@ Il bordo, vuoto. Un casco bianco rotola sulle tavole, si ferma.
 L'uomo cade lungo la facciata, braccia aperte, come uno che nuota. Le finestre gli scorrono accanto. Sul
 cemento, accanto a ogni finestra, un numero dipinto: 49. 48. 47.
 
-> VO: Fin qui tutto bene.
+> NARRATORE: Fino a qui tutto bene.
 > *So far so good.*
 
 **7. INT. 49° PIANO — ATTICO IN VENDITA**
 
-Vetro, marmo, una cucina senza un graffio. Un agente immobiliare mostra la vista a una giovane coppia.
+Vetro, marmo, una cucina senza un graffio. Un'agente immobiliare mostra la vista a una giovane coppia.
 
 **AGENTE:** Classe A. Vista libera fino alle montagne.
 *Energy class A. Clear view all the way to the mountains.*
@@ -138,7 +142,7 @@ Il rosso passa. Nessuno.
 
 40. 39. Le finestre scorrono più veloci.
 
-> VO: Fin qui tutto bene.
+> NARRATORE: Fino a qui tutto bene.
 > *So far so good.*
 
 **11. INT. 40° PIANO — STANZA DA QUATTRO**
@@ -207,7 +211,7 @@ lentissima. Sotto, la città in bianco e nero. Il vento tace.
 
 La caduta riprende. 24. 23. 22. Più veloce.
 
-> VO: Fin qui tutto bene.
+> NARRATORE: Fino a qui tutto bene.
 > *So far so good.*
 
 **18. INT. 21° PIANO — CUCINA**
@@ -240,8 +244,8 @@ un bambino in braccio. Il rosso passa nella finestra del pianerottolo. Tutti, an
 
 8. 7. 6. 5. I numeri passano come un battito.
 
-> VO: Fin qui tutto bene. Fin qui tutto bene. Fin qui tutto bene.
-> *So far so good. So far so good. So far so good.*
+> NARRATORE: Fino a qui tutto bene.
+> *So far so good.*
 
 La voce non è più sola: altre voci la ripetono, a tempo, sempre di più. Il ritmo della frase diventa il ritmo
 di un coro.
@@ -270,11 +274,8 @@ Le braccia alzate. Il rosso a un metro dalle mani.
 
 Nero.
 
-> VO: L'importante non è la caduta.
-> *What matters isn't the fall.*
-
-> VO: È l'atterraggio.
-> *It's the landing.*
+> NARRATORE: Il problema non è la caduta, ma l'atterraggio.
+> *The problem isn't the fall. It's the landing.*
 
 Silenzio. Poi un respiro, mille respiri. Poi la piazza: il coro, vero.
 

@@ -508,7 +508,7 @@ async function s10() {
   const P = await piano(49, { W: 8, Dp: 6, H: 3.2, big: true, wall: '#e6e4de', floorC: '#d6d4cc', lampI: 0.6 });
   const { s, y0 } = P;
   s.add(boxMesh(2.6, 0.92, 0.9, '#f0eee8', [1.6, y0, -2.0]));
-  const agent = await person('man', 'stand', [-0.6, y0, -2.4], 25, { wear: { top: '#2a2a2c', bottom: '#2a2a2c' }, aim: { RightArm: [-0.6, 0.1, 0.5], RightForeArm: [-0.8, 0.3, 0.4] } });
+  const agent = await person('woman', 'stand', [-0.6, y0, -2.4], 25, { wear: { top: '#2a2a2c', bottom: '#2a2a2c', hair: '#1c1814' }, aim: { RightArm: [-0.6, 0.1, 0.5], RightForeArm: [-0.8, 0.3, 0.4] } });
   const a = await person('woman', 'stand', [0.4, y0, -1.4], -15, { wear: { top: '#d8d4cc', bottom: '#3a3a3c', hair: '#3a2a1e' } });
   const b = await person('man', 'stand', [0.95, y0, -1.5], -25, { wear: { top: '#6a6a6c', bottom: '#2a2a2a', hair: '#1c1814' } });
   s.add(agent, a, b);

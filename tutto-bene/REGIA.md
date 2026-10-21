@@ -72,17 +72,19 @@ testa.
   l'aspirapolvere, il brusio del call center, l'acqua del lavandino, la notifica del telefono, la televisione
   muta, le monete sul tavolo, la preghiera, la cassa, la penna, la radio degli agenti.
 - Il ticchettio dei cartelli con l'ora.
-- La voce dell'uomo, vicinissima, senza riverbero. Nel fermo, nient'altro.
+- Due voci. Quella di *L'odio*, dal doppiaggio italiano, racconta la storia nel nero, torna tre volte nella
+  caduta («Fino a qui tutto bene») e chiude il film. L'uomo parla una volta sola, nel fermo: vicinissimo,
+  senza riverbero, un italiano con l'accento francese. Intorno a lui, nient'altro.
 - Il coro e la grancassa del corteo che crescono sotto gli ultimi piani.
 - Dopo il nero: silenzio, un respiro, poi la piazza.
 
 ## Il découpage
 
-Ventisei inquadrature più cartelli e archivio. Circa 4′10″.
+Ventisei inquadrature più cartelli e archivio. Circa 4′19″.
 
 | # | Inquadratura | Durata | Colore |
 |---|---|---|---|
-| 01 | Nero, la voce | 0:14 | — |
+| 01 | Nero, la voce di *L'odio* | 0:22 | — |
 | 02 | Titolo | 0:04 | — |
 | 03 | Archivio: le piazze | 0:30 | materiale reale |
 | 04 | Cartello 06:11:58 · totale del tetto, la città all'alba | 0:10 | argento |
@@ -120,6 +122,7 @@ Ventisei inquadrature più cartelli e archivio. Circa 4′10″.
   strette.
 - **Il gancio**: una frase che tutti conoscono, presa alla lettera; cinque secondi lunghi un film; un palazzo
   che si sveglia piano per piano.
-- **Diritti**: la frase di *L'odio* è citata in omaggio e riscritta in italiano; i versi della voce sono
-  originali; la musica della cassa è provvisoria; il materiale d'archivio va scelto tra quello di cui si
-  hanno i diritti.
+- **Diritti**: la voce del narratore è il doppiaggio italiano di *L'odio*: per i festival serve la licenza
+  di chi ne ha i diritti (il film e il doppiaggio), oppure la si ri-registra sugli stessi tempi con un'altra
+  voce. I versi dell'uomo sono originali; la musica della cassa è provvisoria; il materiale d'archivio va
+  scelto tra quello di cui si hanno i diritti.
