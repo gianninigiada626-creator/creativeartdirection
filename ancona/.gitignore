@@ -1,0 +1,4 @@
+# the clips and the puppet photos belong to the client: they stay out of the repository
+assets/
+build/
+out/

@@ -1,0 +1,63 @@
+<!doctype html><meta charset="utf-8"><style>body{margin:0;background:#000}</style>
+<script>window.STAGE_SIZE = [1920, 804]; // 2.39:1, as A PARTE</script>
+<script type="importmap">{"imports":{"three":"/muerto/node_modules/three/build/three.module.js","three/addons/":"/muerto/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import { SCENES } from './scenes.js';
+import { SHOTS } from './film.js';
+const ALL = { ...SCENES, ...SHOTS };
+import { renderPasses, THREE, W, H } from '/a-parte/engine3d/stage.js';
+/** Where a plane lands on the picture: its four corners in pixels, top-left first, clockwise. */
+function corners(mesh, camera) {
+  mesh.updateWorldMatrix(true, false);
+  const b = new THREE.Box3().setFromBufferAttribute(mesh.geometry.attributes.position);
+  const vs = [[b.min.x, b.max.y], [b.max.x, b.max.y], [b.max.x, b.min.y], [b.min.x, b.min.y]].map(([x, y]) => new THREE.Vector3(x, y, 0).applyMatrix4(mesh.matrixWorld).project(camera));
+  // a frame behind the camera is nowhere on the picture
+  if (vs.some((v) => v.z > 1 || v.z < -1)) return null;
+  return vs.map((v) => [((v.x + 1) / 2) * W, ((1 - v.y) / 2) * H]);
+}
+/** Where her head is on the picture: the colour leaves from the far ends of her toward it. */
+function head(obj, camera) {
+  const b = obj.bones?.Head;
+  if (!b) return null;
+  const v = b.getWorldPosition(new THREE.Vector3()).project(camera);
+  return [((v.x + 1) / 2) * W, ((1 - v.y) / 2) * H];
+}
+function metaOf({ camera, far = 200, screens = [], figure = null }) {
+  return {
+    far, cam: { fov: camera.fov, aspect: camera.aspect, pos: camera.position.toArray() },
+    screens: screens.map((s) => ({ name: s.name, mode: s.mode, corners: corners(s.mesh, camera) })),
+    figure: figure ? { id: figure.obj.userData.id, fade: figure.fade, head: head(figure.obj, camera) } : null,
+  };
+}
+// the film: a shot is built once, then rendered frame by frame at (k, t)
+let cur = null;
+window.buildAnim = async (id, opts = {}) => {
+  cur = await ALL[id]({ ...opts, anim: true });
+  return { far: cur.far ?? 200 };
+};
+window.renderFrame = (k, t) => {
+  cur.scene.traverse((o) => o.tick?.(t));
+  cur.update?.(k, t);
+  cur.scene.updateMatrixWorld(true);
+  cur.camera.updateProjectionMatrix();
+  cur.camera.updateMatrixWorld(true);
+  return { ...renderPasses(cur.scene, cur.camera, { far: cur.far ?? 200 }), meta: JSON.stringify(metaOf(cur)) };
+};
+window.renderPanel = async (id, opts = {}) => {
+  const { scene, camera, far = 200, update, screens = [], figure = null } = await ALL[id](opts);
+  if (opts.t !== undefined) {
+    scene.traverse((o) => o.tick?.(opts.t));
+    update?.(opts.k ?? 0.5, opts.t);
+  }
+  scene.updateMatrixWorld(true);
+  camera.updateProjectionMatrix();
+  camera.updateMatrixWorld(true);
+  const meta = {
+    far, cam: { fov: camera.fov, aspect: camera.aspect, pos: camera.position.toArray() },
+    screens: screens.map((s) => ({ name: s.name, mode: s.mode, corners: corners(s.mesh, camera) })),
+    figure: figure ? { id: figure.obj.userData.id, fade: figure.fade, head: head(figure.obj, camera) } : null,
+  };
+  return { ...renderPasses(scene, camera, { far }), meta: JSON.stringify(meta) };
+};
+window.__ready = true;
+</script>

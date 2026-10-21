@@ -1,0 +1,29 @@
+:root {
+  /* Palette — darkroom */
+  --void: #050505;
+  --void-2: #0b0b0c;
+  --silver: #c9ccd1;
+  --silver-dim: #6e737b;
+  --paper: #e8e6e1;
+  --safelight: #d3121a;
+  --line: rgba(201, 204, 209, 0.16);
+
+  /* Type */
+  --f-display: 'Archivo Variable', 'Arial Narrow', sans-serif;
+  --f-ghost: 'Instrument Serif', 'Times New Roman', serif;
+  --f-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+  --t-micro: 10px;
+  --t-mono: 11px;
+  --track-mono: 0.08em;
+
+  /* Layout */
+  --gutter: clamp(16px, 2.2vw, 32px);
+  --hud: clamp(14px, 1.6vw, 24px);
+
+  /* Motion */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+
+  color-scheme: dark;
+}
