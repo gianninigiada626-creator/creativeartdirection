@@ -7,7 +7,54 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 const set = (o, a) => {
   o.aimNow = { ...o.baseAims, ...a };
   o.aimAll(o.aimNow);
+  hands(o);
 };
+/** Turn a bone by a rotation given in world space. */
+function turnWorld(b, dq) {
+  const wq = b.getWorldQuaternion(new THREE.Quaternion());
+  const pq = b.parent.getWorldQuaternion(new THREE.Quaternion());
+  b.quaternion.copy(pq.invert().multiply(dq.multiply(wq)));
+  b.updateMatrixWorld(true);
+}
+/**
+ * The hands, after the arms are aimed: the wrist goes on along the forearm (a hand that kept its resting angle
+ * flops over when the arm is raised), and the palm turns where a hand at rest would have it: toward the other
+ * hand, a little forward ('in'), or down to the desk ('down'). The roll is shared by the forearm and the wrist.
+ */
+function hands(o, palm = o.userData.palm ?? 'in') {
+  if (!o.bones?.RightHand) return;
+  // every frame replays the body's idle motion and re-aims the arms: the hands go on after it
+  if (o.tick && !o.userData.handsTick) {
+    const tick = o.tick;
+    o.tick = (t) => {
+      tick(t);
+      hands(o);
+    };
+    o.userData.handsTick = true;
+  }
+  o.updateMatrixWorld(true);
+  const q = o.getWorldQuaternion(new THREE.Quaternion());
+  const P = (n) => o.bones[n].getWorldPosition(new THREE.Vector3());
+  for (const side of ['Left', 'Right']) {
+    const fa = o.bones[side + 'ForeArm'], h = o.bones[side + 'Hand'];
+    if (!fa || !h || !o.bones[side + 'HandMiddle1'] || !o.bones[side + 'HandIndex1'] || !o.bones[side + 'HandPinky1']) continue;
+    const axis = P(side + 'Hand').sub(P(side + 'ForeArm')).normalize();
+    turnWorld(h, new THREE.Quaternion().setFromUnitVectors(P(side + 'HandMiddle1').sub(P(side + 'Hand')).normalize(), axis));
+    const fingers = P(side + 'HandMiddle1').sub(P(side + 'Hand')).normalize();
+    const across = P(side + 'HandIndex1').sub(P(side + 'HandPinky1')).normalize();
+    // out of the palm (the index is on the thumb's side, toward the body when the hand hangs)
+    const n = side === 'Right' ? across.clone().cross(fingers) : fingers.clone().cross(across);
+    const inward = side === 'Right' ? 1 : -1;
+    const t = new THREE.Vector3(...(palm === 'down' ? [0, -1, 0.15] : [inward * 0.85, 0, 0.45])).normalize().applyQuaternion(q);
+    const np = n.projectOnPlane(axis), tp = t.projectOnPlane(axis);
+    if (np.lengthSq() < 1e-6 || tp.lengthSq() < 1e-6) continue;
+    np.normalize();
+    tp.normalize();
+    const ang = Math.atan2(np.clone().cross(tp).dot(axis), np.dot(tp));
+    turnWorld(fa, new THREE.Quaternion().setFromAxisAngle(axis, ang * 0.5));
+    turnWorld(h, new THREE.Quaternion().setFromAxisAngle(axis, ang * 0.5));
+  }
+}
 const bell = (t, a, b) => Math.sin(Math.PI * clamp01((t - a) / (b - a))) ** 2;
 const ramp = (t, a, b) => ease(clamp01((t - a) / (b - a)));
 const lerp = (a, b, u) => a + (b - a) * u;
@@ -280,8 +327,12 @@ async function tetto(s) {
   s.add(sign);
   // two workers with a pane of glass, a third with the hoist rope
   const wk = [];
-  for (const [kind, x, z, rot] of [['man', -2.5, 1.2, 90], ['beard', -0.6, 1.2, -90], ['oldman', -6, -1.5, 30]]) {
-    const w = await grey(kind, 'stand', { pos: [x, z > 0 ? TOP + 0.05 : TOP + 0.4, z], rotY: rot, seed: 90 + wk.length, wear: { top: '#9a9a96', bottom: '#4a4a4c' }, aim: { LeftArm: [0.4, 0.3, 0.6], LeftForeArm: [0.1, 0.6, 0.8], RightArm: [-0.4, 0.3, 0.6], RightForeArm: [-0.1, 0.6, 0.8] } });
+  // the two with the pane hold its edges in front of them at chest height; the third pulls the hoist rope
+  const HOLD = { LeftArm: [0.25, -0.5, 0.85], LeftForeArm: [0.05, 0.1, 1], RightArm: [-0.25, -0.5, 0.85], RightForeArm: [-0.05, 0.1, 1] };
+  const ROPE = { LeftArm: [0.15, -0.2, 0.9], LeftForeArm: [0.05, 0.45, 0.9], RightArm: [-0.15, -0.45, 0.8], RightForeArm: [-0.05, 0.2, 1] };
+  for (const [kind, x, z, rot, aim] of [['man', -3.05, 1.2, 90, HOLD], ['beard', -0.05, 1.2, -90, HOLD], ['oldman', -6, -1.5, 30, ROPE]]) {
+    const w = await grey(kind, 'stand', { pos: [x, z > 0 ? TOP + 0.05 : TOP + 0.4, z], rotY: rot, seed: 90 + wk.length, wear: { top: '#9a9a96', bottom: '#4a4a4c' }, aim });
+    hands(w);
     s.add(w);
     wk.push(w);
     const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), clay('#e8e6e0'));
@@ -290,7 +341,7 @@ async function tetto(s) {
     helmet.position.set(0, 0.16 / w.bones.Head.getWorldScale(new THREE.Vector3()).x, 0);
     helmet.scale.setScalar(1 / w.bones.Head.getWorldScale(new THREE.Vector3()).x);
   }
-  s.add(boxMesh(1.7, 1.3, 0.03, '#c0c4ca', [-1.55, TOP + 1.0, 1.2]));
+  s.add(boxMesh(1.7, 1.3, 0.03, '#c0c4ca', [-1.55, TOP + 0.75, 1.2]));
   const man = await him('stand', { pos: EDGE, rotY: 8, aim: { Head: [0, 0.7, 0.7], Neck: [0, 1, 0.35] } });
   s.add(man);
   // his helmet: white, the only thing of his that stays
@@ -445,7 +496,10 @@ async function piano(fl, { W = 5.2, Dp = 4.6, H = 2.8, ww = 1.8, wh = 1.5, sill 
 }
 /** People: kinds, poses and colours for the floors. */
 async function person(kind, pose, pos, rot, opts = {}) {
-  return grey(kind, pose, { pos, rotY: rot, seed: Math.floor(pos[0] * 31 + pos[2] * 17 + 300), ...opts });
+  const o = await grey(kind, pose, { pos, rotY: rot, seed: Math.floor(pos[0] * 31 + pos[2] * 17 + 300), ...opts });
+  if (opts.palm) o.userData.palm = opts.palm;
+  hands(o);
+  return o;
 }
 const look = (o, up) => set(o, mixAims(o.baseAims, { Neck: [0, 1, -0.1], Head: [0, 1, -0.5] }, up));
 
@@ -500,7 +554,7 @@ async function s12() {
     s.add(boxMesh(1.2, 0.74, 0.6, '#9a9894', [x, y0, z - 0.45]));
     s.add(boxMesh(0.45, 0.3, 0.03, '#1c1c1e', [x, y0 + 0.74, z - 0.7]));
     s.add(boxMesh(0.04, 0.5, 0.5, '#d0cec8', [x + 0.62, y0 + 0.74, z - 0.45]));
-    const o = await person(['man', 'woman', 'man', 'woman', 'man', 'woman'][ops.length], 'sitChair', [x, y0 + 0.02, z], 180, { wear: { top: ['#3a3a3c', '#7a7a7c', '#5a5a5c', '#9a9a9a', '#2a2a2a', '#6a6a6a'][ops.length] }, aim: { LeftArm: [0.2, -0.6, -0.8], LeftForeArm: [0, 0, -1], RightArm: [-0.2, -0.6, -0.8], RightForeArm: [0, 0, -1] } });
+    const o = await person(['man', 'woman', 'man', 'woman', 'man', 'woman'][ops.length], 'sitChair', [x, y0 + 0.02, z], 180, { palm: 'down', wear: { top: ['#3a3a3c', '#7a7a7c', '#5a5a5c', '#9a9a9a', '#2a2a2a', '#6a6a6a'][ops.length] }, aim: { LeftArm: [0.2, -0.6, 0.8], LeftForeArm: [0, 0, 1], RightArm: [-0.2, -0.6, 0.8], RightForeArm: [0, 0, 1] } });
     s.add(o);
     ops.push(o);
   }
@@ -533,16 +587,17 @@ async function s14() {
     lie.position.set(k * 1.6, y0 + 0.62, -1.7);
     s.add(lie);
   }
-  s.add(boxMesh(1.2, 0.74, 0.6, '#9a9690', [0, y0, -3.3]));
-  const st = await person('woman', 'sitChair', [0, y0 + 0.02, -2.75], 0, { expr: 'tired', wear: { top: '#3a3a3c', bottom: '#2a2a2c', hair: '#3a2a1e', sleeves: 'long' }, aim: { LeftArm: [0.2, -0.7, 0.7], LeftForeArm: [0.1, -0.1, 1], RightArm: [-0.2, -0.7, 0.7], RightForeArm: [-0.1, -0.1, 1], Head: [0, 0.75, 0.65] } });
+  // her desk in front of her, the window behind
+  s.add(boxMesh(1.2, 0.74, 0.6, '#9a9690', [0, y0, -2.2]));
+  const st = await person('woman', 'sitChair', [0, y0 + 0.02, -2.75], 0, { palm: 'down', expr: 'tired', wear: { top: '#3a3a3c', bottom: '#2a2a2c', hair: '#3a2a1e', sleeves: 'long' }, aim: { LeftArm: [0.2, -0.7, 0.7], LeftForeArm: [0.1, -0.1, 1], RightArm: [-0.2, -0.7, 0.7], RightForeArm: [-0.1, -0.1, 1], Head: [0, 0.75, 0.65] } });
   s.add(st);
-  s.add(boxMesh(0.4, 0.04, 0.3, '#ece8de', [-0.1, y0 + 0.74, -3.15]));
+  s.add(boxMesh(0.4, 0.04, 0.3, '#ece8de', [-0.1, y0 + 0.74, -2.1]));
   const rec = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.12), new THREE.MeshBasicMaterial({ map: canvasTex(256, 160, (c, w, h) => {
     c.fillStyle = '#f2efe6'; c.fillRect(0, 0, w, h); c.fillStyle = '#1a1a1a'; c.font = 'bold 24px "DejaVu Sans Mono", monospace';
     c.fillText('POSTO LETTO', 18, 60); c.fillText('700,00 €', 18, 110);
   }) }));
   rec.rotation.x = -Math.PI / 2 + 0.3;
-  rec.position.set(0.32, y0 + 0.76, -3.2);
+  rec.position.set(0.34, y0 + 0.76, -2.05);
   rec.userData.id = nextId();
   s.add(rec);
   const update = (k, t) => {
@@ -612,7 +667,7 @@ async function s18() {
     items.push(it);
   }
   s.add(boxMesh(0.45, 0.45, 0.45, '#5a5650', [0, y0, -1.05]));
-  const old = await person('oldman', 'sitChair', [0, y0 + 0.02, -1.1], 180, { hide: ['Wolf3D_Headwear'], wear: { top: '#4a4a48', bottom: '#3a3a38' }, aim: { RightArm: [-0.2, -0.7, -0.7], RightForeArm: [0, -0.2, -1], LeftArm: [0.2, -0.7, -0.7], LeftForeArm: [0, -0.2, -1], Head: [0, 0.8, -0.6] } });
+  const old = await person('oldman', 'sitChair', [0, y0 + 0.02, -1.1], 180, { palm: 'down', hide: ['Wolf3D_Headwear'], wear: { top: '#4a4a48', bottom: '#3a3a38' }, aim: { RightArm: [-0.2, -0.7, 0.7], RightForeArm: [0, -0.2, 1], LeftArm: [0.2, -0.7, 0.7], LeftForeArm: [0, -0.2, 1], Head: [0, 0.8, 0.6] } });
   s.add(old);
   const update = (k, t) => {
     P.drop(t, 3.3);
@@ -775,7 +830,7 @@ async function s24() {
   const { s, y0 } = P;
   s.add(boxMesh(1.2, 0.72, 0.7, '#8a8274', [0, y0, -1.75]));
   for (let i = 0; i < 6; i++) s.add(boxMesh(0.21, 0.01, 0.3, '#ece8de', [-0.35 + (i % 3) * 0.25, y0 + 0.72 + Math.floor(i / 3) * 0.01, -1.65 + (i % 2) * 0.05]));
-  const tch = await person('woman', 'sitChair', [0, y0 + 0.02, -2.3], 0, { wear: { top: '#6a6a6c', bottom: '#3a3a3c', hair: '#1c1814' }, aim: { LeftArm: [0.2, -0.7, 0.7], LeftForeArm: [0.1, -0.15, 1], RightArm: [-0.2, -0.7, 0.7], RightForeArm: [-0.1, -0.15, 1], Head: [0, 0.75, 0.65] } });
+  const tch = await person('woman', 'sitChair', [0, y0 + 0.02, -2.3], 0, { palm: 'down', wear: { top: '#6a6a6c', bottom: '#3a3a3c', hair: '#1c1814' }, aim: { LeftArm: [0.2, -0.7, 0.7], LeftForeArm: [0.1, -0.15, 1], RightArm: [-0.2, -0.7, 0.7], RightForeArm: [-0.1, -0.15, 1], Head: [0, 0.75, 0.65] } });
   s.add(tch);
   const update = (k, t) => {
     P.drop(t, 0.5, -0.5);
@@ -957,6 +1012,7 @@ async function s29() {
   update(0, 0);
   return { scene: s, camera, far: 1500, update };
 }
+
 
 export const SHOTS = {
   s04, s05, s06, s07, s08,
