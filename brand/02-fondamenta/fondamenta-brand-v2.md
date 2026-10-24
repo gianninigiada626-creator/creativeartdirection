@@ -37,6 +37,20 @@ La sua accusa è l'**omologazione**. Il consumismo rende tutti uguali, e i ragaz
 
 ---
 
+## 1-bis. La poesia come metodo, non come scritta
+
+Dai poeti e dagli scrittori il brand prende il **metodo**, non le parole: nessun verso o frase compare sui capi. Ogni voce diventa un principio di costruzione.
+
+| Voce | Principio | Come diventa tecnica |
+|---|---|---|
+| **Pasolini: la contaminazione** | In _Accattone_ (1961) mette la musica di Bach sulle borgate; il finale di _Mamma Roma_ (1962) richiama il _Cristo morto_ di Mantegna. Il sacro sul quotidiano. | La tecnica più nobile, cioè la sartoria, applicata al capo più umile, la tuta |
+| **Pasolini: contro l'omologazione** | Il consumismo rende tutti uguali. | Nessun logo; ogni capo ha parti finite a mano, quindi nessun pezzo è identico a un altro |
+| **Il vestito buono** | La dignità non si mostra, si porta. | Fuori è modesto, dentro è il lusso: fodere, rifiniture, interni sartoriali |
+| **Ferrante, Milani: l'uscita** | Il libro e la scuola come via d'uscita. | Capi costruiti per durare, essere modificati e passare di mano |
+| **Dolci: lo sciopero alla rovescia** | Il lavoro come gesto politico. | Il lavoro manuale si vede: travette, asole e giunzioni fatte a mano |
+
+---
+
 ## 2. Il DNA formale: la tuta e il vestito buono
 
 Nelle periferie italiane la povertà ha sempre avuto due abiti.
@@ -93,10 +107,7 @@ Un esempio da seguire: **Martin Margiela** e la linea Artisanal. Il maglione fat
 2. **Niente degrado simulato.** Niente sporco finto né strappi finti. Il segno del tempo o è vero o è costruzione.
 3. **Il valore torna.** Ogni collezione restituisce qualcosa di concreto e verificabile (punto 7).
 4. **Il prezzo paga il lavoro, non la storia.** Si comunicano in modo trasparente materiali, manodopera e produzione italiana.
-5. **Le parole si pagano.** I versi di Pasolini e Merini sono ancora protetti dal diritto d'autore. Pasolini (morto nel 1975) entra nel pubblico dominio nel 2046, Merini (morta nel 2009) nel 2080. Stampare un verso su un capo è un uso commerciale e richiede una licenza dagli eredi. Le alternative:
-   - usare titoli e allusioni invece delle citazioni;
-   - chiedere le licenze;
-   - **commissionare testi nuovi a poeti e rapper dei quartieri**, che è anche un modo per far tornare il valore.
+5. **Nessuna scritta, nessun logo.** Sui capi non compaiono versi, frasi, iniziali né loghi. La poesia entra come metodo, nella tecnica, nella filosofia e nella struttura delle collezioni (punto 1-bis). Il brand si riconosce dalla costruzione, non da un marchio stampato: è anche la risposta a Pasolini, che nel 1973 analizzava lo slogan dei jeans Jesus come linguaggio del consumo. All'interno resta solo l'etichetta di composizione obbligatoria per legge.
 
 ---
 
@@ -108,11 +119,11 @@ Un esempio da seguire: **Martin Margiela** e la linea Artisanal. Il maglione fat
    - Le insulae dello ZEN diventano un patchwork a blocchi.
    - Le piastrelle e le ringhiere dell'INA-Casa diventano jacquard e decori.
 2. **Ogni capo è uno scambio.**
-   - I codici maschili della periferia (tuta, canotta, giubbotto, felpa) si costruiscono con le tecniche del **corredo**, la dote di biancheria ricamata dalle donne delle famiglie povere: ricamo bianco su bianco, cifre, sfilato, uncinetto, merletto.
+   - I codici maschili della periferia (tuta, canotta, giubbotto, felpa) si costruiscono con le tecniche del **corredo**, la dote di biancheria lavorata dalle donne delle famiglie povere: punto a giorno, sfilato, ricamo bianco su bianco (solo motivi, mai lettere), uncinetto, merletto.
    - I codici femminili (sottoveste, grembiule, vestaglia, vestito della festa) si costruiscono con le tecniche da lavoro: tessuti tecnici, cuciture nastrate, tasche cargo.
 3. **Taglie per corpo, non per genere.** Un'unica scala di taglie, con note sulla vestibilità.
 4. **Il rammendo è un dettaglio di lusso.** Si fa a mano e in modo visibile, come firma.
-5. **I nomi.** Ogni collezione prende il nome dal luogo o dall'opera. Ogni capo prende il nome da titoli o versi, con licenza (regola 5).
+5. **I nomi restano fuori dal capo.** Collezioni e capi hanno nomi solo in catalogo, nel lookbook e nelle schede tecniche. Sul capo non c'è scritto niente.
 6. **Casting nei quartieri: "presence over beauty".**
 
 ---
@@ -141,12 +152,11 @@ Un esempio da seguire: **Martin Margiela** e la linea Artisanal. Il maglione fat
 
 ## 9. Collezione 01 "Borgata": il capo manifesto
 
-**La Tuta della Festa**
-- **Struttura:** una tuta streetwear costruita come un vestito buono, in lana o lana tecnica, con interni rifiniti a mano e spalle e girovita lavorati come in sartoria.
-- **Scambio:** le iniziali di chi la compra ricamate bianco su bianco, come le cifre del corredo. È un servizio di personalizzazione e un dettaglio femminile su un codice maschile.
-- **Ingegno:** un rammendo visibile, fatto a mano, come firma.
+**La Tuta della Festa** (giacca + pantalone): il progetto completo è in `brand/03-collezione-01-borgata/`.
+- **Struttura:** fuori è una tuta, dentro è un vestito buono. Flanella di lana rigenerata, interni foderati e rifiniti come una giacca sartoriale.
+- **Scambio:** la riga della tuta sportiva diventa una giunzione a giorno, la tecnica del corredo. Attraverso il vuoto si vede la fodera rosa.
+- **Ingegno ed eredità:** margini di riserva per allargare e modificare il capo, perché passi di mano come il vestito buono.
 - **Il valore torna:** il cartamodello della versione base viene pubblicato gratis.
-- **Nome del capo:** un titolo pasoliniano, se la licenza lo consente.
 
 **Capsule di debutto:** 8–12 look unisex.
 
@@ -178,9 +188,7 @@ Prima di scegliere serve una ricerca di anteriorità sulle banche dati marchi (E
 ## 12. Domande aperte
 
 1. Oltre a Pasolini, quali voci senti tue (Merini, Ferrante, Milani, Dolci, Morante, il rap)?
-2. Ti convince il DNA "la tuta e il vestito buono"?
-3. Nome: ti attira una delle ipotesi, o hai una frase tua?
-4. Ti piace l'idea di commissionare testi a poeti e rapper dei quartieri invece di citare solo i classici?
+2. Nome: ti attira una delle ipotesi, o hai una frase tua?
 
 ---
 
