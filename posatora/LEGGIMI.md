@@ -12,6 +12,7 @@ Grafiche vettorializzate dal mockup e dalla foto dell'ovale. Stampa: 1 colore, *
 
 - `serigrafia/`: i file da mandare allo stampatore se si stampa in serigrafia.
   - `*_bianco.svg` / `*_bianco.pdf`: vettoriale master. Le forme sono **bianche su sfondo trasparente**, quindi su sfondo bianco sembrano vuote. In Illustrator il gruppo si chiama `INCHIOSTRO_BIANCO`.
+  - `*_con-sfondo-NON-STAMPARE.pdf` / `.svg`: lo stesso vettoriale con uno sfondo nero, così la grafica si vede appena si apre il file. Lo sfondo è su un livello separato chiamato `SFONDO MAGLIA - NON STAMPARE` (nell'SVG è il gruppo `SFONDO_NON_STAMPARE`). Nel PDF il livello è impostato per non essere stampato. Prima della stampa va comunque nascosto o eliminato.
   - `*_positivo-pellicola.pdf`: le stesse forme in nero, pronte per la pellicola del telaio.
 - `dtg/`: PNG a 300 dpi in misura reale, bianco su trasparente. Il nero della maglia non va stampato.
   - `POSATORA_retro_DTG_300dpi.png`: identico alla serigrafia (foto a grana).
