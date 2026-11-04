@@ -121,7 +121,8 @@ h4{font-family:var(--f-mono);font-size:12px;letter-spacing:.13em;text-transform:
 /* lineup */
 .lineup{background:var(--plate);border:2px solid var(--ink);padding:18px 18px 8px;overflow-x:auto}
 .lineup svg{display:block;width:100%;min-width:560px;height:auto}
-.lineup text,.plate text,.chart text{font-family:var(--f-mono);fill:var(--ink)}
+.lineup text,.plate text,.chart text{font-family:var(--f-mono)}
+.lineup text:not([fill]),.plate text:not([fill]),.chart text:not([fill]){fill:var(--ink)}
 .dirkey{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:0;border:2px solid var(--ink);border-top:0}
 .dirkey > a{padding:14px 16px;text-decoration:none;min-width:0;display:block}
 .dirkey > a + a{border-left:1px solid var(--rule-strong)}
