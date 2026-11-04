@@ -991,46 +991,86 @@ table.spec{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px}
     <g fill="#8C1748"><circle cx="17" cy="472" r="1.3"/><circle cx="31" cy="491" r="1.2"/><circle cx="45" cy="492" r="1.4"/><circle cx="57" cy="484" r="1"/><circle cx="78" cy="453" r="1.2"/><circle cx="66" cy="481" r="0.9"/></g>
   </g>
 
-  <!-- ═══════════ REAR VIEW ═══════════ -->
-  <symbol id="figA_rear" viewBox="0 0 260 660">
-    <g id="shoeAr">
-      <path d="M34,606 C34,590 56,582 90,582 C114,582 128,592 128,608 L128,622 C128,634 120,640 108,640 L50,640 C38,640 30,634 30,622 Z" fill="#171717"/>
-      <rect x="30" y="615" width="98" height="13" rx="4" fill="#D6D0C4" stroke="#171717" stroke-width="2.6"/>
-      <path d="M79,586 L79,606" stroke="#D6D0C4" stroke-width="2" stroke-linecap="round"/>
-      <path d="M50,602 C62,596 96,596 110,602" fill="none" stroke="#D6D0C4" stroke-width="1.5" stroke-linecap="round" opacity=".85"/>
+  <!-- ═══════════ REAR VIEW v2 · seen truly from behind ═══════════ -->
+  <!-- back of the hand: fingers curl forward, thumb hidden in front -->
+  <g id="handA_back">
+    <path d="M14,404 L64,404 C70,418 70,436 64,452 C58,464 46,470 36,470 C26,468 16,460 14,448 C10,432 10,416 14,404 Z" fill="#D6D0C4" stroke="#171717" stroke-width="3.6" stroke-linejoin="round"/>
+    <g fill="none" stroke="#171717" stroke-linecap="round">
+      <path d="M18,440 C30,435 50,435 64,440" stroke-width="1.6"/>
+      <path d="M27,452 L29,466 M39,455 L40,469 M51,453 L51,465" stroke-width="1.7"/>
+      <path d="M28,436 L33,433 M44,436 L49,433" stroke-width="1.3"/>
+      <path d="M26,412 C30,420 32,428 32,434 M44,412 C45,420 45,428 44,434" stroke-width="1" opacity=".55"/>
     </g>
-    <use href="#shoeAr" transform="translate(260,0) scale(-1,1)"/>
+  </g>
+  <g id="shoeAr2">
+    <path d="M72,577 C72,567 86,567 86,577" fill="none" stroke="#171717" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M44,598 C44,584 60,576 79,576 C98,576 114,584 114,598 L116,622 C116,634 108,640 98,640 L60,640 C50,640 42,634 42,622 Z" fill="#171717"/>
+    <path d="M79,580 L79,602" stroke="#D6D0C4" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M50,605 C62,597 96,597 108,605" fill="none" stroke="#D6D0C4" stroke-width="1.5" stroke-linecap="round" opacity=".85"/>
+    <path d="M42,613 L116,613 L116,627 C116,634 110,638 102,638 L56,638 C48,638 42,634 42,627 Z" fill="#D6D0C4" stroke="#171717" stroke-width="2.6"/>
+    <path d="M48,624 L110,624" stroke="#171717" stroke-width="1" stroke-dasharray="3 3"/>
+  </g>
+  <symbol id="figA_rearBody" viewBox="0 0 260 660">
+    <use href="#shoeAr2"/>
+    <use href="#shoeAr2" transform="translate(260,0) scale(-1,1)"/>
     <path d="M60,390 L200,390 C206,460 208,540 206,604 C188,612 156,612 138,604 L134,452 L126,452 L122,604 C104,612 72,612 54,604 C52,540 54,460 60,390 Z" fill="#171717"/>
     <g fill="none" stroke="#D6D0C4" stroke-width="1.7" stroke-linecap="round" opacity=".88">
-      <path d="M98,404 C108,420 118,430 128,434"/><path d="M162,404 C152,420 142,430 132,434"/>
-      <path d="M78,520 C90,515 104,517 114,525"/><path d="M182,520 C170,515 156,517 146,525"/>
+      <path d="M130,394 L130,450"/>
+      <path d="M62,404 C90,413 116,415 128,413"/><path d="M198,404 C170,413 144,415 132,413"/>
+      <path d="M78,428 L112,432"/><path d="M182,428 L148,432"/>
+      <path d="M76,512 C88,506 102,508 112,516"/><path d="M78,525 C90,519 102,521 110,529"/>
+      <path d="M184,512 C172,506 158,508 148,516"/><path d="M182,525 C170,519 158,521 150,529"/>
       <path d="M64,560 C80,570 104,570 118,562"/><path d="M58,584 C78,594 104,594 120,586"/>
       <path d="M196,560 C180,570 156,570 142,562"/><path d="M202,584 C182,594 156,594 140,586"/>
     </g>
+    <g fill="#D6D0C4"><circle cx="95" cy="430" r="1.6"/><circle cx="165" cy="430" r="1.6"/></g>
     <path d="M56,362 L204,362 L202,394 C172,400 88,400 58,394 Z" fill="#171717"/>
     <path d="M60,386 C90,391 170,391 200,386" fill="none" stroke="#D6D0C4" stroke-width="1.6" opacity=".85"/>
-    <use href="#handA"/>
-    <use href="#handA" transform="translate(260,0) scale(-1,1)"/>
-    <use href="#stainA" transform="translate(260,0) scale(-1,1)"/>
+    <!-- his left hand on the viewer's left, his right (stained) on the viewer's right -->
+    <use href="#handA_back"/>
+    <use href="#handA_back" transform="translate(260,0) scale(-1,1)"/>
+    <g fill="none" stroke="#8C1748" stroke-linecap="round" stroke-width="3">
+      <path d="M232,467 C228,469.5 222,470 217,469"/><path d="M215,469 C211,470 207,469.5 204,468"/>
+    </g>
+    <g fill="#8C1748"><circle cx="214" cy="432" r="1.2"/><circle cx="222" cy="446" r="1"/><circle cx="208" cy="452" r="1.3"/><circle cx="228" cy="425" r=".9"/><circle cx="236" cy="458" r="1.1"/></g>
     <path d="M86,140 C50,138 24,152 18,188 C14,240 12,300 12,350 C12,372 14,392 18,408 L62,408 C61,380 60,340 62,300 L66,180 Z" fill="#171717"/>
     <path d="M174,140 C210,138 236,152 242,188 C246,240 248,300 248,350 C248,372 246,392 242,408 L198,408 C199,380 200,340 198,300 L194,180 Z" fill="#171717"/>
     <path d="M84,136 C66,138 56,150 54,170 L50,368 C84,378 176,378 210,368 L206,170 C204,150 194,138 176,136 Z" fill="#171717"/>
     <path d="M20,196 C26,168 50,153 86,150 L72,168 C50,174 36,194 30,228 L22,300 Z" fill="url(#dotPaper)"/>
     <g fill="none" stroke="#D6D0C4" stroke-width="1.8" stroke-linecap="round" opacity=".9">
       <path d="M66,180 C70,230 68,280 63,340"/><path d="M194,180 C190,230 192,280 197,340"/>
-      <path d="M60,214 C100,226 160,226 200,214"/>
-      <path d="M18,300 C28,294 40,296 50,304"/><path d="M242,300 C232,294 220,296 210,304"/>
+      <path d="M62,222 C100,234 160,234 198,222"/>
+      <path d="M130,234 L130,364"/>
+      <path d="M74,196 C100,184 160,184 186,196"/>
+      <path d="M16,300 C26,292 40,294 52,302"/><path d="M18,316 C28,310 38,312 46,318"/>
+      <path d="M244,300 C234,292 220,294 208,302"/><path d="M242,316 C232,310 222,312 214,318"/>
       <path d="M16,396 C28,400 48,400 61,396"/><path d="M244,396 C232,400 212,400 199,396"/>
       <path d="M52,360 C90,368 170,368 208,360"/>
-      <path d="M118,300 C124,306 136,306 142,300"/>
     </g>
-    <!-- hood seen from behind, draping on the upper back -->
-    <path d="M84,142 C80,100 86,62 110,38 C120,28 127,23 130.7,20 C138,22 148,28 158,38 C178,62 182,100 178,142 C176,172 158,196 130,200 C102,196 86,172 84,142 Z" fill="#171717"/>
+  </symbol>
+  <symbol id="figA_rear" viewBox="0 0 260 660">
+    <use href="#figA_rearBody" width="260" height="660"/>
+    <path d="M84,142 C80,100 86,62 110,38 C120,28 127,23 130.7,20 C138,22 148,28 158,38 C178,62 182,100 178,142 C176,176 156,202 130,208 C104,202 84,176 84,142 Z" fill="#171717"/>
     <path d="M90,140 C86,100 92,64 112,40 L119,44 C100,66 96,100 98,140 Z" fill="url(#dotPaper)"/>
-    <g fill="none" stroke="#D6D0C4" stroke-width="1.4" stroke-linecap="round" opacity=".85">
-      <path d="M130.7,23 C130.5,80 130.5,140 130,196"/>
-      <path d="M98,172 C108,186 120,192 130,194"/><path d="M162,172 C152,186 140,192 130,194"/>
+    <g fill="none" stroke="#D6D0C4" stroke-width="1.4" stroke-linecap="round" opacity=".88">
+      <path d="M130.7,23 C130.5,80 130.5,140 130,202"/>
+      <path d="M96,170 C108,188 120,198 130,202"/><path d="M164,170 C152,188 140,198 130,202"/>
+      <path d="M92,118 C96,140 104,156 114,168"/><path d="M168,118 C164,140 156,156 146,168"/>
     </g>
+  </symbol>
+
+  <!-- ═══ Pose «Si volta»: from behind, head turned ~80° over his right shoulder ═══ -->
+  <symbol id="figA_turn" viewBox="0 0 260 660">
+    <use href="#figA_rearBody" width="260" height="660"/>
+    <path d="M84,140 C82,172 98,198 122,206 C142,200 164,184 176,158 L176,140 Z" fill="#171717"/>
+    <g fill="none" stroke="#D6D0C4" stroke-width="1.4" stroke-linecap="round" opacity=".88">
+      <path d="M94,168 C104,186 114,198 122,204"/><path d="M166,166 C154,184 138,198 122,204"/><path d="M104,150 C110,170 116,186 122,200"/>
+    </g>
+    <g transform="translate(134 166) rotate(-6) scale(0.92)">
+      <use href="#r_head"/>
+      <ellipse cx="44.5" cy="-86" rx="3.6" ry="2" fill="#E8E4DB"/><circle cx="42.6" cy="-85.8" r="1.25" fill="#171717"/>
+    </g>
+    <path d="M196,150 C206,146 220,148 232,156" fill="none" stroke="#D6D0C4" stroke-width="1.6" stroke-linecap="round" opacity=".85"/>
   </symbol>
 
   <!-- ═══════════ 3/4 VIEW (turned to his left, toward viewer's right) ═══════════ -->
@@ -1551,7 +1591,7 @@ table.spec{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px}
     <div class="poses">
       <figure class="pose"><div class="stage" data-pose="walk"></div><figcaption><b>Camminata pesante</b><span>Prologo · contatto del tallone</span>Ogni passo affonda: il bacino scende di 3–4 cm al contatto.</figcaption></figure>
       <figure class="pose"><div class="stage" data-pose="hands"></div><figcaption><b>Si guarda le mani</b><span>Cap. II–III</span>Testa china, entrambe le mani portate davanti al petto.</figcaption></figure>
-      <figure class="pose"><div class="stage" data-pose="back"></div><figcaption><b>Si volta</b><span>Cap. I · il Testimone</span>Il corpo resta in avanti, si gira solo il cappuccio: è il disegno della testa ribaltato.</figcaption></figure>
+      <figure class="pose"><div class="stage" data-pose="back"></div><figcaption><b>Si volta</b><span>Cap. I · il Testimone</span>Di schiena: gira la testa di circa 80° sopra la spalla destra e lo sguardo scivola indietro. Il corpo non si muove.</figcaption></figure>
       <figure class="pose"><div class="stage" data-pose="run"></div><figcaption><b>Fuga</b><span>Cap. IV · la Discesa</span>Busto inclinato di 18°, braccia piegate; unica posa con le due gambe lontane da terra.</figcaption></figure>
       <figure class="pose"><div class="stage" data-pose="tag"></div><figcaption><b>Ripassa il tag</b><span>Cap. II · la Memoria</span>Bomboletta grigia con tappo bordeaux, indice sull'erogatore.</figcaption></figure>
       <figure class="pose"><div class="stage" data-pose="kneel"></div><figcaption><b>Crollo</b><span>Climax · il Collasso</span>In ginocchio, testa sotto le spalle, braccia abbandonate.</figcaption></figure>
@@ -1571,7 +1611,7 @@ table.spec{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px}
     <div class="sheet" style="overflow-x:auto;margin-top:10px"><div class="silrow small" id="sil-small"></div></div>
     <div class="grid2" style="margin-top:20px">
       <div><h4>Superato</h4><ul class="list-tight"><li>La punta del cappuccio si legge in tutte e dieci le sagome.</li><li>Le braccia lunghe e le mani oltre il bacino distinguono le pose statiche.</li><li>Le scarpe pesanti ancorano la sagoma al suolo anche nella fuga.</li></ul></div>
-      <div><h4>Da sorvegliare</h4><ul class="list-tight"><li>Nella posa «si guarda le mani» il cappuccio è chino e la punta si legge meno: in scena va inquadrata leggermente dall'alto.</li><li>Il retro e il fronte hanno la stessa sagoma: la direzione va data dalla scena (luce, movimento, scarpe).</li></ul></div>
+      <div><h4>Da sorvegliare</h4><ul class="list-tight"><li>Nella posa «si guarda le mani» il cappuccio è chino e la punta si legge meno: in scena va inquadrata leggermente dall'alto.</li><li>Retro e fronte hanno sagome simili: nel retro la direzione la danno il cappuccio che scende sulla schiena e i talloni delle scarpe.</li></ul></div>
     </div>
   </section>
 
@@ -1631,7 +1671,7 @@ table.spec{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px}
         <thead><tr><th>Pezzo</th><th>Pivot</th><th>Rotazione</th><th>Note</th></tr></thead>
         <tbody>
           <tr><td>Busto con bacino</td><td class="m">P1 anca</td><td class="m">−10° … +35°</td><td>La gobba è nel disegno; il busto ruota solo per inclinarsi</td></tr>
-          <tr><td>Testa (cappuccio)</td><td class="m">P2 collo</td><td class="m">−20° … +30°</td><td>Per lo sguardo indietro si usa il disegno ribaltato</td></tr>
+          <tr><td>Testa (cappuccio)</td><td class="m">P2 collo</td><td class="m">−20° … +30°</td><td>Lo sguardo indietro si disegna di schiena, con la testa girata al massimo di 80°</td></tr>
           <tr><td>Braccio</td><td class="m">P3 spalla</td><td class="m">−130° … +45°</td><td>Il braccio lontano resta dietro al busto</td></tr>
           <tr><td>Avambraccio</td><td class="m">P4 gomito</td><td class="m">−120° … 0°</td><td>Mai iperesteso</td></tr>
           <tr><td>Mano</td><td class="m">P5 polso</td><td class="m">−30° … +30°</td><td>Sostituzione di disegno: rilassata, bomboletta; aperta e pugno a mano libera</td></tr>
@@ -1686,7 +1726,6 @@ var RIG = (function(){
   var POSES = {
     walk:  {torso:6, head:-4, nS:16, nE:-14, nW:4, fS:-18, fE:-18, fW:0, nH:-24, nK:4, nA:10, fH:22, fK:10, fA:-10},
     hands: {torso:12, head:26, nS:-40, nE:-70, nW:20, fS:-34, fE:-72, fW:16, nH:-3, nK:3, nA:0, fH:4, fK:2, fA:-6},
-    back:  {torso:-2, head:8, flip:true, nS:8, nE:-8, nW:0, fS:-4, fE:-6, fW:0, nH:-10, nK:6, nA:4, fH:10, fK:4, fA:-14},
     run:   {torso:18, head:-14, nS:44, nE:-78, nW:0, fS:-52, fE:-80, fW:0, nH:-58, nK:72, nA:-8, fH:34, fK:48, fA:8},
     tag:   {torso:2, head:-10, nS:-70, nE:-30, nW:0, fS:6, fE:-10, fW:0, nH:-14, nK:8, nA:6, fH:14, fK:4, fA:-18, hand:'r_handCan'},
     kneel: {torso:26, head:30, nS:-16, nE:-14, nW:0, fS:-10, fE:-12, fW:0, nH:10, nK:80, nA:0, fH:-70, fK:72, fA:-2}
@@ -1765,7 +1804,14 @@ var RIG = (function(){
   }
   var NAMES = {walk:'Camminata pesante', hands:'Si guarda le mani', back:'Si volta', run:'Fuga', tag:'Ripassa il tag', kneel:'Crollo'};
   document.querySelectorAll('.stage[data-pose]').forEach(function(st){
-    var k = st.getAttribute('data-pose'), svg = poseSvg(RIG.POSES[k], false, NAMES[k]);
+    var k = st.getAttribute('data-pose'), svg;
+    if (k === 'back'){
+      svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('viewBox', '-14 0 288 662'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', NAMES[k]);
+      svg.innerHTML = '<use href="#figA_turn" width="260" height="660"/><line x1="-14" y1="640" x2="274" y2="640" stroke="#171717" stroke-width="1.6"/>';
+      st.appendChild(svg); return;
+    }
+    svg = poseSvg(RIG.POSES[k], false, NAMES[k]);
     st.appendChild(svg); fit(svg);
   });
 
@@ -1781,7 +1827,10 @@ var RIG = (function(){
     row.appendChild(staticSil('figA2')); row.appendChild(staticSil('figA_34'));
     var side = poseSvg({}, true, 'Profilo'); row.appendChild(side); fit(side);
     row.appendChild(staticSil('figA_rear'));
-    ['walk','hands','back','run','tag','kneel'].forEach(function(k){ var s = poseSvg(RIG.POSES[k], true, NAMES[k]); row.appendChild(s); fit(s); });
+    ['walk','hands','back','run','tag','kneel'].forEach(function(k){
+      if (k === 'back'){ row.appendChild(staticSil('figA_turn')); return; }
+      var s = poseSvg(RIG.POSES[k], true, NAMES[k]); row.appendChild(s); fit(s);
+    });
   });
 
   // rig diagram with pivots
