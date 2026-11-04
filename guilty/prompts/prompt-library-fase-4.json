@@ -1,0 +1,961 @@
+[
+ {
+  "shot": 1,
+  "tc_in": "00:00:00",
+  "tc_out": "00:05:16",
+  "duration_s": 5.67,
+  "usage": "Produzione (plate) e animatic",
+  "ai_tool": "Veo 3.1",
+  "ai_role": "Veo 3.1 Frames to Video tra i due style frame della gru: previs e plate atmosferico (panni, piccioni)",
+  "image_prompt": "Extreme wide shot: the whole estate seen from above, rooftops and antennas in the foreground, the courtyard small in the centre, low sun on the left. Residents from the approved city-people library (CP01–CP12) drawn in the same ink style, mixing black with concrete grey, cement blue and brown; some are half-animal street characters (pigeon, gull, cat, wild boar, crow), no rats, with simple faces. Setting: Lotto 7, a fictional Roman public-housing estate: long concrete slab blocks with access galleries, roll-down shutters, satellite dishes, laundry lines, a fenced five-a-side pitch in the courtyard, shops with metal shutters at the ground floor of block D. Camera: high angle looking down at about 60 degrees, 24 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: late-afternoon sun from the west (frame left), long raking shadows, dust in the light. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: residents in small everyday stories: an old cat lady with a trolley, a kid on a scooter, a café owner at his shutter. Continuity: sun on the left; the burgundy tag already visible, tiny, on the second shutter from the west of block D. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.7 seconds at 24 fps. Camera: slow crane descent from rooftop height toward the street, decelerating to a stop. Subject: no main character; passers-by walk in short loops. Environment: laundry moving in the wind, pigeons taking off. Timing: background people on threes (8 drawings per second). Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, rats, caricature of real ethnic groups",
+  "continuity": [
+   "Luce principale da sinistra",
+   "Folla viva, volti semplici",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "map of Lotto 7 (VD-04 §6) come reference",
+   "modular kit (VD-04 §8) come reference",
+   "storyboard panel S01 (VD-05) come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 2,
+  "tc_in": "00:05:16",
+  "tc_out": "00:11:14",
+  "duration_s": 5.92,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Wide shot: he walks in from the side street on the left third while the crowd moves to the right. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow; the fingertips of his right hand stained with matte burgundy (#8C1748) spray paint with speckled edges. Residents from the approved city-people library (CP01–CP12) drawn in the same ink style, mixing black with concrete grey, cement blue and brown; some are half-animal street characters (pigeon, gull, cat, wild boar, crow), no rats, with simple faces. Setting: Lotto 7, a fictional Roman public-housing estate: long concrete slab blocks with access galleries, roll-down shutters, satellite dishes, laundry lines, a fenced five-a-side pitch in the courtyard, shops with metal shutters at the ground floor of block D. Camera: eye level, 35 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: backlit by the sunset, long shadows stretching to the right. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: heavy walk, hood up, hands hanging. Continuity: stain stage 1; his right drawstring shorter. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: lateral tracking move from right to left at his walking speed. Subject: he walks to the left with a heavy step on every beat. Environment: passers-by walk to the right, against him. Timing: protagonist on twos (12 drawings per second), crowd on threes, camera smooth at 24 fps. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, rats, caricature of real ethnic groups",
+  "continuity": [
+   "Macchia allo stadio 1 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Folla viva, volti semplici",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "PRT turnaround and walk cycle (VD-03 §1–4, §12) come reference",
+   "city people library (VD-04 §4) come reference",
+   "storyboard panel S02 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 3,
+  "tc_in": "00:11:14",
+  "tc_out": "00:14:13",
+  "duration_s": 2.97,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Close-up: one black sneaker with its thick off-white midsole fills the right half of the frame, trouser hem stacked above it. One chunky black sneaker of the protagonist with a thick off-white midsole and the stacked hem of his wide black trousers. Setting: cracked asphalt of the estate street with halftone texture. Camera: very low, 20 cm from the ground, 50 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: raking light from the left across the asphalt. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: the foot lands and presses into the asphalt. Continuity: midsole always visible. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 3.0 seconds at 24 fps. Camera: locked-off. Subject: the foot enters frame and lands with weight. Environment: a small puff of dust. Timing: drawn on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, brand logos on the shoe",
+  "continuity": [
+   "Macchia allo stadio 1 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "PRT sneaker (VD-03 §8) come reference",
+   "storyboard panel S03 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 4,
+  "tc_in": "00:14:13",
+  "tc_out": "00:20:20",
+  "duration_s": 6.29,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Medium shot: medium shot, centred, the courtyard galleries and the fenced pitch behind him, background people soft. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow; the fingertips of his right hand stained with matte burgundy (#8C1748) spray paint with speckled edges. Residents from the approved city-people library (CP01–CP12) drawn in the same ink style, mixing black with concrete grey, cement blue and brown; some are half-animal street characters (pigeon, gull, cat, wild boar, crow), no rats, with simple faces. Setting: the courtyard of Lotto 7: access galleries with laundry, the fenced five-a-side pitch, benches, a cast-iron drinking fountain. Camera: frontal, slightly from below, 50 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: sunset behind him, face lost in the hood shadow. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: walking toward camera, head low. Continuity: expression 1 (exhausted); face reduced to two pale eye points. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 6.3 seconds at 24 fps. Camera: dolly back keeping the same distance as he walks forward. Subject: he walks toward camera. Environment: background residents out of focus. Timing: protagonist on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, rats, caricature of real ethnic groups",
+  "continuity": [
+   "Macchia allo stadio 1 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Folla viva, volti semplici",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "PRT front view and face (VD-03 §1, §5) come reference",
+   "storyboard panel S04 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 5,
+  "tc_in": "00:20:20",
+  "tc_out": "00:26:19",
+  "duration_s": 5.92,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Wide shot: seen from the third-floor balcony: the small black figure crossing the courtyard diagonally, railing bars and a white glasses glint out of focus in the foreground. The protagonist seen from above: a small black hooded figure with a long shadow. Out-of-focus railing bars and the white-glinting rim of an old man's glasses in the foreground. Setting: the courtyard of Lotto 7 seen from a third-floor balcony: concrete ground, the pitch markings, a few residents. Camera: steep high angle from a balcony, 50 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: last light of the sunset, his long shadow. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: crossing the courtyard unaware. Continuity: the balcony is on the third floor of block B. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off with a slight pan following him. Subject: he crosses the courtyard diagonally. Environment: —. Timing: protagonist on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, visible eyes behind the glasses, the Witness moving, visible eyes of the observer",
+  "continuity": [
+   "Macchia allo stadio 1 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Testimone fermo",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "map of Lotto 7 (VD-04 §6) come reference",
+   "storyboard panel S05 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 6,
+  "tc_in": "00:26:19",
+  "tc_out": "00:29:18",
+  "duration_s": 2.97,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Medium close-up: medium close-up of the Witness behind the balcony railing, dry plants at the sides. The Witness, an original elderly man about 70: tall and thin, flat black cap, thick round glasses reflecting pure white so the eyes are never visible, long concrete-grey cardigan to the knees, black trousers, hands clasped behind his back, completely still. Setting: a third-floor balcony of block B with a black railing and dry potted plants. Camera: frontal, 85 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: cold end-of-day light. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: standing perfectly still, hands behind his back. Continuity: glasses always reflect pure white. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 3.0 seconds at 24 fps. Camera: very slow push-in, about 5 percent over the shot. Subject: the Witness does not move at all. Environment: —. Timing: the Witness is one held drawing. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, visible eyes behind the glasses, the Witness moving, visible eyes, smiling, moving hands",
+  "continuity": [
+   "Luce principale da sinistra",
+   "Testimone fermo",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "Witness sheet (VD-04 §2) come reference",
+   "storyboard panel S06 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 7,
+  "tc_in": "00:29:18",
+  "tc_out": "00:35:15",
+  "duration_s": 5.9,
+  "usage": "Previs della transizione e animatic",
+  "ai_tool": "Kling 3.0",
+  "ai_role": "Kling 3.0 primo e ultimo fotogramma: previs della transizione d'inchiostro verso lo shot 8, poi ricostruita in Houdini",
+  "image_prompt": "Wide shot: seen from behind, he has stopped and turns his head over his right shoulder; the empty balcony in the top right. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, seen from behind with his head turned about 80 degrees over his right shoulder, the hood in profile showing only the edge of his face; the fingertips of his right hand stained with matte burgundy (#8C1748) spray paint with speckled edges. Setting: the courtyard of Lotto 7: access galleries with laundry, the fenced five-a-side pitch, benches, a cast-iron drinking fountain. Camera: low, behind him, 35 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: dusk. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: looking back over his shoulder at the empty balcony. Continuity: pose «Si volta» from the character bible. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off. Subject: only the head turns, about 80 degrees; the body stays still. Environment: —. Timing: protagonist on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, body turning, face fully visible",
+  "continuity": [
+   "Macchia allo stadio 1 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "PRT turning pose and rear view (VD-03 §1–4, §9) come reference",
+   "storyboard panel S07 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 8,
+  "tc_in": "00:35:15",
+  "tc_out": "00:41:14",
+  "duration_s": 5.94,
+  "usage": "Produzione (plate) e animatic",
+  "ai_tool": "Runway Gen-4.5",
+  "ai_role": "Runway Gen-4.5 image-to-video: plate dello skyline (foschia, finestre) dietro i piani 2.5D",
+  "image_prompt": "Wide shot: he steps out of the stair door onto the roof, small in frame, the big halftone moon above the skyline. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow; the fingertips of his right hand stained with matte burgundy (#8C1748) spray paint with speckled edges. Setting: the flat roof of block A at night: parapet, service hut with the stair door, water tanks, TV antennas, satellite dishes, a pair of sneakers hanging from a cable between antennas, the city skyline in six depth planes, a large halftone moon. Camera: eye level, 35 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: night: warm city glow from below, halftone moon. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: stepping out and stopping in front of the service hut. Continuity: service-hut door faces south, the tag is on its west side. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: crane rising behind him. Subject: he walks out and stops. Environment: haze drifting over the skyline, distant windows. Timing: protagonist on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck",
+  "continuity": [
+   "Macchia allo stadio 1 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "rooftop spec (VD-04 §9 C) come reference",
+   "storyboard panel S08 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 9,
+  "tc_in": "00:41:14",
+  "tc_out": "00:47:12",
+  "duration_s": 5.92,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Medium shot: three-quarter medium shot: him in front of the hut wall with the large burgundy tag behind; a pale instant photo in his hand. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, in three-quarter view; the fingertips of his right hand stained with matte burgundy (#8C1748) spray paint with speckled edges. Setting: the west wall of the rooftop service hut at night with the friend's large burgundy tag. Camera: three-quarter, 50 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: moon and warm city bounce. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: holding the instant photo, thumb over his friend's face. Continuity: the tag is the studio design from VD-05 §3. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off, then a slight push toward the tag. Subject: he takes the photo out of his pocket. Environment: —. Timing: hands on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck",
+  "continuity": [
+   "Macchia allo stadio 1 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "PRT three-quarter view (VD-03 §1–4) come reference",
+   "memory object O1 (VD-04 §5) come reference",
+   "tag (VD-05 §3) come reference",
+   "storyboard panel S09 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 10,
+  "tc_in": "00:47:12",
+  "tc_out": "00:53:11",
+  "duration_s": 5.94,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Medium shot: the Memory paints next to the tag while he stands still on the right. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow; the fingertips of his right hand stained with matte burgundy (#8C1748) spray paint with speckled edges. The Memory, a young graffiti writer about 20 in late-2000s streetwear (colour-blocked windbreaker, cap, backpack straps, straight jeans, skate shoes, a spray can), drawn only with a single burgundy ink line on paper, the face dissolved into burgundy halftone dots. Setting: the west wall of the rooftop service hut at night with the friend's large burgundy tag. Camera: eye level, 35 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: night. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: the Memory spraying the wall; he does not turn. Continuity: Memory's face stays halftone (medium dots). No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: slow 30-degree orbit around the service hut. Subject: the Memory appears halfway through the orbit and moves in choppy steps. Environment: —. Timing: Memory at 6 drawings per second, protagonist still, camera smooth at 24 fps. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, black ink on the Memory, a visible face on the Memory, Memory with a visible face, black on the Memory",
+  "continuity": [
+   "Macchia allo stadio 1 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Memoria a 6 fps, solo lastra bordeaux",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "Memory sheet (VD-04 §3) come reference",
+   "storyboard panel S10 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 11,
+  "tc_in": "00:53:11",
+  "tc_out": "00:59:08",
+  "duration_s": 5.9,
+  "usage": "Previs della transizione e animatic",
+  "ai_tool": "Kling 3.0",
+  "ai_role": "Kling 3.0 primo e ultimo fotogramma: previs della transizione verso la strada di sera",
+  "image_prompt": "Close-up: side close-up of his huge hand on a grey spray can with a burgundy cap, the tag being repainted. The protagonist's oversized right hand with thick tube-like fingers gripping a grey spray can with a burgundy cap, index finger on the nozzle; the fingertips of his right hand stained with matte burgundy (#8C1748) spray paint with speckled edges. Setting: close on the rooftop wall with the burgundy tag at night. Camera: side, 85 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: night. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: spraying; paint lands on his fingertips. Continuity: from here the stain is at stage 1. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: slow move in. Subject: four bursts of spray, one per beat. Environment: burgundy paint mist dots. Timing: hand on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, dripping paint, blood",
+  "continuity": [
+   "Macchia allo stadio 1 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "hand sheet (VD-03 §7) come reference",
+   "storyboard panel S11 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 12,
+  "tc_in": "00:59:08",
+  "tc_out": "01:05:07",
+  "duration_s": 5.95,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Wide shot: Dutch angle of 4 degrees; the shutter with the burgundy tag in the centre, him from behind on the left. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, seen from behind: the hood draping onto the upper back, the heels of the sneakers; the fingertips of his right hand stained with matte burgundy (#8C1748) spray paint with speckled edges. Setting: the estate street at night: block D with metal shutters, the second shutter from the west carrying a burgundy tag. Camera: eye level, tilted 4 degrees, 28 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: sodium street lamps as warm paper glows, cement-blue sky. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: standing in front of the shutter, looking at the tag. Continuity: the tagged shutter is the second from the west of block D. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off. Subject: he walks in and stops. Environment: —. Timing: protagonist on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck",
+  "continuity": [
+   "Macchia allo stadio 1 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "PRT rear view (VD-03 §1–4) come reference",
+   "map (VD-04 §6) come reference",
+   "storyboard panel S12 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 13,
+  "tc_in": "01:05:07",
+  "tc_out": "01:11:03",
+  "duration_s": 5.83,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Extreme close-up: both open hands from his point of view; the right one stained burgundy over the whole fingers. The protagonist's two oversized open hands with thick tube-like fingers, palms up; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. Setting: a plain black background (the inside of the hood shadow). Camera: from above, point of view, 100 mm macro lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: street lamp from above. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: looking at his palms. Continuity: stain stage 2 from here to chapter IV. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.8 seconds at 24 fps. Camera: locked-off. Subject: the stain creeps one finger joint further each bar. Environment: —. Timing: drawn on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, clean right hand",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "hand sheet and stain stages (VD-03 §7) come reference",
+   "storyboard panel S13 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 14,
+  "tc_in": "01:11:03",
+  "tc_out": "01:17:02",
+  "duration_s": 5.94,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Medium shot: through a shop window: him and his reflection, faceless passers-by at the sides. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. Residents from the approved city-people library (CP01–CP12) drawn in the same ink style, mixing black with concrete grey, cement blue and brown; some are half-animal street characters (pigeon, gull, cat, wild boar, crow), no rats, their faces blank paper with no features. Setting: a dark shop window on the estate street at night, reflecting the street. Camera: frontal, 50 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: street lamps. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: he turns; his reflection turns two frames later. Continuity: crowd state 'faceless'. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off. Subject: the reflection lags two frames behind him. Environment: faceless passers-by walk past. Timing: protagonist on twos; the reflection is the same animation delayed by two frames. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, rats, caricature of real ethnic groups, reflection in sync",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Folla senza volto",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "city people states (VD-04 §4) come reference",
+   "storyboard panel S14 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 15,
+  "tc_in": "01:17:02",
+  "tc_out": "01:23:02",
+  "duration_s": 6.01,
+  "usage": "Previs della transizione e animatic",
+  "ai_tool": "Kling 3.0",
+  "ai_role": "Kling 3.0 primo e ultimo fotogramma: previs della deformazione prospettica verso le scale",
+  "image_prompt": "Wide shot: central perspective down the street to the black mouth of the metro; flat silhouettes of residents standing on both sides, all turned toward him. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. Residents from the approved city-people library (CP01–CP12) drawn in the same ink style, mixing black with concrete grey, cement blue and brown; some are half-animal street characters (pigeon, gull, cat, wild boar, crow), no rats, rendered as flat dark-grey silhouettes standing still, all turned toward him. Setting: the estate street at night stretching toward the black mouth of the metro entrance. Camera: eye level, central perspective, dolly zoom 24 → 50 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: street lamps. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: he pulls his hood tighter and walks fast toward the metro. Continuity: crowd state 'silhouettes' in this shot only. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 6.0 seconds at 24 fps. Camera: dolly zoom from 24 to 50 mm, the street stretching toward the stairs. Subject: he walks fast toward the metro. Environment: the silhouettes do not move. Timing: protagonist on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, rats, caricature of real ethnic groups, silhouettes with faces",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Folla come sagome ferme",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "storyboard panel S15 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 16,
+  "tc_in": "01:23:02",
+  "tc_out": "01:26:01",
+  "duration_s": 2.95,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Wide shot: straight down onto a stairwell that seems to repeat forever, a tiny black figure on it. The protagonist as a tiny black hooded figure seen from above. Setting: the Mental Zone: a stairwell of the estate repeating inward forever. Camera: top-down, 24 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: cold fluorescent from above. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: walking down the stairs. Continuity: only modules M04 and M12. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 2.9 seconds at 24 fps. Camera: locked-off. Subject: he goes down the first flight. Environment: the stair module repeats inward. Timing: drawn on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, new architecture",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "modular kit (VD-04 §8) come reference",
+   "storyboard panel S16 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 17,
+  "tc_in": "01:26:01",
+  "tc_out": "01:31:23",
+  "duration_s": 5.92,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Wide shot: side view of an endless escalator crossing the frame diagonally, him in the centre. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, in right-facing profile; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. Setting: an endless metro escalator with off-white tiled walls. Camera: side, 35 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: cold fluorescent tubes. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: standing on the escalator, carrying his weight. Continuity: module M11. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: tilted tracking move descending with him. Subject: he rides down. Environment: the steps move in time, the tiles dissolve into halftone dots. Timing: protagonist on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "PRT side view (VD-03 §1–4) come reference",
+   "storyboard panel S17 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 18,
+  "tc_in": "01:31:23",
+  "tc_out": "01:37:20",
+  "duration_s": 5.88,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Wide shot: central perspective of the mezzanine corridor with turnstiles; at the far end the corridor folds back on itself. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, running with the torso leaning forward and arms bent; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. Setting: the Mental Zone: the metro mezzanine corridor with turnstiles folding back on itself. Camera: central perspective, dolly zoom 24 → 85 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: fluorescent tubes, one failing. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: running toward camera. Continuity: pose «Fuga». No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: controlled dolly zoom forward from 24 to 85 mm. Subject: he runs; a few strides snap on ones. Environment: the corridor closes like a ring. Timing: protagonist on twos with 4-frame bursts on ones. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "PRT run pose (VD-03 §9) come reference",
+   "storyboard panel S18 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 19,
+  "tc_in": "01:37:20",
+  "tc_out": "01:43:20",
+  "duration_s": 5.99,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Wide shot: across the tracks: a black train cuts the frame; between the cars, on the opposite platform, the Witness stands still; he is seen from behind in the right foreground. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, seen from behind: the hood draping onto the upper back, the heels of the sneakers; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. Far away, the Witness, an original elderly man about 70: tall and thin, flat black cap, thick round glasses reflecting pure white so the eyes are never visible, long concrete-grey cardigan to the knees, black trousers, hands clasped behind his back, completely still. Setting: an underground metro side platform with off-white tiles, cold fluorescent tubes (one failing), a graffiti-covered train with illegible tags. Camera: eye level across the tracks, 50 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: fluorescent tubes plus flashing train windows. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: he sees the Witness between the passing cars. Continuity: the Witness is the same held drawing. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 6.0 seconds at 24 fps. Camera: locked-off. Subject: he does not move. Environment: the train passes; papers and dust blow. Timing: Witness held drawing; train motion smooth. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, visible eyes behind the glasses, the Witness moving, Witness moving",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Testimone fermo",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "platform spec (VD-04 §9 B) come reference",
+   "storyboard panel S19 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 20,
+  "tc_in": "01:43:20",
+  "tc_out": "01:46:17",
+  "duration_s": 2.9,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Extreme close-up: only his eyes inside the black hood shadow, filling the frame. Only the protagonist's eyes: two pale points inside the black hood shadow, a scar on his left eyebrow. Setting: a plain black background (the inside of the hood shadow). Camera: frontal, 100 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: the failing fluorescent tube flickers. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: eyes narrowing in fear. Continuity: hood shadow edge unchanged. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 2.9 seconds at 24 fps. Camera: locked-off. Subject: eyes narrow. Environment: flicker from the faulty tube only. Timing: drawn on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, full face visible",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "expression 3 (VD-03 §6) come reference",
+   "storyboard panel S20 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 21,
+  "tc_in": "01:46:17",
+  "tc_out": "01:52:16",
+  "duration_s": 5.94,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Medium shot: two-point perspective inside the car: him seated on the left; in the dark window on the right, instead of his reflection, the Witness. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, sitting with his hands on his knees; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. As a reflection in the dark window, the Witness, an original elderly man about 70: tall and thin, flat black cap, thick round glasses reflecting pure white so the eyes are never visible, long concrete-grey cardigan to the knees, black trousers, hands clasped behind his back, completely still. Setting: inside a near-empty metro car: plastic seats, poles, dark windows reflecting the interior. Camera: eye level, two-point perspective, 28 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: carriage fluorescent lights. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag, the stain and the double's eyes and mouth. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: seated, hands on his knees. Continuity: never the frontal symmetric layout of Reference B. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off. Subject: still. Environment: the carriage sways in time. Timing: protagonist on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, visible eyes behind the glasses, the Witness moving, frontal symmetrical composition",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Testimone fermo",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "PRT sitting pose (rig, VD-03 §12) come reference",
+   "storyboard panel S21 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 22,
+  "tc_in": "01:52:16",
+  "tc_out": "01:58:14",
+  "duration_s": 5.92,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Medium close-up: profile of him seated; in the dark glass the reflection turns toward him with a grin. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, sitting with his hands on his knees; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. His psychological double: the same block-shaped silhouette, hood and clothes with inverted values (the black garments become dirty off-white paper described by black lines, face and hands become solid ink black), wet unstable outlines, joints bending past natural, blank eyes rimmed in burgundy, a burgundy grin wider than the face, clean hands, appearing as a reflection in the dark window. Setting: a dark metro car window reflecting the interior. Camera: profile, 50 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: carriage fluorescent lights. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag, the stain and the double's eyes and mouth. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: he stays still while the reflection moves on its own. Continuity: double with inverted values and unstable outline. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off. Subject: the reflection turns its head too far and grins. Environment: —. Timing: protagonist still; the double moves on every frame. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, pupils in the double's eyes, stain on the double, reflection in sync",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Doppio a 24 fps, valori invertiti, ombra verso la luce",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "Double sheet (VD-04 §1) come reference",
+   "storyboard panel S22 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 23,
+  "tc_in": "01:58:14",
+  "tc_out": "02:04:13",
+  "duration_s": 5.94,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Wide shot: the double half through the window glass as if it were liquid ink; the windows repeat into other windows. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. His psychological double: the same block-shaped silhouette, hood and clothes with inverted values (the black garments become dirty off-white paper described by black lines, face and hands become solid ink black), wet unstable outlines, joints bending past natural, blank eyes rimmed in burgundy, a burgundy grin wider than the face, clean hands. Setting: inside the metro car where the windows open onto other windows. Camera: eye level, 28 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: carriage lights. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag, the stain and the double's eyes and mouth. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: the double steps out of the glass; he stands up abruptly. Continuity: the carriage starts to repeat (Mental Zone). No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: slight lateral move. Subject: the double steps out on the beat. Environment: the glass ripples like ink. Timing: protagonist on twos, double on ones. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, pupils in the double's eyes, stain on the double",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Doppio a 24 fps, valori invertiti, ombra verso la luce",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "Double sheet (VD-04 §1) come reference",
+   "storyboard panel S23 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 24,
+  "tc_in": "02:04:13",
+  "tc_out": "02:10:11",
+  "duration_s": 5.94,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Over-the-shoulder shot: over his shoulder: his black back on the left foreground, the double facing him on the right, its shadow falling toward the light. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, seen from behind: the hood draping onto the upper back, the heels of the sneakers; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. His psychological double: the same block-shaped silhouette, hood and clothes with inverted values (the black garments become dirty off-white paper described by black lines, face and hands become solid ink black), wet unstable outlines, joints bending past natural, blank eyes rimmed in burgundy, a burgundy grin wider than the face, clean hands. Setting: the Mental Zone: an empty space where the paper itself glows. Camera: from behind his shoulder, slightly low, 35 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: the paper itself glows. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag, the stain and the double's eyes and mouth. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: the double tilts its head past natural. Continuity: double's shadow points toward the light. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off. Subject: the double's grin widens. Environment: —. Timing: double on ones. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, pupils in the double's eyes, stain on the double, double with pupils",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Doppio a 24 fps, valori invertiti, ombra verso la luce",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "Double face and wrong shadow (VD-04 §1) come reference",
+   "storyboard panel S24 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 25,
+  "tc_in": "02:10:11",
+  "tc_out": "02:16:10",
+  "duration_s": 5.94,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Extreme wide shot: extreme wide: staircases climbing and descending into each other; he runs up while the double walks down the same flight. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, running with the torso leaning forward and arms bent; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. His psychological double: the same block-shaped silhouette, hood and clothes with inverted values (the black garments become dirty off-white paper described by black lines, face and hands become solid ink black), wet unstable outlines, joints bending past natural, blank eyes rimmed in burgundy, a burgundy grin wider than the face, clean hands. Setting: the Mental Zone: the courtyard staircase recombined into an endless loop of flights climbing and descending into each other. Camera: Dutch angle of 8 degrees, 18 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: no motivated source, giant halftone dots as shadows. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag, the stain and the double's eyes and mouth. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: running up / walking down. Continuity: only module M04 recombined. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: slow 4-degree clockwise roll. Subject: he runs, the double walks calmly. Environment: —. Timing: protagonist on twos, double on ones. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, pupils in the double's eyes, stain on the double, new architecture",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Doppio a 24 fps, valori invertiti, ombra verso la luce",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "Mental Zone spec (VD-04 §9 D) come reference",
+   "storyboard panel S25 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 26,
+  "tc_in": "02:16:10",
+  "tc_out": "02:22:08",
+  "duration_s": 5.92,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Medium shot: frontal two-shot like a wrong mirror; their two shadows on the floor point in opposite directions. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, raising his right hand; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. His psychological double: the same block-shaped silhouette, hood and clothes with inverted values (the black garments become dirty off-white paper described by black lines, face and hands become solid ink black), wet unstable outlines, joints bending past natural, blank eyes rimmed in burgundy, a burgundy grin wider than the face, clean hands, raising its hand with the wrist bending too far. Setting: the Mental Zone: an empty space where the paper itself glows. Camera: frontal, 50 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: from the paper. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag, the stain and the double's eyes and mouth. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: both raise a hand; the double's bends too far. Continuity: protagonist at 24 fps only in this part. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off. Subject: the double copies him 15 degrees beyond. Environment: —. Timing: both on ones from here (contamination). Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, pupils in the double's eyes, stain on the double",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Doppio a 24 fps, valori invertiti, ombra verso la luce",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "storyboard panel S26 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 27,
+  "tc_in": "02:22:08",
+  "tc_out": "02:28:06",
+  "duration_s": 5.92,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Insert shot: insert: his right hand stained burgundy to the palm from the left, the double's clean black hand from the right. The protagonist's oversized right hand stained burgundy up to the palm reaching in from the left, and the double's clean solid-black hand with an off-white outline reaching in from the right. Setting: plain dirty off-white paper. Camera: frontal, 85 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: from the paper. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag, the stain and the double's eyes and mouth. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: fingers almost touching. Continuity: stain stage 3. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off. Subject: the hands touch on the last quarter of the bar. Environment: —. Timing: on ones. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, stain on the double",
+  "continuity": [
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "stain stages (VD-03 §7) come reference",
+   "storyboard panel S27 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 28,
+  "tc_in": "02:28:06",
+  "tc_out": "02:34:05",
+  "duration_s": 5.95,
+  "usage": "Previs della transizione e animatic",
+  "ai_tool": "Kling 3.0",
+  "ai_role": "Kling 3.0 primo e ultimo fotogramma: previs del passaggio al Collasso",
+  "image_prompt": "Wide shot: an endless corridor of shutters, every one with the same burgundy tag; the figure falling backwards at the far end. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, falling backwards with arms thrown up; his entire right hand stained with matte burgundy (#8C1748) spray paint up to the palm. Setting: the Mental Zone: an endless corridor of metal shutters, every one with the same burgundy tag. Camera: low, camera falling backwards, 24 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: from the paper, getting whiter. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag, the stain and the double's eyes and mouth. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: falling backwards. Continuity: module M03 repeated. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: reverse crane, falling backwards. Subject: he falls. Environment: shutters rushing away in perspective. Timing: on ones. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, readable words",
+  "continuity": [
+   "Macchia allo stadio 3 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "tag (VD-05 §3) come reference",
+   "storyboard panel S28 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 29,
+  "tc_in": "02:34:05",
+  "tc_out": "02:37:00",
+  "duration_s": 2.81,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Extreme wide shot: extreme wide: the whole estate broken into grid-aligned blocks suspended in black, burgundy filling the cracks. Setting: the Collapse: the blocks of Lotto 7 broken along a 3-metre grid and suspended in black ink space, burgundy flooding the cracks. Camera: from below, 21 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: burgundy backlight from the fractures. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 flooding the fractures. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Continuity: fractures always follow the module grid. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 2.8 seconds at 24 fps. Camera: locked-off for one bar. Subject: —. Environment: blocks separating along the 3 m grid. Timing: —. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, fire, explosions, debris not aligned to a grid",
+  "continuity": [
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Collapse spec (VD-04 §9 E) come reference",
+   "storyboard panel S29 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 30,
+  "tc_in": "02:37:00",
+  "tc_out": "02:42:17",
+  "duration_s": 5.69,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Wide shot: him kneeling on a floating piece of the courtyard, the five memory objects circling him. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, kneeling on one knee, head below the shoulders, arms hanging; matte burgundy (#8C1748) paint covering his right hand and climbing over the sleeve cuff. Setting: the Collapse: a floating fragment of the courtyard in black ink space with burgundy cracks. Camera: eye level, 28 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: burgundy from the cracks. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 flooding the fractures. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: kneeling, head down. Continuity: stain stage 4 (over the cuff). No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.7 seconds at 24 fps. Camera: slow dolly against the falling fragments. Subject: his knee lands on the beat. Environment: objects dissolve into ink particles. Timing: protagonist on ones. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck",
+  "continuity": [
+   "Macchia allo stadio 4 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "memory objects (VD-04 §5) come reference",
+   "storyboard panel S30 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 31,
+  "tc_in": "02:42:17",
+  "tc_out": "02:48:22",
+  "duration_s": 6.22,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Close-up: close-up of the Witness on a fragment, burgundy halo behind. Close-up of the Witness's head: flat black cap, thick round glasses reflecting pure white, long narrow face with deep folds and white stubble. Setting: the Collapse: a floating fragment of the courtyard in black ink space with burgundy cracks. Camera: frontal, 85 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: burgundy backlight. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 flooding the fractures. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: turning his head toward camera. Continuity: the only time the Witness moves. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 6.2 seconds at 24 fps. Camera: locked-off. Subject: six drawings, on fours. Environment: —. Timing: 6 drawings over 24 frames. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, visible eyes behind the glasses, the Witness moving, visible eyes",
+  "continuity": [
+   "Luce principale da sinistra",
+   "Testimone: unica girata della testa (6 disegni)",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "Witness head turn (VD-04 §2) come reference",
+   "storyboard panel S31 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 32,
+  "tc_in": "02:48:22",
+  "tc_out": "02:54:22",
+  "duration_s": 5.99,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Wide shot: a diagonal paper tear splits the frame: him kneeling on the paper side, the double flaking apart on the ink side, the Memory passing in burgundy. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, kneeling on one knee, head below the shoulders, arms hanging; matte burgundy (#8C1748) paint covering his right hand and climbing over the sleeve cuff. His psychological double: the same block-shaped silhouette, hood and clothes with inverted values (the black garments become dirty off-white paper described by black lines, face and hands become solid ink black), wet unstable outlines, joints bending past natural, blank eyes rimmed in burgundy, a burgundy grin wider than the face, clean hands, flaking apart into ink particles. The Memory, a young graffiti writer about 20 in late-2000s streetwear (colour-blocked windbreaker, cap, backpack straps, straight jeans, skate shoes, a spray can), drawn only with a single burgundy ink line on paper, the face dissolved into burgundy halftone dots. Setting: the Collapse: the paper of the image torn diagonally, pure black ink behind. Camera: eye level, 35 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: ink under the paper. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 flooding the fractures. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: the double dissolves, the Memory walks past. Continuity: Memory face in large dots. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 6.0 seconds at 24 fps. Camera: locked-off. Subject: the tear opens. Environment: ink particles. Timing: Memory 6 fps, double on ones. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, pupils in the double's eyes, stain on the double, black ink on the Memory, a visible face on the Memory",
+  "continuity": [
+   "Macchia allo stadio 4 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da sinistra",
+   "Doppio a 24 fps, valori invertiti, ombra verso la luce",
+   "Memoria a 6 fps, solo lastra bordeaux",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "storyboard panel S32 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 33,
+  "tc_in": "02:54:22",
+  "tc_out": "02:57:21",
+  "duration_s": 2.95,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Extreme wide shot: almost empty paper with a few ink dots falling. Setting: plain dirty off-white paper. Camera: —, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: paper white. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 flooding the fractures. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 2.9 seconds at 24 fps. Camera: locked-off. Subject: —. Environment: ink rain thinning out. Timing: —. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, objects, characters",
+  "continuity": [
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "storyboard panel S33 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 34,
+  "tc_in": "02:57:21",
+  "tc_out": "03:03:19",
+  "duration_s": 5.94,
+  "usage": "Produzione (plate) e animatic",
+  "ai_tool": "Veo 3.1",
+  "ai_role": "Veo 3.1 image-to-video: plate del cielo all'alba con il sole che sale",
+  "image_prompt": "Wide shot: side view: him sitting on the parapet facing the sunrise, the hanging sneakers between the antennas behind. The protagonist MONOLITH, an original fictional man about 36: heavy block-shaped silhouette about 6 heads tall, massive rounded hunched shoulders with the head sunk between them, no visible neck, pointed black hood always up, boxy black technical jacket, oversized black hoodie with two uneven drawstrings (his right one shorter), wide baggy black trousers stacking above the ankles, chunky black sneakers with thick off-white midsoles, oversized paper-toned hands with thick tube-like fingers, face recessed in the hood shadow with two pale eye points and a scar on his left eyebrow, sitting on the parapet in right-facing profile; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. Setting: the flat roof of block A at dawn: parapet, antennas, the hanging sneakers, paper-white sky. Camera: eye level, side, 35 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: cold dawn from the east (frame right), the only time the light comes from the right. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: sitting still. Continuity: stain stage 2 (it never goes away). No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off. Subject: still. Environment: the sun touches the horizon. Timing: protagonist on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood down, visible hair, visible neck, light from the left",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio su, volto in ombra con due punti chiari",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da destra (alba)",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "rooftop dawn spec (VD-04 §9 C) come reference",
+   "storyboard panel S34 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 35,
+  "tc_in": "03:03:19",
+  "tc_out": "03:09:18",
+  "duration_s": 5.92,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Medium shot: medium shot: his hands pulling the hood down, the shaved head coming into the light. The protagonist pulling his black hood down with both oversized hands, revealing a shaved head, heavy brow, scar on his left eyebrow, broken nose, thick lower lip and halftone stubble, his face lit for the first time; the whole fingers of his right hand stained with matte burgundy (#8C1748) spray paint. Setting: the flat roof of block A at dawn: parapet, antennas, the hanging sneakers, paper-white sky. Camera: frontal, 50 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: dawn from the right. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: pulling the hood down with both hands. Continuity: first shot with the hood down. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off. Subject: the hood drops when the drums thin out. Environment: —. Timing: drawn on twos. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood up, hood up at the end of the shot",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio giù, volto in luce",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da destra (alba)",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Epilogue face (VD-03 §5, §6) come reference",
+   "storyboard panel S35 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 36,
+  "tc_in": "03:09:18",
+  "tc_out": "03:15:16",
+  "duration_s": 5.95,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Close-up: close-up of his face looking straight into the lens. Close-up of the protagonist with the hood down: shaved head, heavy brow, scar splitting his left eyebrow, broken nose with a bump, small deep-set eyes looking straight into the lens, thick lower lip, halftone stubble. Setting: the flat roof of block A at dawn: parapet, antennas, the hanging sneakers, paper-white sky. Camera: frontal, 85 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: dawn from the right. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Moment: looking into the camera. Continuity: the only look into the camera in the film. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 5.9 seconds at 24 fps. Camera: locked-off. Subject: held, no movement. Environment: —. Timing: held drawing with line boil. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood up, hood, smile",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio giù, volto in luce",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da destra (alba)",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "expression 8 (VD-03 §6) come reference",
+   "storyboard panel S36 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 37,
+  "tc_in": "03:15:16",
+  "tc_out": "03:24:22",
+  "duration_s": 9.24,
+  "usage": "Produzione (plate) e animatic",
+  "ai_tool": "Veo 3.1",
+  "ai_role": "Veo 3.1 Frames to Video: previs e plate della gru finale",
+  "image_prompt": "Extreme wide shot: pulling away: the rooftop, the burgundy tag on the hut, then the whole estate at dawn; the Witness's balcony empty. The protagonist, tiny, sitting on the rooftop parapet with the hood down. Residents from the approved city-people library (CP01–CP12) drawn in the same ink style, mixing black with concrete grey, cement blue and brown; some are half-animal street characters (pigeon, gull, cat, wild boar, crow), no rats, with simple faces. Setting: Lotto 7 seen from above at dawn, the rooftop of block A with the service hut and its burgundy tag. Camera: high, moving away, 24 mm lens, 16:9 frame with the action kept inside a 2.39:1 safe area. Lighting: dawn from the right. Palette ink black #171717, dirty paper #D6D0C4, concrete grey #777A79, cement blue #687783, industrial brown #66594E; burgundy #8C1748 only on the tag and the stain. Urban Ink Cinematic style: underground European comic-book illustration, confident black brush-ink outlines in three weights, black masses described by off-white reverse lines, halftone dot shading on a single 30-degree screen, light photocopy grain, printed on distressed dirty off-white paper (#D6D0C4); architecture as stylized 3D with three-band toon shading and a thin ink line render. Materials: matte cotton and nylon as solid ink with reverse lines, concrete with fine halftone and water stains, paper-toned skin with fine hatching. Continuity: the final frame mirrors shot 1 with light from the right. No text, no logos, no signature.",
+  "image_to_video_prompt": "Animate this exact frame for 9.2 seconds at 24 fps. Camera: crane backwards and up. Subject: he stays seated, tiny. Environment: residents start their day again. Timing: crowd on threes. Keep the drawing, line weights, halftone screen, paper texture and palette exactly as in the first frame; no new characters, objects or text; no morphing of faces, hands or clothes; no camera moves other than the one described.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, clothing changes, six fingers, three fingers, stain on the left hand, hood up, rats, caricature of real ethnic groups, Witness on the balcony",
+  "continuity": [
+   "Macchia allo stadio 2 solo sulla mano destra",
+   "Cappuccio giù, volto in luce",
+   "Cicatrice sul sopracciglio sinistro; coulisse destra più corta",
+   "Luce principale da destra (alba)",
+   "Folla viva, volti semplici",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "Character anchor del protagonista (VD-03: turnaround, volto, mani) come reference di personaggio, intensità alta",
+   "Schede dei secondari interessati (VD-04 §1–4) come reference di personaggio",
+   "map (VD-04 §6) come reference",
+   "storyboard panel S37 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ },
+ {
+  "shot": 38,
+  "tc_in": "03:24:22",
+  "tc_out": "03:29:01",
+  "duration_s": 4.12,
+  "usage": "Animatic e style frame",
+  "ai_tool": "",
+  "ai_role": "",
+  "image_prompt": "Title card on distressed dirty off-white paper (#D6D0C4): the word GUILTY in heavy condensed black ink letters, NOYZ NARCOS in small spaced mono capitals below, a small burgundy (#8C1748) illegible graffiti tag under it. Light photocopy grain, no other text, no logos.",
+  "image_to_video_prompt": "Hold the title card still for 4 seconds with a very slight paper grain flicker; no camera move.",
+  "negative_prompt": "photorealistic, 3D render look, plastic CGI, anime, manga, chibi, glossy highlights, soft gradients, airbrush, extra fingers, fused fingers, deformed hands, distorted faces, inconsistent line weight, uncontrolled flicker, random background objects, random extra characters, unwanted text, letters, logos, watermark, signature, saturated red, neon colours, lens flare, other text",
+  "continuity": [
+   "Luce principale da sinistra",
+   "Contorno 9–10 px a 4K, linea degli ambienti entro 3,5 px"
+  ],
+  "references": [
+   "storyboard panel S38 come reference",
+   "Il riquadro dello storyboard serve per la composizione (struttura alta, stile basso). Lo style frame approvato del capitolo, a intensità media. Mai la Reference B."
+  ]
+ }
+]
