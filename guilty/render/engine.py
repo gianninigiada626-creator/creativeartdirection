@@ -68,7 +68,8 @@ def stage_html():
 @font-face{{font-family:'Big Shoulders Display';font-weight:900;src:url(fonts/bigshoulders-900-latin.woff2) format('woff2')}}
 @font-face{{font-family:'IBM Plex Mono';font-weight:500;src:url(fonts/plexmono-500-latin.woff2) format('woff2')}}
 html,body{{margin:0;padding:0;background:#171717;overflow:hidden;width:1920px;height:1080px}}
-#root{{display:block}}
+#root{{display:block;position:absolute;left:0;top:0}}
+svg.defs{{position:absolute;width:0;height:0;overflow:hidden}}
 </style></head><body>
 {defs}
 <svg id="root" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 960 540" width="1920" height="1080">
@@ -77,6 +78,7 @@ html,body{{margin:0;padding:0;background:#171717;overflow:hidden;width:1920px;he
   <feTurbulence id="boilT" type="fractalNoise" baseFrequency="0.028" numOctaves="2" seed="1" result="n"/>
   <feDisplacementMap id="boilD" in="SourceGraphic" in2="n" scale="1" xChannelSelector="R" yChannelSelector="G"/>
  </filter>
+ <filter id="rimPap" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius="6" result="d"/><feFlood flood-color="#D6D0C4"/><feComposite in2="d" operator="in" result="rim"/><feMerge><feMergeNode in="rim"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
  <radialGradient id="vignG" cx="50%" cy="50%" r="75%"><stop offset="55%" stop-color="#171717" stop-opacity="0"/><stop offset="100%" stop-color="#171717" stop-opacity="1"/></radialGradient>
 </defs>
 <rect width="960" height="540" fill="#171717"/>
@@ -139,8 +141,8 @@ def frames(fs):
 def seg_worker(k, f0, f1, crf, path):
     from playwright.sync_api import sync_playwright
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", str(FPS), "-c:v", "mjpeg", "-i", "-",
-           "-vf", "noise=alls=7:allf=t+u,format=yuv420p", "-c:v", "libx264", "-preset", "medium", "-crf", str(crf),
-           "-tune", "grain", "-r", str(FPS), path]
+           "-vf", "noise=alls=4:allf=t+u,format=yuv420p", "-c:v", "libx264", "-preset", "medium", "-crf", str(crf), "-maxrate", "24M", "-bufsize", "48M",
+           "-r", str(FPS), path]
     ff = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     t = time.time()
     with sync_playwright() as pw:

@@ -14,6 +14,8 @@ def lerp(a, b, p): return a + (b - a) * p
 def clamp(x, a=0, b=1): return max(a, min(b, x))
 def cam(markup, zoom=1, cx=480, cy=270, dx=0, dy=0, rot=0):
     return f'<g transform="translate({F(480+dx)} {F(270+dy)}) rotate({F(rot)}) scale({zoom:.4f}) translate({F(-cx)} {F(-cy)})">{markup}</g>'
+def zoomat(markup, z, px=480, py=270, dx=0, dy=0):
+    return f'<g transform="translate({F(px+dx)} {F(py+dy)}) scale({z:.4f}) translate({F(-px)} {F(-py)})">{markup}</g>'
 def tr(markup, x=0, y=0, s=1, r=0, ox=0, oy=0):
     return f'<g transform="translate({F(x)} {F(y)}) translate({F(ox)} {F(oy)}) rotate({F(r)}) scale({s:.4f}) translate({F(-ox)} {F(-oy)})">{markup}</g>'
 def op(markup, o): return f'<g opacity="{o:.3f}">{markup}</g>'
@@ -120,15 +122,24 @@ def _(t, d, fi):
     return o
 @shot(3)
 def _(t, d, fi):
-    land = ease(min(1, t / .17))
-    o = R(0, 0, 960, 540, "#B9B2A5") + R(0, 0, 960, 540, "url(#dotInk)", extra=' opacity=".2"') + R(0, 0, 960, 120, "#9C968A")
-    y = lerp(-120, 0, land) - (0 if t < 2.4 else ease((t - 2.4) / .5) * 40)
-    o += f'<g transform="translate(0 {F(y)})"><g transform="translate(520 560) scale(4.2) translate(-79 -640)"><use href="#shoeA"/></g>' + R(540, -200, 340, 430, INK) + Pth("M560,180 C620,200 720,200 860,180 M570,140 C640,160 720,160 850,140", stroke=PAP, sw=3) + "</g>"
+    land = ease(min(1, t / .17)); lift = 0 if t < 2.4 else ease((t - 2.4) / .5)
+    o = R(0, 0, 960, 540, "#B9B2A5") + R(0, 0, 960, 540, "url(#dotInk)", extra=' opacity=".2"') + R(0, 0, 960, 150, "#9C968A") + Pth("M0,150 H960", sw=2)
+    o += Pth("M0,330 L960,300 M0,430 L960,410", sw=1.4, extra=' opacity=".35"')
+    # far leg passing in the background (on twos)
+    tq = q(t, 12); fx = lerp(-160, 260, clamp((tq - .4) / 1.6))
+    o += f'<g transform="translate({F(fx)} 0)">' + Pth("M60,-20 L150,-20 L160,170 L50,170 Z", fill=INK, stroke=INK, sw=3) + f'<g transform="translate(105 230) scale(1.5) translate(-79 -640)"><use href="#shoeA"/></g></g>'
+    y = lerp(-140, 0, land) - lift * 60
+    o += f'<g transform="translate(0 {F(y)})">'
+    o += f'<ellipse cx="520" cy="548" rx="{F(lerp(120, 230, land))}" ry="18" fill="{INK}" opacity=".35"/>'
+    o += Pth("M392,-220 L652,-220 L668,330 L380,330 Z", fill=INK, stroke=INK, sw=4)
+    o += Pth("M392,250 C470,268 590,268 664,250 M388,296 C470,314 590,314 666,296", stroke=PAP, sw=3)
+    o += Pth("M560,-200 L574,240", stroke=PAP, sw=2, extra=' opacity=".7"')
+    o += '<g transform="translate(520 560) scale(4.2) translate(-79 -640)"><use href="#shoeA"/></g></g>'
     if t > .15:
         k = clamp((t - .15) / 1.2); rnd = random.Random(4)
-        for i in range(16):
-            a = rnd.uniform(math.pi * .9, math.pi * 2.1); rr = 40 + 160 * ease(k) * rnd.uniform(.5, 1.2)
-            o += f'<circle cx="{F(560 + math.cos(a)*rr*1.6)}" cy="{F(500 + math.sin(a)*rr*.35)}" r="{F(lerp(10, 2, k) * rnd.uniform(.6, 1.2))}" fill="{PAP}" opacity="{F(1-k)}"/>'
+        for i in range(18):
+            a = rnd.uniform(math.pi * .9, math.pi * 2.1); rr = 40 + 170 * ease(k) * rnd.uniform(.5, 1.2)
+            o += f'<circle cx="{F(520 + math.cos(a)*rr*1.7)}" cy="{F(520 + math.sin(a)*rr*.3)}" r="{F(lerp(10, 2, k) * rnd.uniform(.6, 1.2))}" fill="{PAP}" stroke="{INK}" stroke-width="1" opacity="{F(1-k)}"/>'
     return o
 @shot(4)
 def _(t, d, fi):
@@ -160,7 +171,7 @@ def _(t, d, fi):
     g += place("figWitness2", 480, 1500, 1300, w=240)
     g += R(0, 400, 960, 18, INK) + "".join(R(x, 418, 12, 122, INK) for x in range(10, 960, 60))
     g += Pth("M70,400 C60,360 90,340 80,300 M110,400 C120,350 100,330 116,290 M840,400 C850,360 820,340 834,300", stroke=BRN, sw=4)
-    return cam(g, z, 480, 230)
+    return cam(g, z, 480, 270)
 @shot(7)
 def _(t, d, fi):
     o = sky("dusk") + building(0, 0, 960, 340, kind="bal") + R(0, 340, 960, 200, "#CFC9BD") + Pth("M0,340 H960", sw=3)
@@ -188,19 +199,19 @@ def _(t, d, fi):
 def _(t, d, fi):
     p = t / d; z = 1 + .04 * ease(clamp((t - 3.5) / 2.4))
     g = sky("night") + tech_room(0, 540, w=960, h=520) + R(0, 470, 960, 70, "#2E3338") + '<use href="#tagM" x="70" y="80" width="460" height="317"/>'
-    g += place("figA_34", 700, 760, 700)
+    g += place("figA_34", 690, 790, 700)
     k = ease(clamp(q(t, 12) / 1.4)); g += f'<use href="#obj1" x="560" y="{F(lerp(420, 300, k))}" width="120" height="120"/>'
-    return cam(g, z, 300, 240)
+    return zoomat(g, z, 300, 240)
 @shot(10)
 def _(t, d, fi):
     p = t / d; orb = lerp(-70, 70, ease(p))
     o = sky("night") + f'<g transform="translate({F(orb*.25)} 0)">' + skyline(360, col="#22272B") + "</g>"
-    o += f'<g transform="translate({F(orb*.6)} 0)">' + roof(440) + tech_room(300, 440, w=360, h=260) + "</g>"
+    o += f'<g transform="translate({F(orb*.6)} 0)">' + R(-300, 414, 1560, 26, CON, 2) + R(-300, 440, 1560, 100, "#2E3338") + roof(440) + tech_room(300, 440, w=360, h=260) + "</g>"
     if t >= 2.92:
         tq6 = q(t, 6); j = random.Random(int(tq6 * 6))
         o += f'<g transform="translate({F(orb + j.uniform(-1.5, 1.5))} {F(j.uniform(-1, 1))})" opacity="{F(.82 + j.uniform(-.1, .1))}">' + place("figMemory3", 300, 470, 230, w=240, filt="toBurgPlate")
         o += particles(tq6, int(tq6 * 6), 10, (350, 330, 400, 380), (30, -10), col=BURG, rmin=1.5, rmax=3.5) + "</g>"
-    o += f'<g transform="translate({F(orb*1.1)} 0)">' + place("figA2", 760, 480, 230) + "</g>"
+    o += f'<g transform="translate({F(orb*1.1)} 0)">' + place("figA2", 740, 480, 230) + "</g>"
     return o
 @shot(11)
 def _(t, d, fi):
@@ -209,14 +220,19 @@ def _(t, d, fi):
     burst = [i * 1.486 for i in range(4)]
     live = any(0 <= t - b < .9 for b in burst)
     g += f'<use href="#tagM" x="20" y="120" width="420" height="290" opacity="{F(.85 + (.15 if live else 0))}"/>'
-    g += '<g transform="translate(620 300) rotate(-90) scale(4.6)"><use href="#r_handCan"/></g>'
+    g += Pth("M690,620 C700,560 730,500 760,430 L860,452 C840,520 830,580 830,620 Z", fill=INK, stroke=INK, sw=4) + Pth("M752,446 L866,470", stroke=PAP, sw=3)
+    g += '<g transform="translate(790 440) rotate(180) scale(4.6)"><use href="#r_handCan"/></g>'
+    for i, b in enumerate(burst):
+        if 0 <= t - b < .9:
+            k = (t - b) / .9
+            g += f'<path d="M600,312 L{F(lerp(560, 300, ease(k)))},{F(lerp(300, 200, ease(k)))} L{F(lerp(560, 300, ease(k)))},{F(lerp(330, 380, ease(k)))} Z" fill="{BURG}" opacity="{F(.28*(1-k))}"/>'
     for i, b in enumerate(burst):
         if 0 <= t - b < 1.2:
             k = (t - b) / 1.2; rnd = random.Random(30 + i)
             for j in range(26):
-                a = rnd.uniform(math.pi * .85, math.pi * 1.2); rr = 30 + 320 * k * rnd.uniform(.5, 1.1)
-                g += f'<circle cx="{F(480 + math.cos(a)*rr)}" cy="{F(190 + math.sin(a)*rr*.6)}" r="{F(rnd.uniform(2, 7)*(1-k*.5))}" fill="{BURG}" opacity="{F(1-k)}"/>'
-    o = cam(g, z, 520, 270)
+                a = rnd.uniform(math.pi * .88, math.pi * 1.12); rr = 20 + 300 * k * rnd.uniform(.5, 1.1)
+                g += f'<circle cx="{F(600 + math.cos(a)*rr)}" cy="{F(312 + math.sin(a)*rr*.5)}" r="{F(rnd.uniform(2, 7)*(1-k*.5))}" fill="{BURG}" opacity="{F(1-k)}"/>'
+    o = zoomat(g, z, 520, 270)
     if t > d - .5: o += ink_wipe((t - (d - .5)) / .5, 41)
     return o
 
@@ -230,7 +246,7 @@ def street_night(dx=0):
 def _(t, d, fi):
     tq = q(t, 12); k = ease(clamp(tq / 1.6)); b = 0 if k >= 1 else bob(t, amp=4)
     o = street_night() + place("figA_rear", lerp(90, 250, k), 520 - b, 270)
-    o = f'<g transform="rotate(4 480 270)">{o}</g>'
+    o = f'<g transform="rotate(4 480 270) translate(480 270) scale(1.1) translate(-480 -270)">{o}</g>'
     if t < .5: o += ink_wipe(t / .5, 41, close=False)
     return o
 @shot(13)
@@ -260,8 +276,9 @@ def _(t, d, fi):
     g += Pth("M0,540 L380,330 L580,330 L960,540 Z", fill="#3A3F44", sw=2) + R(440, 260, 80, 70, INK, 2) + Pth("M452,276 H508 M452,290 H508 M452,304 H508", stroke=PAP, sw=2)
     for (sym, x, w, h, gg) in (("cp01", 160, 250, 210, 470), ("cp12", 800, 250, 210, 470), ("cp06", 300, 250, 130, 395), ("cp09", 660, 280, 140, 395), ("cp11", 90, 270, 260, 540)):
         g += place(sym, x, gg, h, w=w, filt="toGreyDk")
-    o = cam(g, z, 480, 300)
-    o += rigp(walk_pose((q(t, 12) / 1.0) % 1), 480, 470, lerp(210, 190, p))
+    o = zoomat(g, z, 480, 300)
+    tq = q(t, 12); bb = 4 * abs(math.sin(math.pi * tq / .5)); sw = 1.5 * math.sin(math.pi * tq / .5)
+    o += f'<g transform="rotate({F(sw)} 480 {F(lerp(500, 440, p))})">' + place("figA_rear", 480, lerp(500, 440, p) - bb, lerp(250, 150, p)) + "</g>"
     return o
 
 # ═════════ CAP. IV ═════════
@@ -322,7 +339,7 @@ def train_interior():
     o = R(0, 0, 960, 540, "#9AA2A6") + Pth("M0,40 L960,0 L960,140 L0,160 Z", fill="#CFC9BD", sw=2) + Pth("M0,400 L960,430 L960,540 L0,540 Z", fill="#5E6160", sw=2)
     o += Pth("M520,170 L900,150 L900,330 L520,340 Z", fill="#22272B", sw=4) + Pth("M140,170 L460,180 L460,340 L140,350 Z", fill="#22272B", sw=4)
     o += Pth("M500,30 V430 M930,10 V440", sw=8) + Pth("M500,30 V430 M930,10 V440", stroke=PAP, sw=2, extra=' opacity=".6"')
-    o += R(120, 340, 380, 30, BRN, 3) + R(120, 300, 380, 44, BRN, 3)
+    o += R(120, 300, 380, 50, BRN, 3) + R(120, 372, 380, 30, BRN, 3)
     return o
 @shot(21)
 def _(t, d, fi):
@@ -333,6 +350,7 @@ def _(t, d, fi):
 def _(t, d, fi):
     k = ease(clamp((t - .6) / 2.2))
     o = R(0, 0, 960, 540, "#9AA2A6") + Pth("M500,40 L940,40 L940,500 L500,500 Z", fill="#22272B", sw=5)
+    o += R(-20, 210, 470, 260, BRN, 4) + R(-20, 300, 470, 6, INK) + R(-20, 470, 500, 90, "#5E6160", 4) + R(-20, 446, 500, 34, BRN, 4)
     o += f'<g transform="translate(260 560) scale(1.05) translate(-120 -640)">{rig_markup("sit")}</g>'
     pose = dict(POSES["sit"]); pose["head"] = lerp(8, -34, k); pose["torso"] = lerp(4, -4, k)
     o += f'<g opacity=".95"><g transform="translate(760 520) scale(-.9 .9) translate(-120 -640)"><g filter="url(#fxDouble)">{rig_markup(pose)}</g></g></g>'
@@ -378,12 +396,16 @@ def _(t, d, fi):
     return o
 @shot(27)
 def _(t, d, fi):
-    k = ease(clamp(t / (d * .9)))
+    k = ease(clamp(t / (d * .85))); tq = q(t, 12); tr_ = 1.2 * math.sin(tq * 31)
     hand_l = (f'<use href="#handA"/><path d="M14,404 L64,404 C70,418 70,434 66,446 L18,446 C12,434 12,418 14,404 Z" fill="{BURG}"/><g fill="none" stroke="{BURG}" stroke-linecap="round" stroke-width="9.5">'
               '<path d="M24,440 C22,456 22,466 25,476"/><path d="M36,442 C35,460 36,474 38,486"/><path d="M48,442 C48,460 49,474 51,484"/><path d="M60,440 C61,454 61,464 60,474"/><path d="M64,412 C74,420 77,434 71,448" stroke-width="11.5"/></g>')
-    o = R(0, 0, 960, 540, "#EEEAE1")
-    o += f'<g transform="translate({F(lerp(-150, 60, k))} -1140) scale(3.2)">{hand_l}</g>' + R(lerp(-210, 0, k), 0, 400, 140, INK)
-    o += f'<g transform="translate({F(lerp(1110, 900, k))} -1140) scale(-3.2 3.2)"><use href="#handA" filter="url(#fxDouble)"/></g>' + R(lerp(770, 560, k), 0, 400, 140, "#E2DDD2", 3)
+    hl = lerp(-170, 222, k); hr = lerp(1130, 738, k)
+    o = R(0, 0, 960, 540, "#EEEAE1") + R(0, 420, 960, 120, "url(#dotInk)", extra=' opacity=".08"')
+    o += f'<g transform="translate({F(hl)} {F(-1140 + tr_)}) scale(3.2)">{hand_l}</g>' + R(hl + 26, -20, 196, 176, INK)
+    o += f'<g transform="translate({F(hr)} {F(-1140 - tr_)}) scale(-3.2 3.2)"><use href="#handA" filter="url(#fxDouble)"/></g>' + R(hr - 222, -20, 196, 176, "#E2DDD2", 3)
+    if t > d * .8:
+        kk = clamp((t - d * .8) / (d * .2))
+        o += f'<circle cx="480" cy="{F(-1140 + 470*3.2)}" r="{F(8 + 90*kk)}" fill="none" stroke="{BURG}" stroke-width="{F(6*(1-kk)+1)}" opacity="{F(1-kk)}"/>'
     return o
 @shot(28)
 def _(t, d, fi):
@@ -418,7 +440,7 @@ def _(t, d, fi):
     land = 2.77; k = ease(clamp(t / land)); up = lerp(30, -20, t / d)
     o = R(0, 0, 960, 540, INK) + f'<g transform="translate(0 {F(up)})">' + Pth("M200,440 L760,420 L820,500 L160,520 Z", fill="#CFC9BD", sw=3) + Pth("M200,440 L160,520", stroke=BURG, sw=6) + "</g>"
     fall_y = lerp(-260, 0, k * k)
-    o += rigp("kneel" if t >= land else "fall", 470, 470 + fall_y + up, 260, rotd=0 if t >= land else -20)
+    o += rigp("kneel" if t >= land else "fall", 470, 470 + fall_y + up, 260, rotd=0 if t >= land else -20, filt="rimPap")
     for i, (sym, x, y, w, r) in enumerate((("obj1", 160, 120, 120, -12), ("obj2", 720, 110, 110, 18), ("obj3", 80, 300, 110, 8), ("obj4", 760, 280, 120, -6), ("obj5", 420, 60, 110, 10))):
         a = t * .25 + i; ox, oy = 18 * math.cos(a), 12 * math.sin(a)
         o += f'<g transform="translate({F(ox)} {F(oy)}) rotate({F(r + t*6*(1 if i%2 else -1))} {x+w/2} {y+w/2})"><use href="#{sym}" x="{x}" y="{y}" width="{w}" height="{w}"/></g>'
@@ -429,7 +451,7 @@ def _(t, d, fi):
     start = 2.45
     i = 1 if t < start else min(6, 1 + int((t - start) / (4 / 24)) + 1)
     o = R(0, 0, 960, 540, INK) + Pth("M0,540 L960,500", stroke=BURG, sw=14) + f'<circle cx="480" cy="250" r="{F(300 + 10*math.sin(t*2))}" fill="{BURG}" opacity=".18"/>'
-    o += head(f"wt2_{i}", 480, 20, 520) + R(0, 500, 960, 40, "#5E6160", 2)
+    o += head(f"wt2_{i}", 480, -40, 430) + R(0, 506, 960, 40, "#5E6160", 2)
     return o
 @shot(32)
 def _(t, d, fi):
@@ -459,7 +481,7 @@ def dawn_sky(sun_y):
 def _(t, d, fi):
     o = dawn_sky(lerp(380, 330, ease(t / d))) + skyline(400, col="#5E6160", lit=False) + roof(430, night=False) + tech_room(40, 430, w=200, h=150)
     br = 1 + .006 * math.sin(2 * math.pi * q(t, 12) / 2.97)
-    o += f'<g transform="translate(520 404) scale({.42*br:.4f}) translate(-120 -640)">{rig_markup("sit")}</g>'
+    o += f'<g transform="translate(520 452) scale({.42*br:.4f}) translate(-120 -640)">{rig_markup("sit")}</g>'
     return o
 @shot(35)
 def _(t, d, fi):
@@ -477,15 +499,15 @@ def _(t, d, fi):
 @shot(36)
 def _(t, d, fi):
     z = 1 + .02 * t / d
-    return cam(dawn_sky(320) + R(0, 420, 960, 120, CON) + head("headA_open", 480, -60, 600), z, 480, 260)
+    return zoomat(dawn_sky(320) + R(0, 420, 960, 120, CON) + head("headA_open", 480, -70, 600), z, 480, 260)
 @shot(37)
 def _(t, d, fi):
     p = ease(t / d); z = lerp(2.6, 1.0, p); cy = lerp(230, 270, p); cx = lerp(220, 480, p)
     g = dawn_sky(300)
     for (x, tp, w) in ((40, 250, 300), (380, 280, 280), (700, 230, 220)):
         g += building(x, tp, w, 500, shade=False) + R(x, tp, w * .35, 500 - tp, "url(#dotInk)", extra=' opacity=".3"')
-    g += R(0, 500, 960, 40, "#B9B2A5") + R(60, 220, 260, 30, CON, 2) + tech_room(120, 222, w=90, h=50)
-    g += f'<g transform="translate(250 220) scale(.12) translate(-120 -640)">{rig_markup("sit")}</g>'
+    g += R(0, 500, 960, 40, "#B9B2A5") + R(60, 220, 260, 30, CON, 2) + R(110, 168, 96, 54, DEEP, 2) + R(178, 186, 18, 36, INK, 1.5) + '<use href="#tagM" x="114" y="176" width="58" height="40"/>'
+    g += f'<g transform="translate(262 232) scale(.12) translate(-120 -640)">{rig_markup("sit")}</g>'
     for i, (sym, x, w, sp) in enumerate((("cp02", 360, 260, 8), ("cp04", 560, 250, 16), ("cp03", 820, 250, -10))):
         g += crowd_walker(sym, w, x, 528, 34, t, sp, phase=i * .3)
     return cam(g, z, cx, cy)
