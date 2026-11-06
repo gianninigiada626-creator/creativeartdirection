@@ -7,8 +7,9 @@
 | **Categoria** | Capospalla leggero / giacca della tuta |
 | **Vestibilità** | Regolare-morbida, lunghezza al fianco, unisex |
 | **Taglia base** | 3 (scala unisex 1–5) |
-| **Versione** | v1 — da approvare |
+| **Versione** | v1.1 — disegni approvati, misure precisate dal cartamodello |
 | **Disegni** | [tavola tecnica](tavola-tecnica.svg) · [interno](tavola-interno.svg) |
+| **Cartamodello** | Taglia 3: [cartella](cartamodello/) · [verifica misure](cartamodello/verifica-misure.md) |
 
 ## Descrizione
 
@@ -40,13 +41,13 @@
 | D | Lunghezza manica dal punto spalla | 0,7 | 62 | 63 | **64** | 65 | 66 |
 | E | 1/2 bicipite, 2,5 cm sotto il giro manica | 0,5 | 18,9 | 19,7 | **20,5** | 21,3 | 22,1 |
 | F | 1/2 fondo manica, spacco chiuso | 0,3 | 12,9 | 13,2 | **13,5** | 13,8 | 14,1 |
-| G | Giro manica in linea retta | 0,5 | 23,4 | 24,2 | **25** | 25,8 | 26,6 |
+| G | Giro manica in linea retta (dal cartamodello) | 0,5 | 21,5 | 22,3 | **23,1** | 23,9 | 24,7 |
 | H | 1/2 fondo, fascia a riposo | 1 | 49 | 52 | **55** | 58 | 61 |
-| I | 1/2 fondo, fascia in estensione | 1 | 52 | 55 | **58** | 61 | 64 |
+| I | 1/2 fondo, fascia in estensione (dal cartamodello) | 1 | 51,5 | 54,5 | **57,5** | 60,5 | 63,5 |
 | J | Altezza fascia fondo | 0,2 | 5 | 5 | **5** | 5 | 5 |
 | K | Altezza collo al centro dietro | 0,2 | 5,5 | 5,5 | **5,5** | 5,5 | 5,5 |
-| L | Lunghezza collo lungo la cucitura (aperto) | 0,5 | 44,6 | 45,8 | **47** | 48,2 | 49,4 |
-| M | Lunghezza zip, dalla sommità del collo al fondo | 0,5 | 63,5 | 65 | **66,5** | 68 | 69,5 |
+| L | Lunghezza collo lungo la cucitura, aperto (dal cartamodello) | 0,5 | 41,9 | 43,1 | **44,3** | 45,5 | 46,7 |
+| M | Lunghezza zip, dalla sommità del collo al fondo (dal cartamodello) | 0,5 | 65,5 | 67 | **68,5** | 70 | 71,5 |
 | N | Apertura tasca | 0,3 | 15 | 15 | **16** | 16 | 16 |
 | O | Tasca: dall'estremità inferiore alla fascia | 0,3 | 3 | 3 | **3** | 3 | 3 |
 | P | Tasca: dall'estremità superiore al centro davanti | 0,3 | 10 | 10,5 | **11** | 11,5 | 12 |
@@ -63,8 +64,8 @@ I consumi sono stime da confermare dopo il piazzamento del cartamodello.
 
 | Componente | Specifica | Fornitore da contattare | Consumo |
 |---|---|---|---|
-| Tessuto esterno | Flanella di lana rigenerata, grigio medio mélange, circa 340 g/m², altezza 150 cm. Composizione da definire con il lanificio (base lana rigenerata + lana vergine, eventuale 2% elastan per la comodità). Certificazione GRS. | Lanifici di Prato (es. Manteco) | circa 1,9 m |
-| Fodera | Cupro Bemberg in tela, rosa cipria, altezza 140 cm | Distributori italiani Bemberg | circa 1,4 m |
+| Tessuto esterno | Flanella di lana rigenerata, grigio medio mélange, circa 340 g/m², altezza 150 cm. Composizione da definire con il lanificio (base lana rigenerata + lana vergine, eventuale 2% elastan per la comodità). Certificazione GRS. | Lanifici di Prato (es. Manteco) | 1,4–1,7 m (stima dal cartamodello) |
+| Fodera | Cupro Bemberg in tela, rosa cipria, altezza 140 cm | Distributori italiani Bemberg | 0,9–1,4 m (stima dal cartamodello) |
 | Collo interno | Melton di lana, grigio antracite | — | 0,1 m |
 | Teletta | Adesiva tessuta leggera: paramonture, collo, filetti, metà esterna della fascia, bordi della giunzione a giorno | — | circa 0,6 m |
 | Nastro spalla | Fettuccia di cotone 6 mm, rinforzo sotto la giunzione | — | 0,4 m |
@@ -72,7 +73,7 @@ I consumi sono stime da confermare dopo il piazzamento del cartamodello.
 | Sacchi tasca | Cotone pocketing grigio | — | 0,3 m |
 | Zip | Lampo divisibile a due cursori, metallo n. 5, finitura canna di fucile, lunghezza M | Lampo (Lanfranchi) | 1 |
 | Bottoni | Corozo, 4 fori, 24L (15 mm), grigio scuro | — | 8 + 2 di riserva |
-| Elastico | Piatto, 4 cm, nella fascia dietro | — | circa 0,45 m |
+| Elastico | Piatto, 4 cm, nella fascia dietro | — | 53,6 cm |
 | Filo di cucitura | Poliestere core-spun Tex 40, in tono | — | — |
 | Filo per giunzione a giorno | Seta 100% o cotone mercerizzato, grigio in tono | — | — |
 | Filo per asole a mano | Cordonetto di seta | — | — |
@@ -99,7 +100,7 @@ I consumi sono stime da confermare dopo il piazzamento del cartamodello.
    - Cucitura sottomanica normale.
 6. **Montaggio manica a spalla camicia napoletana.**
    - Margini del giro manica stirati verso la manica.
-   - Leggera arricciatura in testa manica (agio 2–2,5 cm).
+   - Leggera arricciatura in testa manica: agio 2,5 cm (1 cm sul davanti, 1,5 cm sul dietro).
    - Nessuna imbottitura né rollino.
 7. **Fianchi e fascia fondo.** La fascia è doppia, con elastico da 4 cm solo nel tratto del dietro, tra le cuciture laterali.
 8. **Collo.** Esterno in tessuto, interno in melton, montato sullo scollo. Punto a mano a 6 mm dal bordo superiore.

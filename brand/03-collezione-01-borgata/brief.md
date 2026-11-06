@@ -63,9 +63,9 @@ Della **Giacca della Festa** si pubblicherà gratis una versione base: senza fod
 
 ## Fasi di sviluppo
 
-1. **Approvazione dei disegni** del capo manifesto. _Siamo qui._
-2. **Cartamodelli in taglia base 3**: PDF in scala 1:1 e DXF per CAD.
-3. **Tela di prova** (toile), prova su corpi diversi (uomo, donna, taglie diverse) e correzioni.
+1. **Approvazione dei disegni** del capo manifesto. _Fatto._
+2. **Cartamodelli in taglia base 3** di giacca e pantalone: PDF A4 e plotter in scala 1:1, DXF per CAD, verifica delle misure. _Fatto._
+3. **Tela di prova** (toile), prova su corpi diversi (uomo, donna, taglie diverse) e correzioni. _Prossimo passo._
 4. **Prototipo** in tessuto vero, con fodera, giunzioni e asole a mano.
 5. **Sviluppo taglie** da 1 a 5.
 6. **Campionario** e preventivi dei laboratori.
@@ -77,7 +77,9 @@ Della **Giacca della Festa** si pubblicherà gratis una versione base: senza fod
 - [Giacca della Festa — scheda tecnica](giacca-della-festa/scheda-tecnica.md)
 - [Pantalone della Festa — tavola tecnica](pantalone-della-festa/tavola-tecnica.svg)
 - [Pantalone della Festa — scheda tecnica](pantalone-della-festa/scheda-tecnica.md)
-- Generatore dei disegni: `brand/strumenti/flats_borgata.py`
+- [Giacca della Festa — cartamodello taglia 3](giacca-della-festa/cartamodello/README.md)
+- [Pantalone della Festa — cartamodello taglia 3](pantalone-della-festa/cartamodello/README.md)
+- Generatori: `brand/strumenti/flats_borgata.py` (disegni), `cartamodello_giacca.py` e `cartamodello_pantalone.py` (cartamodelli)
 
 ## Fonti
 
